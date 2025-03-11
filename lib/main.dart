@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/chat.dart';
+import 'package:rentree/screen/mypage.dart';
+import 'package:rentree/screen/point.dart';
 import 'screen/home.dart';
 import 'screen/like.dart';
 import 'screen/first.dart';
@@ -17,7 +20,10 @@ class MyApp extends StatelessWidget {
       home: FirstScreen(), // 초기 화면을 FirstScreen으로 설정
       routes: {
         '/home': (context) => HomeScreen(),
-        // '/Like': (context) => LikeScreen(),
+        '/Like': (context) => LikeScreen(),
+        '/Point': (context) => PointScreen(),
+        '/Mypage': (context) => MypageScreen(),
+        '/Chat': (context) => ChatScreen(),
       },
     );
   }

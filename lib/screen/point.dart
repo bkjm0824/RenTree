@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/point.dart';
 
 import 'chat.dart';
 import 'home.dart';
+import 'like.dart';
 import 'mypage.dart';
 
-class LikeScreen extends StatefulWidget {
+class PointScreen extends StatefulWidget {
   @override
-  _LikeScreenState createState() => _LikeScreenState();
+  _PointScreenState createState() => _PointScreenState();
 }
 
-class _LikeScreenState extends State<LikeScreen> {
-  int _selectedIndex = 1;
+class _PointScreenState extends State<PointScreen> {
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -68,13 +68,26 @@ class _LikeScreenState extends State<LikeScreen> {
             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
             child: Column(
               children: [
-                SizedBox(height: 20), // 상단 여백
-                Text(
-                  '관심목록',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                SizedBox(height: 15), // 상단 여백
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_rounded),
+                      color: Color(0xff97C663),
+                      iconSize: 30,
+                      padding: EdgeInsets.only(left: 10),
+                      onPressed: () {},
+                    ),
+                    Text('포인트'),
+                    IconButton(
+                      icon: const Icon(Icons.search),
+                      color: Color(0xff97C663),
+                      iconSize: 30,
+                      padding: EdgeInsets.only(right: 10),
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
                 SizedBox(height: 10), // 상단 여백
                 Container(height: 1, color: Colors.grey[300]), // 구분선

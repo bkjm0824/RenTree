@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'point.dart';
+import 'chat.dart';
+import 'like.dart';
+import 'mypage.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -9,9 +13,47 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    switch (index) {
+      case 0:
+        // 홈 화면
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+        break;
+      case 1:
+        // 찜 목록
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LikeScreen()),
+        );
+        break;
+      case 2:
+        // 포인트
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PointScreen()),
+        );
+        break;
+      case 3:
+        // 채팅
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ChatScreen()),
+        );
+        break;
+      case 4:
+        // 마이페이지
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MypageScreen()),
+        );
+        break;
+      default:
+        setState(() {
+          _selectedIndex = index;
+        });
+    }
   }
 
   @override
