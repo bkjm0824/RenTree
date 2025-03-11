@@ -180,6 +180,8 @@ class _PointScreenState extends State<PointScreen> {
         onTap: _onItemTapped,
         showSelectedLabels: false,
         showUnselectedLabels: false,
+        selectedItemColor: Color(0xff97C663), // 선택된 아이템 색상 변경
+        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '찜'),
