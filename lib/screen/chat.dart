@@ -82,7 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          // 🔥 리스트뷰를 Expanded로 감싸기
+          //
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -131,13 +131,28 @@ class _ChatScreenState extends State<ChatScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Flexible(
-                                        child:
-                                            Text('안녕하세요 물품 대여 글 보고 연락드렸습니다!')),
-                                    SizedBox(
-                                      width: 20,
+                                      child: Text('안녕하세요 물품 대여 글 보고 연락드렸습니다!'),
+                                    ),
+                                    SizedBox(width: 20),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 2), // 내부 여백 설정
+                                      decoration: BoxDecoration(
+                                        color: Color(0xffFF6466), // 빨간색 배경
+                                        borderRadius: BorderRadius.circular(
+                                            12), // 타원형으로 만듦
+                                      ),
+                                      child: Text(
+                                        '3', // 숫자
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ),
                                   ],
-                                ),
+                                )
                               ],
                             ),
                           ),

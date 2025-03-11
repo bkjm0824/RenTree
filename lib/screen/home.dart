@@ -3,6 +3,7 @@ import 'point.dart';
 import 'chat.dart';
 import 'like.dart';
 import 'mypage.dart';
+import 'post_give.dart'; // 글쓰기 화면 추가
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,35 +16,30 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
-        // 홈 화면
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
         break;
       case 1:
-        // 찜 목록
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LikeScreen()),
         );
         break;
       case 2:
-        // 포인트
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => PointScreen()),
         );
         break;
       case 3:
-        // 채팅
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ChatScreen()),
         );
         break;
       case 4:
-        // 마이페이지
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MypageScreen()),
@@ -56,18 +52,37 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // 🔹 글쓰기 화면 모달 열기
+  void _showWriteScreen() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // 전체 화면 크기 조정 가능
+      backgroundColor: Colors.black.withOpacity(0.5), // 어두운 배경 효과
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.95, // 화면의 90% 차지
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: PostGiveScreen(), // 글쓰기 화면으로 이동
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF4F1F1), // 전체 배경색 설정
+      backgroundColor: Color(0xffF4F1F1),
       body: Column(
         children: [
           Container(
-            color: Color(0xffF4F1F1), // 배경색 고정
+            color: Color(0xffF4F1F1),
             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
             child: Column(
               children: [
-                SizedBox(height: 15), // 상단 여백
+                SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -88,13 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10), // 상단 여백
-                Container(height: 1, color: Colors.grey[300]), // 구분선
+                SizedBox(height: 10),
+                Container(height: 1, color: Colors.grey[300]),
               ],
             ),
           ),
 
-          // 🔥 리스트뷰를 Expanded로 감싸기
+          // 🔥 리스트뷰
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -192,6 +207,15 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
         ],
       ),
+
+      // 🔹 우측 하단 녹색 플러스 버튼 추가
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showWriteScreen, // 글쓰기 화면으로 이동
+        backgroundColor: Color(0xff97C663), // 녹색 버튼
+        child: Icon(Icons.add, size: 32, color: Colors.white),
+      ),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.endFloat, // 우측 하단 배치
     );
   }
 }
