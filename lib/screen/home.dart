@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/post_request.dart';
 import 'point.dart';
 import 'chat.dart';
 import 'like.dart';
@@ -54,18 +55,65 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🔹 글쓰기 화면 모달 열기
   void _showWriteScreen() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent, // 배경 없애기
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // 내용물 크기에 맞춤
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff97C663),
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(230, 60), // 버튼 크기 설정
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToScreen(PostGiveScreen());
+                },
+                child: Text(
+                  "대여 요청하기",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff97C663),
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(230, 60),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToScreen(RequestScreen());
+                },
+                child: Text(
+                  "물품 등록하기",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToScreen(Widget screen) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // 전체 화면 크기 조정 가능
-      backgroundColor: Colors.black.withOpacity(0.5), // 어두운 배경 효과
+      isScrollControlled: true,
+      backgroundColor: Colors.black.withOpacity(0.5),
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.95, // 화면의 90% 차지
+          height: MediaQuery.of(context).size.height * 0.95,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: PostGiveScreen(), // 글쓰기 화면으로 이동
+          child: screen,
         );
       },
     );
