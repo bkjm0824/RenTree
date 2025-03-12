@@ -1,3 +1,4 @@
+// 물품 대여 요청글 작성 화면
 import 'package:flutter/material.dart';
 
 class RequestScreen extends StatefulWidget {

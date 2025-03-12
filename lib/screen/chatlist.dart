@@ -1,17 +1,18 @@
+// 채팅 목록 화면
 import 'package:flutter/material.dart';
 import 'package:rentree/screen/point.dart';
 
-import 'chat.dart';
 import 'home.dart';
+import 'likelist.dart';
 import 'mypage.dart';
 
-class LikeScreen extends StatefulWidget {
+class ChatScreen extends StatefulWidget {
   @override
-  _LikeScreenState createState() => _LikeScreenState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _LikeScreenState extends State<LikeScreen> {
-  int _selectedIndex = 1;
+class _ChatScreenState extends State<ChatScreen> {
+  int _selectedIndex = 3;
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -70,7 +71,7 @@ class _LikeScreenState extends State<LikeScreen> {
               children: [
                 SizedBox(height: 20), // 상단 여백
                 Text(
-                  '관심목록',
+                  '채팅목록',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -82,7 +83,7 @@ class _LikeScreenState extends State<LikeScreen> {
             ),
           ),
 
-          // 🔥 리스트뷰를 Expanded로 감싸기
+          //
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -91,7 +92,7 @@ class _LikeScreenState extends State<LikeScreen> {
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -119,31 +120,40 @@ class _LikeScreenState extends State<LikeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '상품 ${index + 1}',
+                                  '익명 ${index + 1}',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
                                 ),
-                                SizedBox(height: 4),
-                                Text('상품 설명 ${index + 1}',
-                                    style: TextStyle(color: Colors.grey[700])),
-                                SizedBox(height: 8),
+                                SizedBox(height: 10),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.favorite_border,
-                                            size: 20, color: Colors.red),
-                                        SizedBox(width: 5),
-                                        Text('좋아요'),
-                                      ],
+                                    Flexible(
+                                      child: Text('안녕하세요 물품 대여 글 보고 연락드렸습니다!'),
                                     ),
-                                    Text('3시간 전',
-                                        style: TextStyle(color: Colors.grey)),
+                                    SizedBox(width: 20),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 2), // 내부 여백 설정
+                                      decoration: BoxDecoration(
+                                        color: Color(0xffFF6466), // 빨간색 배경
+                                        borderRadius: BorderRadius.circular(
+                                            12), // 타원형으로 만듦
+                                      ),
+                                      child: Text(
+                                        '3', // 숫자
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
                                   ],
-                                ),
+                                )
                               ],
                             ),
                           ),

@@ -1,8 +1,9 @@
+// 상추 포인트 화면
 import 'package:flutter/material.dart';
 
-import 'chat.dart';
+import 'chatlist.dart';
 import 'home.dart';
-import 'like.dart';
+import 'likelist.dart';
 import 'mypage.dart';
 
 class PointScreen extends StatefulWidget {

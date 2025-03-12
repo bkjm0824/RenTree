@@ -1,48 +1,52 @@
-// 홈 화면
+// 관심 목록 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/addpost_request.dart';
-import 'point.dart';
+import 'package:rentree/screen/point.dart';
+
 import 'chatlist.dart';
-import 'likelist.dart';
+import 'home.dart';
 import 'mypage.dart';
-import 'addpost_give.dart'; // 글쓰기 화면 추가
 import 'post.dart';
 
-class HomeScreen extends StatefulWidget {
+class LikeScreen extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _LikeScreenState createState() => _LikeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+class _LikeScreenState extends State<LikeScreen> {
+  int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
+        // 홈 화면
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
         break;
       case 1:
+        // 찜 목록
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LikeScreen()),
         );
         break;
       case 2:
+        // 포인트
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => PointScreen()),
         );
         break;
       case 3:
+        // 채팅
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ChatScreen()),
         );
         break;
       case 4:
+        // 마이페이지
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MypageScreen()),
@@ -53,72 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _selectedIndex = index;
         });
     }
-  }
-
-  // 🔹 글쓰기 화면 모달 열기
-  void _showWriteScreen() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent, // 배경 없애기
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // 내용물 크기에 맞춤
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff97C663),
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(230, 60), // 버튼 크기 설정
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _navigateToScreen(PostGiveScreen());
-                },
-                child: Text(
-                  "대여 요청하기",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff97C663),
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(230, 60),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _navigateToScreen(RequestScreen());
-                },
-                child: Text(
-                  "물품 등록하기",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _navigateToScreen(Widget screen) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.black.withOpacity(0.5),
-      builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.95,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: screen,
-        );
-      },
-    );
   }
 
   // 🔥 리스트뷰에서 아이템 클릭 시 물품 상세 페이지로 이동
@@ -138,37 +76,24 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF4F1F1),
+      backgroundColor: Color(0xffF4F1F1), // 전체 배경색 설정
       body: Column(
         children: [
           Container(
-            color: Color(0xffF4F1F1),
+            color: Color(0xffF4F1F1), // 배경색 고정
             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
             child: Column(
               children: [
-                SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_rounded),
-                      color: Color(0xff97C663),
-                      iconSize: 30,
-                      padding: EdgeInsets.only(left: 10),
-                      onPressed: () {},
-                    ),
-                    Image.asset('assets/rentree.png', height: 40),
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      color: Color(0xff97C663),
-                      iconSize: 30,
-                      padding: EdgeInsets.only(right: 10),
-                      onPressed: () {},
-                    ),
-                  ],
+                SizedBox(height: 20), // 상단 여백
+                Text(
+                  '관심목록',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                SizedBox(height: 10),
-                Container(height: 1, color: Colors.grey[300]),
+                SizedBox(height: 10), // 상단 여백
+                Container(height: 1, color: Colors.grey[300]), // 구분선
               ],
             ),
           ),
@@ -177,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: 10,
+              itemCount: 2,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
@@ -260,7 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           )
-
         ],
       ),
 
@@ -285,15 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
         ],
       ),
-
-      // 🔹 우측 하단 녹색 플러스 버튼 추가
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showWriteScreen, // 글쓰기 화면으로 이동
-        backgroundColor: Color(0xff97C663), // 녹색 버튼
-        child: Icon(Icons.add, size: 32, color: Colors.white),
-      ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.endFloat, // 우측 하단 배치
     );
   }
 }
