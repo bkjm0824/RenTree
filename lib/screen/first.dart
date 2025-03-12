@@ -1,3 +1,4 @@
+// 시작 화면
 import 'package:flutter/material.dart';
 import 'dart:async';
 
