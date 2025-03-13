@@ -1,18 +1,18 @@
-// 채팅 목록 화면
+// 상추 포인트 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/point.dart';
 
-import 'home.dart';
-import 'likelist.dart';
-import 'mypage.dart';
+import '../Chat/chatlist.dart';
+import '../Home/home.dart';
+import '../Like/likelist.dart';
+import '../MyPage/mypage.dart';
 
-class ChatScreen extends StatefulWidget {
+class PointScreen extends StatefulWidget {
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _PointScreenState createState() => _PointScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
-  int _selectedIndex = 3;
+class _PointScreenState extends State<PointScreen> {
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -69,13 +69,26 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
             child: Column(
               children: [
-                SizedBox(height: 20), // 상단 여백
-                Text(
-                  '채팅목록',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                SizedBox(height: 15), // 상단 여백
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_rounded),
+                      color: Color(0xff97C663),
+                      iconSize: 30,
+                      padding: EdgeInsets.only(left: 10),
+                      onPressed: () {},
+                    ),
+                    Text('포인트'),
+                    IconButton(
+                      icon: const Icon(Icons.search),
+                      color: Color(0xff97C663),
+                      iconSize: 30,
+                      padding: EdgeInsets.only(right: 10),
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
                 SizedBox(height: 10), // 상단 여백
                 Container(height: 1, color: Colors.grey[300]), // 구분선
@@ -83,7 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          //
+          // 🔥 리스트뷰를 Expanded로 감싸기
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -92,7 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -120,40 +133,31 @@ class _ChatScreenState extends State<ChatScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '익명 ${index + 1}',
+                                  '상품 ${index + 1}',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
                                 ),
-                                SizedBox(height: 10),
+                                SizedBox(height: 4),
+                                Text('상품 설명 ${index + 1}',
+                                    style: TextStyle(color: Colors.grey[700])),
+                                SizedBox(height: 8),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Flexible(
-                                      child: Text('안녕하세요 물품 대여 글 보고 연락드렸습니다!'),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.favorite_border,
+                                            size: 20, color: Colors.red),
+                                        SizedBox(width: 5),
+                                        Text('좋아요'),
+                                      ],
                                     ),
-                                    SizedBox(width: 20),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 2), // 내부 여백 설정
-                                      decoration: BoxDecoration(
-                                        color: Color(0xffFF6466), // 빨간색 배경
-                                        borderRadius: BorderRadius.circular(
-                                            12), // 타원형으로 만듦
-                                      ),
-                                      child: Text(
-                                        '3', // 숫자
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
+                                    Text('3시간 전',
+                                        style: TextStyle(color: Colors.grey)),
                                   ],
-                                )
+                                ),
                               ],
                             ),
                           ),

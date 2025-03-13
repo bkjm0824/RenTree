@@ -1,10 +1,10 @@
 // 마이페이지 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/point.dart';
+import 'package:rentree/screen/Point/point.dart';
 
-import 'chatlist.dart';
-import 'home.dart';
-import 'likelist.dart';
+import '../Chat/chatlist.dart';
+import '../Home/home.dart';
+import '../Like/likelist.dart';
 import 'mypage_profile.dart';
 
 class MypageScreen extends StatefulWidget {

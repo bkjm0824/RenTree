@@ -1,7 +1,7 @@
 // 프로필 상세 화면
 import 'package:flutter/material.dart';
 
-import 'home.dart';
+import '../Home/home.dart';
 
 class MyPageProfile extends StatelessWidget {
   @override
