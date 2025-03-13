@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/chatlist.dart';
-import 'package:rentree/screen/mypage.dart';
-import 'package:rentree/screen/point.dart';
-import 'screen/home.dart';
-import 'screen/likelist.dart';
+import 'package:rentree/screen/Chat/chatlist.dart';
+import 'package:rentree/screen/MyPage/mypage.dart';
+import 'package:rentree/screen/Point/point.dart';
+import 'screen/Home/home.dart';
+import 'screen/Like/likelist.dart';
 import 'screen/first.dart';
 
 void main() {
