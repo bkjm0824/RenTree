@@ -6,6 +6,7 @@ import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
 import 'mypage_profile.dart';
+import '../Notification/notification.dart';
 
 class MypageScreen extends StatefulWidget {
   @override
@@ -80,7 +81,12 @@ class _MypageScreenState extends State<MypageScreen> {
                         color: Color(0xff97C663),
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                          );
+                        },
                       ),
                       Text(
                         '마이페이지',
