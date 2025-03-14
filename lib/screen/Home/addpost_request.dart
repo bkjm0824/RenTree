@@ -14,7 +14,7 @@ class _RequestScreenState extends State<RequestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false, // 키보드가 올라와도 레이아웃 변경 방지
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xffF4F1F1),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus(); // 화면 터치 시 키보드 내리기
@@ -37,7 +37,7 @@ class _RequestScreenState extends State<RequestScreen> {
 
                             // 🔹 큰 제목
                             Text(
-                              '대여 물품 등록하기',
+                              '물건 대여 요청하기',
                               style: TextStyle(
                                 fontSize: 33,
                                 fontWeight: FontWeight.bold,
@@ -59,7 +59,6 @@ class _RequestScreenState extends State<RequestScreen> {
                               ),
                             ),
                             SizedBox(height: 20),
-
                             // 🔹 대여 시간 입력 필드
                             Row(
                               children: [
