@@ -22,7 +22,7 @@ class MyPageProfile extends StatelessWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back_ios_new),
-                        color: Color(0xff918B8B),
+                        color: Color(0xff97C663),
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
@@ -38,7 +38,7 @@ class MyPageProfile extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.home),
-                        color: Color(0xff918B8B),
+                        color: Color(0xff97C663),
                         iconSize: 30,
                         padding: EdgeInsets.only(right: 10),
                         onPressed: () {

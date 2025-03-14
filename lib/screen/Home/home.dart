@@ -8,6 +8,7 @@ import '../MyPage/mypage.dart';
 import 'addpost_give.dart';
 import 'addpost_request.dart';
 import '../post.dart';
+import '../Notification/notification.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -157,7 +158,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xff97C663),
                       iconSize: 30,
                       padding: EdgeInsets.only(left: 10),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                        );
+                      },
                     ),
                     Image.asset('assets/rentree.png', height: 40),
                     IconButton(
@@ -179,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: 2,
+              itemCount: 10,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
