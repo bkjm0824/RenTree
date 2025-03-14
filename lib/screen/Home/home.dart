@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 onPressed: () {
                   Navigator.pop(context);
-                  _navigateToScreen(PostGiveScreen());
+                  _navigateToScreen(RequestScreen());
                 },
                 child: Text(
                   "대여 요청하기",
@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 onPressed: () {
                   Navigator.pop(context);
-                  _navigateToScreen(RequestScreen());
+                  _navigateToScreen(PostGiveScreen());
                 },
                 child: Text(
                   "물품 등록하기",
@@ -124,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // 🔥 리스트뷰에서 아이템 클릭 시 물품 상세 페이지로 이동
-  void _navigateToPostScreen(String title, String description, String imageUrl) {
+  void _navigateToPostScreen(
+      String title, String description, String imageUrl) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -233,14 +234,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Text(
                                     '상품 ${index + 1}',
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold, fontSize: 16),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
                                   ),
                                   SizedBox(height: 4),
                                   Text('상품 설명 ${index + 1}',
-                                      style: TextStyle(color: Colors.grey[700])),
+                                      style:
+                                          TextStyle(color: Colors.grey[700])),
                                   SizedBox(height: 8),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
