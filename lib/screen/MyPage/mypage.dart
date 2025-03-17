@@ -1,6 +1,6 @@
 // 마이페이지 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/Point/point.dart';
+import 'package:rentree/screen/Point/point_first.dart';
 
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
@@ -84,7 +84,9 @@ class _MypageScreenState extends State<MypageScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
                           );
                         },
                       ),
@@ -147,7 +149,8 @@ class _MypageScreenState extends State<MypageScreen> {
           BottomNavigationBarItem(
               icon: Image(image: AssetImage('assets/sangchoo.png'), height: 40),
               label: '포인트'),
-          BottomNavigationBarItem(icon: Icon(Icons.messenger_outline_rounded), label: '채팅'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.messenger_outline_rounded), label: '채팅'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
         ],
       ),
@@ -200,11 +203,13 @@ class _MypageScreenState extends State<MypageScreen> {
 
           // 🔹 오른쪽 화살표 아이콘
           IconButton(
-            icon: Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 20),
+            icon:
+                Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 20),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MyPageProfile()), // 🔥 페이지 이동
+                MaterialPageRoute(
+                    builder: (context) => MyPageProfile()), // 🔥 페이지 이동
               );
             },
           ),
@@ -212,7 +217,6 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
     );
   }
-
 
 // 🔹 현재 대여 진행 상태
   Widget CurrentRentalBox() {
@@ -233,11 +237,17 @@ class _MypageScreenState extends State<MypageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [SizedBox(width: 5), Text('내가 대여 받은 물품', style: TextStyle(fontSize: 16))]),
+          Row(children: [
+            SizedBox(width: 5),
+            Text('내가 대여 받은 물품', style: TextStyle(fontSize: 16))
+          ]),
           SizedBox(height: 8),
           _buildRentalItem('assets/box.png', '상품 1', '3시간 10분 남음'),
           SizedBox(height: 8),
-          Row(children: [SizedBox(width: 5), Text('내가 대여 해준 물품', style: TextStyle(fontSize: 16))]),
+          Row(children: [
+            SizedBox(width: 5),
+            Text('내가 대여 해준 물품', style: TextStyle(fontSize: 16))
+          ]),
           SizedBox(height: 8),
           _buildRentalItem('assets/box.png', '상품 1', '3시간 10분 남음'),
         ],
@@ -263,15 +273,21 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
       child: Row(
         children: [
-          CircleAvatar(radius: 40, backgroundImage: AssetImage(imagePath), backgroundColor: Colors.white),
+          CircleAvatar(
+              radius: 40,
+              backgroundImage: AssetImage(imagePath),
+              backgroundColor: Colors.white),
           SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(title,
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 SizedBox(height: 4),
-                Text(timeLeft, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(timeLeft,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               ],
             ),
           ),
@@ -318,14 +334,15 @@ class _MypageScreenState extends State<MypageScreen> {
             title,
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54), // 오른쪽 이동 아이콘
+          trailing: Icon(Icons.arrow_forward_ios,
+              size: 16, color: Colors.black54), // 오른쪽 이동 아이콘
           onTap: () {
             // 🔥 여기에 해당 페이지로 이동하는 코드 추가
           },
         ),
-        if (!isLast) Divider(height: 1, color: Colors.grey[400]), // 마지막 항목이 아닐 때만 구분선 추가
+        if (!isLast)
+          Divider(height: 1, color: Colors.grey[400]), // 마지막 항목이 아닐 때만 구분선 추가
       ],
     );
   }
-
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rentree/screen/Chat/chatlist.dart';
 import 'package:rentree/screen/MyPage/mypage.dart';
-import 'package:rentree/screen/Point/point.dart';
+import 'package:rentree/screen/Point/point_first.dart';
+import 'package:rentree/screen/Point/point_second.dart';
 import 'screen/Home/home.dart';
 import 'screen/Like/likelist.dart';
 import 'screen/first.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => HomeScreen(),
         '/Like': (context) => LikeScreen(),
-        '/Point': (context) => PointScreen(),
+        '/Point': (context) => PointedScreen(),
         '/Mypage': (context) => MypageScreen(),
         '/Chat': (context) => ChatScreen(),
       },

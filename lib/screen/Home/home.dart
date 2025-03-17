@@ -1,10 +1,11 @@
 // 홈 화면
 import 'package:flutter/material.dart';
 
-import '../Point/point.dart';
+import '../Point/point_first.dart';
 import '../Chat/chatlist.dart';
 import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
+import '../Point/point_second.dart';
 import 'addpost_give.dart';
 import 'addpost_request.dart';
 import '../post.dart';
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PointScreen()),
+          MaterialPageRoute(builder: (context) => PointedScreen()),
         );
         break;
       case 3:
@@ -161,7 +162,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
                         );
                       },
                     ),

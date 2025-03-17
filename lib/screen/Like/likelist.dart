@@ -1,6 +1,6 @@
 // 관심 목록 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/Point/point.dart';
+import 'package:rentree/screen/Point/point_first.dart';
 
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
@@ -60,7 +60,8 @@ class _LikeScreenState extends State<LikeScreen> {
   }
 
   // 🔥 리스트뷰에서 아이템 클릭 시 물품 상세 페이지로 이동
-  void _navigateToPostScreen(String title, String description, String imageUrl) {
+  void _navigateToPostScreen(
+      String title, String description, String imageUrl) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -151,14 +152,17 @@ class _LikeScreenState extends State<LikeScreen> {
                                   Text(
                                     '상품 ${index + 1}',
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold, fontSize: 16),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
                                   ),
                                   SizedBox(height: 4),
                                   Text('상품 설명 ${index + 1}',
-                                      style: TextStyle(color: Colors.grey[700])),
+                                      style:
+                                          TextStyle(color: Colors.grey[700])),
                                   SizedBox(height: 8),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
