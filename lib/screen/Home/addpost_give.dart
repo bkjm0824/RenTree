@@ -387,7 +387,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xff97C663),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                           padding: EdgeInsets.symmetric(vertical: 14),
                         ),

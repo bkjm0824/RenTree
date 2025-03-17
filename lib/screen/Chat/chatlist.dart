@@ -1,6 +1,6 @@
 // 채팅 목록 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/Point/point.dart';
+import 'package:rentree/screen/Point/point_first.dart';
 
 import '../Home/home.dart';
 import '../Like/likelist.dart';
