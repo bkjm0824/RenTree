@@ -1,3 +1,4 @@
+// 알림 화면
 import 'package:flutter/material.dart';
 import 'notification_keyword.dart';
 import '../post.dart';

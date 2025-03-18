@@ -10,6 +10,7 @@ import 'addpost_give.dart';
 import 'addpost_request.dart';
 import '../post.dart';
 import '../Notification/notification.dart';
+import '../Search/search.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -174,7 +175,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xff97C663),
                       iconSize: 30,
                       padding: EdgeInsets.only(right: 10),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -278,25 +284,36 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       // 🔥 하단 네비게이션 바
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xffEBEBEB),
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        selectedItemColor: Color(0xff97C663), // 선택된 아이템 색상 변경
-        unselectedItemColor: Colors.grey, // 선택되지 않은 아이템 색상
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: '찜'),
-          BottomNavigationBarItem(
-              icon: Image(image: AssetImage('assets/sangchoo.png'), height: 40),
-              label: '포인트'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.messenger_outline_rounded), label: '채팅'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
-        ],
+      bottomNavigationBar: Container(
+        color: Color(0xffEBEBEB), // 배경색 유지
+        padding: const EdgeInsets.only(bottom: 5),
+        child: BottomNavigationBar(
+          backgroundColor: Color(0xffEBEBEB),
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          selectedItemColor: Color(0xff97C663),
+          unselectedItemColor: Colors.grey,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          items: const [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home, size: 27), label: '홈'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.favorite, size: 27), label: '찜'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.control_point_duplicate_rounded, size: 27),
+                label: '포인트'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.messenger_outline_rounded, size: 27),
+                label: '채팅'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.person, size: 27), label: '마이페이지'),
+          ],
+        ),
       ),
 
       // 🔹 우측 하단 녹색 플러스 버튼 추가
