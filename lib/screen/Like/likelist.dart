@@ -6,6 +6,8 @@ import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../MyPage/mypage.dart';
 import '../post.dart';
+import '../Notification/notification.dart';
+import '../Search/search.dart';
 
 class LikeScreen extends StatefulWidget {
   @override
@@ -78,22 +80,54 @@ class _LikeScreenState extends State<LikeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xffF4F1F1), // 전체 배경색 설정
-      body: Column(
+      body: SafeArea(
+      child: Column(
         children: [
+          // 🔹 상단바 (알림, 검색 포함)
           Container(
-            color: Color(0xffF4F1F1), // 배경색 고정
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            color: Color(0xffF4F1F1),
             child: Column(
               children: [
-                SizedBox(height: 20), // 상단 여백
-                Text(
-                  '관심목록',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_rounded),
+                      color: Color(0xff97C663),
+                      iconSize: 30,
+                      padding: EdgeInsets.only(left: 10),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                        );
+                      },
+                    ),
+                    Text(
+                      '관심 목록',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.search),
+                      color: Color(0xff97C663),
+                      iconSize: 30,
+                      padding: EdgeInsets.only(right: 10),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10), // 상단 여백
+                SizedBox(height: 10),
                 Container(height: 1, color: Colors.grey[300]), // 구분선
               ],
             ),
@@ -160,36 +194,37 @@ class _LikeScreenState extends State<LikeScreen> {
                                       style:
                                           TextStyle(color: Colors.grey[700])),
                                   SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(Icons.favorite_border,
-                                              size: 20, color: Colors.red),
-                                          SizedBox(width: 5),
-                                          Text('좋아요'),
-                                        ],
-                                      ),
-                                      Text('3시간 전',
-                                          style: TextStyle(color: Colors.grey)),
-                                    ],
-                                  ),
-                                ],
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.favorite_border,
+                                                size: 20, color: Colors.red),
+                                            SizedBox(width: 5),
+                                            Text('좋아요'),
+                                          ],
+                                        ),
+                                        Text('3시간 전',
+                                            style: TextStyle(color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                    ],
-                  ),
-                );
-              },
-            ),
-          )
-        ],
+                        Divider(height: 1, color: Colors.grey[300]),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            )
+          ],
+        ),
       ),
 
       // 🔥 하단 네비게이션 바
@@ -224,6 +259,7 @@ class _LikeScreenState extends State<LikeScreen> {
           ],
         ),
       ),
+
     );
   }
 }

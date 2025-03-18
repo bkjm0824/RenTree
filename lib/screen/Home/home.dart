@@ -10,6 +10,7 @@ import 'addpost_give.dart';
 import 'addpost_request.dart';
 import '../post.dart';
 import '../Notification/notification.dart';
+import '../Search/search.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -174,7 +175,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xff97C663),
                       iconSize: 30,
                       padding: EdgeInsets.only(right: 10),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
+                        );
+                      },
                     ),
                   ],
                 ),

@@ -7,6 +7,7 @@ import '../Home/home.dart';
 import '../Like/likelist.dart';
 import 'mypage_profile.dart';
 import '../Notification/notification.dart';
+import '../Search/search.dart';
 
 class MypageScreen extends StatefulWidget {
   @override
@@ -102,7 +103,12 @@ class _MypageScreenState extends State<MypageScreen> {
                         color: Color(0xff97C663),
                         iconSize: 30,
                         padding: EdgeInsets.only(right: 10),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
+                          );
+                        },
                       ),
                     ],
                   ),

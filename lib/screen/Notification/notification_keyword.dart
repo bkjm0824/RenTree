@@ -1,4 +1,4 @@
-// 키워드 설정 화면
+// 알림 키워드 설정 화면
 import 'package:flutter/material.dart';
 
 class NotificationKeywordScreen extends StatelessWidget {
