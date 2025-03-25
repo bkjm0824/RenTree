@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'guide.dart';
+
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -68,7 +70,10 @@ class LoginScreen extends StatelessWidget {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 로그인 로직 추가
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => GuideScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xff97C663),
