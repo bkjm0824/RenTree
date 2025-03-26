@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../Home/home.dart';
+import '../post.dart';
 
 class MyPageHistory1 extends StatelessWidget {
   @override
@@ -56,9 +57,96 @@ class MyPageHistory1 extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 20), // 상단바와 정보 사이 간격
-
-
+            // 🔥 리스트뷰
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      // 해당 아이템 클릭 시 상세 페이지로 이동
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostScreen(
+                            title: '상품 ${index + 1}', // 제목
+                            description: '상품 설명 ${index + 1}', // 설명
+                            imageUrl: 'assets/box.png', // 이미지 URL
+                          ),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  'assets/box.png',
+                                  width: 110,
+                                  height: 110,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 80,
+                                      height: 80,
+                                      color: Colors.grey[300],
+                                      child: Icon(Icons.image_not_supported,
+                                          color: Colors.grey),
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '상품 ${index + 1}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text('상품 설명 ${index + 1}',
+                                        style:
+                                        TextStyle(color: Colors.grey[700])),
+                                    SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.favorite_border,
+                                                size: 20, color: Colors.red),
+                                            SizedBox(width: 5),
+                                            Text('좋아요'),
+                                          ],
+                                        ),
+                                        Text('3시간 전',
+                                            style: TextStyle(color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Divider(height: 1, color: Colors.grey[300]),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            )
 
           ],
         ),
