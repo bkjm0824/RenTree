@@ -5,9 +5,15 @@ import 'package:rentree/screen/Point/point_first.dart';
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
-import 'mypage_profile.dart';
 import '../Notification/notification.dart';
 import '../Search/search.dart';
+import '../Point/point_second.dart';
+import 'mypage_profile.dart';
+import 'mypage_mypost.dart';
+import 'mypage_history1.dart';
+import 'mypage_history2.dart';
+import 'mypage_userguide.dart';
+import 'mypage_customersupport.dart';
 
 class MypageScreen extends StatefulWidget {
   @override
@@ -331,19 +337,49 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
       child: Column(
         children: [
-          _buildMenuItem('나의 게시글'),
-          _buildMenuItem('대여받은 내역'),
-          _buildMenuItem('대여해준 내역'),
-          _buildMenuItem('나의 상추'),
-          _buildMenuItem('이용 가이드'),
-          _buildMenuItem('고객 지원', isLast: true), // 마지막 항목은 구분선 없음
+          _buildMenuItem('나의 게시글', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyPageMypost()),
+            );
+          }),
+          _buildMenuItem('대여받은 내역', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyPageHistory1()),
+            );
+          }),
+          _buildMenuItem('대여해준 내역', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyPageHistory2()),
+            );
+          }),
+          _buildMenuItem('나의 상추', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PointedScreen()),
+            );
+          }),
+          _buildMenuItem('이용 가이드', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyPageUserGuide()),
+            );
+          }),
+          _buildMenuItem('고객 지원', isLast: true, onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyPageCustomerSupport()),
+            );
+          }), // 마지막 항목은 구분선 없음
         ],
       ),
     );
   }
 
   // 🔹 메뉴 항목을 생성하는 함수
-  Widget _buildMenuItem(String title, {bool isLast = false}) {
+  Widget _buildMenuItem(String title, {bool isLast = false, VoidCallback? onTap}) {
     return Column(
       children: [
         ListTile(
@@ -352,14 +388,13 @@ class _MypageScreenState extends State<MypageScreen> {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           trailing: Icon(Icons.arrow_forward_ios,
-              size: 16, color: Colors.black54), // 오른쪽 이동 아이콘
-          onTap: () {
-            // 🔥 여기에 해당 페이지로 이동하는 코드 추가
-          },
+              size: 16, color: Colors.black54),
+          onTap: onTap,
         ),
         if (!isLast)
-          Divider(height: 1, color: Colors.grey[400]), // 마지막 항목이 아닐 때만 구분선 추가
+          Divider(height: 1, color: Colors.grey[400]),
       ],
     );
   }
+
 }
