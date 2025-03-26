@@ -17,19 +17,19 @@ class _GuideScreenState extends State<GuideScreen> {
   final List<Map<String, String>> guideData = [
     {
       'image': 'assets/box.png',
-      'text': '다양한 물품을 대여하고 대여해줄 수 있어요.',
+      'text': '다양한 물품을\n대여하고 대여해줄 수 있어요.',
     },
     {
       'image': 'assets/sangchoo.png',
-      'text': '상추를 모으면 비교과포인트로 바꿀 수 있어요.',
+      'text': '상추를 모으면\n비교과포인트로 바꿀 수 있어요.',
     },
     {
       'image': 'assets/cabinet.png',
-      'text': '캐비넷을 통해 비대면으로 대여가 가능해요.',
+      'text': '캐비넷을 통해\n비대면으로 대여가 가능해요.',
     },
     {
       'image': 'assets/rentreestart.png',
-      'text': '렌트리와 함께 즐거운 대여생활을 시작해봐요!',
+      'text': '렌트리와 함께\n즐거운 대여생활을 시작해봐요!',
     },
   ];
 
@@ -108,30 +108,39 @@ class GuidePage extends StatelessWidget {
                   description,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     color: Color(0xff464646),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               SizedBox(height: 25),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(totalPages, (index) {
-                  return AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    margin: EdgeInsets.symmetric(horizontal: 6),
-                    width: currentIndex == index ? 14 : 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: currentIndex == index
-                          ? Color(0xff97C663)
-                          : Color(0xffD6D6D6),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  );
-                }),
-              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 8), // 내부 패딩 조절
+                decoration: BoxDecoration(
+                  color: Color(0xffEDEDED), // 회색 배경
+                  borderRadius: BorderRadius.circular(20), // 둥근 모서리
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // 내용 크기에 맞게 최소 크기로 설정
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(totalPages, (index) {
+                    return AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      margin: EdgeInsets.symmetric(horizontal: 6),
+                      width: currentIndex == index ? 14 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: currentIndex == index
+                            ? Color(0xff97C663) // 현재 페이지 표시 (초록색)
+                            : Color(0xffD6D6D6), // 기본 페이지 색상 (연한 회색)
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+                  }),
+                ),
+              )
             ],
           ),
         ),
@@ -168,4 +177,3 @@ class GuidePage extends StatelessWidget {
     );
   }
 }
-
