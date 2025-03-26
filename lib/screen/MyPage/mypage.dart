@@ -8,12 +8,13 @@ import '../Like/likelist.dart';
 import '../Notification/notification.dart';
 import '../Search/search.dart';
 import '../Point/point_second.dart';
+import '../guide.dart';
 import 'mypage_profile.dart';
 import 'mypage_mypost.dart';
 import 'mypage_history1.dart';
 import 'mypage_history2.dart';
-import 'mypage_userguide.dart';
 import 'mypage_customersupport.dart';
+import 'mypage_userguide.dart';
 
 class MypageScreen extends StatefulWidget {
   @override
@@ -364,7 +365,7 @@ class _MypageScreenState extends State<MypageScreen> {
           _buildMenuItem('이용 가이드', onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MyPageUserGuide()),
+              MaterialPageRoute(builder: (context) => GuideScreen()),
             );
           }),
           _buildMenuItem('고객 지원', isLast: true, onTap: () {

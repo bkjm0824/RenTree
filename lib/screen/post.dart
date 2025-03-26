@@ -1,3 +1,4 @@
+// 물품 글 화면
 import 'package:flutter/material.dart';
 
 class PostScreen extends StatelessWidget {
