@@ -19,8 +19,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: FirstScreen(), // 초기 화면을 FirstScreen으로 설정
-      // home: LoginScreen(), //로그인 스크린 만드느라 경로 설정
+      //home: FirstScreen(), // 초기 화면을 FirstScreen으로 설정
+      home: LoginScreen(), //로그인 스크린 만드느라 경로 설정
       routes: {
         '/home': (context) => HomeScreen(),
         '/Like': (context) => LikeScreen(),
