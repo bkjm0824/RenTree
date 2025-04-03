@@ -1,10 +1,14 @@
 package com.example.rentree.dto;
 
+import lombok.Getter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
 public class RentalItemCreateRequest {
 
+    // Getter 메서드
     private String studentId;  // 학번
     private String title;  // 제목
     private String description;  // 설명
@@ -18,40 +22,4 @@ public class RentalItemCreateRequest {
     // 기본 생성자 (JSON 직렬화/역직렬화 시 필요)
     public RentalItemCreateRequest() {}
 
-    // Getter 메서드
-    public String getStudentId() {
-        return studentId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Boolean getIsFaceToFace() {
-        return isFaceToFace;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
-    public LocalDate getRentalDate() {
-        return rentalDate;
-    }
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public LocalDateTime getRentalStartTime() {
-        return rentalStartTime;
-    }
-
-    public LocalDateTime getRentalEndTime() {
-        return rentalEndTime;
-    }
 }

@@ -1,9 +1,14 @@
 package com.example.rentree.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 public class RentalItem {
 
@@ -56,19 +61,11 @@ public class RentalItem {
         this.rentalEndTime = rentalEndTime;
     }
 
-    public Long getId() { return id; }
-    public String getStudentId() { return studentId; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public Boolean getIsFaceToFace() { return isFaceToFace; }
-    public String getPhotoUrl() { return photoUrl; }
-    public LocalDate getRentalDate() { return rentalDate; }
-    public Integer getViewCount() { return viewCount; }
-    public Long getCategoryId() { return categoryId; }
-    public LocalDateTime getRentalStartTime() { return rentalStartTime; }
-    public LocalDateTime getRentalEndTime() { return rentalEndTime; }
-
     public void incrementViewCount() {
         this.viewCount++;
     }
 }
+
+
+
+
