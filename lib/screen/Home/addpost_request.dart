@@ -1,5 +1,6 @@
-// 물품 대여 요청글 작성 화면
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RequestScreen extends StatefulWidget {
   @override
@@ -7,18 +8,101 @@ class RequestScreen extends StatefulWidget {
 }
 
 class _RequestScreenState extends State<RequestScreen> {
-  bool isFaceToFace = false; // 대면 여부 체크박스 상태
-  bool isNonFaceToFace = false; // 비대면 여부 체크박스 상태
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
+
+  bool isFaceToFace = false;
+  bool isNonFaceToFace = false;
+
+  TimeOfDay? _startTime;
+  TimeOfDay? _endTime;
+
+  String formatTimeOfDay(TimeOfDay time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
+  }
+
+  Future<void> _selectStartTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _startTime = picked;
+        _startTimeController.text = formatTimeOfDay(picked);
+      });
+    }
+  }
+
+  Future<void> _selectEndTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _endTime = picked;
+        _endTimeController.text = formatTimeOfDay(picked);
+      });
+    }
+  }
+
+  Future<void> submitRequest() async {
+    final title = _titleController.text.trim();
+    final startTime = _startTimeController.text.trim();
+    final endTime = _endTimeController.text.trim();
+    final description = _descriptionController.text.trim();
+    final isPerson = isFaceToFace; // boolean으로 전송
+    final studentId = 1; // 예시용, 로그인 연동 시 변경
+
+    if (title.isEmpty ||
+        startTime.isEmpty ||
+        endTime.isEmpty ||
+        description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('모든 필드를 입력해주세요')),
+      );
+      return;
+    }
+
+    final url =
+        Uri.parse('http://10.0.2.2:8080/ItemRequest'); // 🔁 백엔드 컨트롤러에 맞춤
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'title': title,
+        'description': description,
+        'startTime': startTime,
+        'endTime': endTime,
+        'isPerson': isPerson,
+        'studentId': studentId,
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('글이 등록되었습니다!')),
+      );
+      Navigator.pop(context);
+    } else {
+      print('서버 오류: ${response.statusCode} - ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('글 등록 실패')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // 키보드가 올라와도 레이아웃 변경 방지
+      resizeToAvoidBottomInset: false,
       backgroundColor: Color(0xffF4F1F1),
       body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus(); // 화면 터치 시 키보드 내리기
-        },
+        onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
           child: Stack(
             children: [
@@ -34,19 +118,15 @@ class _RequestScreenState extends State<RequestScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: 70),
-
-                            // 🔹 큰 제목
-                            Text(
-                              '물건 대여 요청하기',
-                              style: TextStyle(
-                                fontSize: 33,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            Text('물건 대여 요청하기',
+                                style: TextStyle(
+                                    fontSize: 33, fontWeight: FontWeight.bold)),
                             SizedBox(height: 50),
 
-                            // 🔹 제목 입력 필드
+                            // 제목
                             TextField(
+                              controller: _titleController,
+                              keyboardType: TextInputType.text,
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Color(0xffEBEBEB),
@@ -59,21 +139,30 @@ class _RequestScreenState extends State<RequestScreen> {
                               ),
                             ),
                             SizedBox(height: 20),
-                            // 🔹 대여 시간 입력 필드
+
+                            // 시간 입력
                             Row(
                               children: [
                                 Text("대여 시간은"),
                                 SizedBox(width: 10),
                                 Expanded(
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Color(0xffEBEBEB),
-                                      hintText: '시작 시간',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
-                                            width: 1, color: Color(0xFF888686)),
+                                  child: InkWell(
+                                    onTap: _selectStartTime,
+                                    child: IgnorePointer(
+                                      child: TextField(
+                                        controller: _startTimeController,
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: Color(0xffEBEBEB),
+                                          hintText: '시작 시간',
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            borderSide: BorderSide(
+                                                width: 1,
+                                                color: Color(0xFF888686)),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -82,15 +171,23 @@ class _RequestScreenState extends State<RequestScreen> {
                                 Text("부터"),
                                 SizedBox(width: 10),
                                 Expanded(
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Color(0xffEBEBEB),
-                                      hintText: '종료 시간',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
-                                            width: 1, color: Color(0xFF888686)),
+                                  child: InkWell(
+                                    onTap: _selectEndTime,
+                                    child: IgnorePointer(
+                                      child: TextField(
+                                        controller: _endTimeController,
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: Color(0xffEBEBEB),
+                                          hintText: '종료 시간',
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            borderSide: BorderSide(
+                                                width: 1,
+                                                color: Color(0xFF888686)),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -101,12 +198,14 @@ class _RequestScreenState extends State<RequestScreen> {
                             ),
                             SizedBox(height: 20),
 
-                            // 🔹 본문 입력 필드
+                            // 설명
                             Container(
                               height: 275,
                               child: TextField(
+                                controller: _descriptionController,
                                 maxLines: null,
                                 expands: true,
+                                keyboardType: TextInputType.text,
                                 textAlignVertical: TextAlignVertical.top,
                                 decoration: InputDecoration(
                                   filled: true,
@@ -123,32 +222,25 @@ class _RequestScreenState extends State<RequestScreen> {
                             ),
                             SizedBox(height: 20),
 
-                            // 🔹 대면 / 비대면 체크박스
+                            // 대면 / 비대면
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      '대면',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xff606060)),
-                                    ),
+                                    Text('대면',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xff606060))),
                                     Checkbox(
                                       value: isFaceToFace,
-                                      activeColor:
-                                          Color(0xff97C663), // 체크 색상 초록색
+                                      activeColor: Color(0xff97C663),
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          if (value == true) {
-                                            isFaceToFace = true;
-                                            isNonFaceToFace =
-                                                false; // 다른 체크박스 해제
-                                          } else {
-                                            isFaceToFace = false;
-                                          }
+                                          isFaceToFace = value ?? false;
+                                          if (value == true)
+                                            isNonFaceToFace = false;
                                         });
                                       },
                                     ),
@@ -157,25 +249,19 @@ class _RequestScreenState extends State<RequestScreen> {
                                 SizedBox(width: 8),
                                 Row(
                                   children: [
-                                    Text(
-                                      '비대면',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xff606060)),
-                                    ),
+                                    Text('비대면',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xff606060))),
                                     Checkbox(
                                       value: isNonFaceToFace,
-                                      activeColor:
-                                          Color(0xff97C663), // 체크 색상 초록색
+                                      activeColor: Color(0xff97C663),
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          if (value == true) {
-                                            isNonFaceToFace = true;
-                                            isFaceToFace = false; // 다른 체크박스 해제
-                                          } else {
-                                            isNonFaceToFace = false;
-                                          }
+                                          isNonFaceToFace = value ?? false;
+                                          if (value == true)
+                                            isFaceToFace = false;
                                         });
                                       },
                                     ),
@@ -189,28 +275,23 @@ class _RequestScreenState extends State<RequestScreen> {
                       ),
                     ),
 
-                    // 🔹 RenTree에 글 올리기 버튼 (키보드 영향 안 받게)
-                    Container(
-                      // padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    // 제출 버튼
+                    SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // 글 올리기 버튼 클릭 시 동작
-                        },
+                        onPressed: submitRequest,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xff97C663),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
+                              borderRadius: BorderRadius.circular(15)),
                           padding: EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: Text(
                           'RenTree에 글 올리기',
                           style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -218,10 +299,10 @@ class _RequestScreenState extends State<RequestScreen> {
                 ),
               ),
 
-              // 🔹 상단 X 아이콘 (왼쪽 끝으로 정렬)
+              // 상단 닫기 버튼
               Positioned(
                 top: 10,
-                left: 0, // 왼쪽 끝 정렬
+                left: 0,
                 child: IconButton(
                   icon: Icon(Icons.close, size: 40, color: Color(0xff918B8B)),
                   onPressed: () {
