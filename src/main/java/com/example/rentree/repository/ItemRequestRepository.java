@@ -15,7 +15,7 @@ ItemRequest 엔티티와 데이터베이스 간 상호작용을 담당하는 레
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
 
     // 글 등록하기
-    public ItemRequest save(ItemRequest itemRequest);
+    // public ItemRequest save(ItemRequest itemRequest);
 
     // 학번으로 게시글 가져오기
     List<ItemRequest> findByStudentId(int studentId);

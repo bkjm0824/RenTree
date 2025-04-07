@@ -1,10 +1,7 @@
 package com.example.rentree.domain;
 
 import com.example.rentree.dto.ItemRequestDTO;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -27,6 +24,7 @@ import java.time.LocalTime;
 public class ItemRequest {
 
     @Id // 기본 키임을 명시
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
     @Column(nullable = false)
     private int id; // 요청 식별자
 
