@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RequestScreen extends StatefulWidget {
   @override
@@ -54,8 +55,21 @@ class _RequestScreenState extends State<RequestScreen> {
     final startTime = _startTimeController.text.trim();
     final endTime = _endTimeController.text.trim();
     final description = _descriptionController.text.trim();
-    final isPerson = isFaceToFace; // boolean으로 전송
-    final studentId = 1; // 예시용, 로그인 연동 시 변경
+    final isPerson = isFaceToFace;
+    final createdAt = DateTime.now().toIso8601String();
+
+    final prefs = await SharedPreferences.getInstance();
+    final studentId = prefs.getInt('studentId'); // ✅ 저장된 값만 가져오기
+
+    print("불러온 studentId: $studentId");
+    print("불러온 datetime: $createdAt");
+
+    if (studentId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('로그인 정보를 찾을 수 없습니다. 다시 로그인해주세요.')),
+      );
+      return;
+    }
 
     if (title.isEmpty ||
         startTime.isEmpty ||
@@ -67,8 +81,9 @@ class _RequestScreenState extends State<RequestScreen> {
       return;
     }
 
-    final url =
-        Uri.parse('http://10.0.2.2:8080/ItemRequest'); // 🔁 백엔드 컨트롤러에 맞춤
+    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest');
+
+    print('[전송 데이터] isPerson: $isPerson');
 
     final response = await http.post(
       url,
@@ -78,8 +93,9 @@ class _RequestScreenState extends State<RequestScreen> {
         'description': description,
         'startTime': startTime,
         'endTime': endTime,
-        'isPerson': isPerson,
+        'person': isFaceToFace,
         'studentId': studentId,
+        'createdAt': createdAt,
       }),
     );
 
@@ -122,8 +138,6 @@ class _RequestScreenState extends State<RequestScreen> {
                                 style: TextStyle(
                                     fontSize: 33, fontWeight: FontWeight.bold)),
                             SizedBox(height: 50),
-
-                            // 제목
                             TextField(
                               controller: _titleController,
                               keyboardType: TextInputType.text,
@@ -139,8 +153,6 @@ class _RequestScreenState extends State<RequestScreen> {
                               ),
                             ),
                             SizedBox(height: 20),
-
-                            // 시간 입력
                             Row(
                               children: [
                                 Text("대여 시간은"),
@@ -197,8 +209,6 @@ class _RequestScreenState extends State<RequestScreen> {
                               ],
                             ),
                             SizedBox(height: 20),
-
-                            // 설명
                             Container(
                               height: 275,
                               child: TextField(
@@ -221,8 +231,6 @@ class _RequestScreenState extends State<RequestScreen> {
                               ),
                             ),
                             SizedBox(height: 20),
-
-                            // 대면 / 비대면
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -238,15 +246,18 @@ class _RequestScreenState extends State<RequestScreen> {
                                       activeColor: Color(0xff97C663),
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          isFaceToFace = value ?? false;
-                                          if (value == true)
+                                          if (value == true) {
+                                            isFaceToFace = true;
                                             isNonFaceToFace = false;
+                                          } else {
+                                            isFaceToFace = false;
+                                          }
                                         });
                                       },
                                     ),
                                   ],
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 5),
                                 Row(
                                   children: [
                                     Text('비대면',
@@ -259,9 +270,12 @@ class _RequestScreenState extends State<RequestScreen> {
                                       activeColor: Color(0xff97C663),
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          isNonFaceToFace = value ?? false;
-                                          if (value == true)
+                                          if (value == true) {
+                                            isNonFaceToFace = true;
                                             isFaceToFace = false;
+                                          } else {
+                                            isNonFaceToFace = false;
+                                          }
                                         });
                                       },
                                     ),
@@ -274,8 +288,6 @@ class _RequestScreenState extends State<RequestScreen> {
                         ),
                       ),
                     ),
-
-                    // 제출 버튼
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -298,8 +310,6 @@ class _RequestScreenState extends State<RequestScreen> {
                   ],
                 ),
               ),
-
-              // 상단 닫기 버튼
               Positioned(
                 top: 10,
                 left: 0,
