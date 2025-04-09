@@ -9,6 +9,7 @@ import '../Notification/notification.dart';
 import '../Search/search.dart';
 import '../Point/point_second.dart';
 import '../guide.dart';
+import '../post.dart';
 import 'mypage_profile.dart';
 import 'mypage_mypost.dart';
 import 'mypage_history1.dart';
@@ -134,7 +135,7 @@ class _MypageScreenState extends State<MypageScreen> {
                     ProfileBox(),
 
                     // 현재 대여 진행 내역
-                    CurrentRentalBox(),
+                    CurrentRentalBox(context),
 
                     // 🔥 새로운 메뉴 박스 추가
                     MenuBox(),
@@ -243,7 +244,7 @@ class _MypageScreenState extends State<MypageScreen> {
   }
 
 // 🔹 현재 대여 진행 상태
-  Widget CurrentRentalBox() {
+  Widget CurrentRentalBox(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 32, vertical: 5),
       padding: EdgeInsets.all(16),
@@ -266,59 +267,88 @@ class _MypageScreenState extends State<MypageScreen> {
             Text('내가 대여 받은 물품', style: TextStyle(fontSize: 16))
           ]),
           SizedBox(height: 8),
-          _buildRentalItem('assets/box.png', '상품 1', '3시간 10분 남음'),
+          _buildRentalItem(
+            context,
+            'assets/box.png',
+            '상품 1',
+            '3시간 10분 남음',
+            '상품 1에 대한 설명입니다.',
+          ),
           SizedBox(height: 8),
           Row(children: [
             SizedBox(width: 5),
             Text('내가 대여 해준 물품', style: TextStyle(fontSize: 16))
           ]),
           SizedBox(height: 8),
-          _buildRentalItem('assets/box.png', '상품 1', '3시간 10분 남음'),
+          _buildRentalItem(
+            context,
+            'assets/box.png',
+            '상품 2',
+            '5시간 20분 남음',
+            '상품 2에 대한 설명입니다.',
+          ),
         ],
       ),
     );
   }
 
+
 // 🔹 대여 물품 아이템
-  Widget _buildRentalItem(String imagePath, String title, String timeLeft) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Color(0xFFF4F1F1),
-        borderRadius: BorderRadius.circular(35),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage(imagePath),
-              backgroundColor: Colors.white),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                SizedBox(height: 4),
-                Text(timeLeft,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              ],
+  Widget _buildRentalItem(BuildContext context, String imagePath, String title, String timeLeft, String description) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PostScreen(
+              title: title,
+              description: description,
+              imageUrl: imagePath,
             ),
           ),
-        ],
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Color(0xFFF4F1F1),
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundImage: AssetImage(imagePath),
+              backgroundColor: Colors.white,
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text(timeLeft,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+
 
 // 🔹 메뉴 박스
   Widget MenuBox() {

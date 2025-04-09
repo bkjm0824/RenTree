@@ -1,4 +1,4 @@
-// 시작 화면
+// 시작 로딩 화면
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -11,17 +11,13 @@ class FirstScreen extends StatelessWidget {
     });
 
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/firstScreen.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ],
+      body: Center(
+        child: Image.asset(
+          'assets/rentree.png',
+          width: 200,
+          height: 200,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

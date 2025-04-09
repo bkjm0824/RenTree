@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../Home/home.dart';
+import '../login.dart';
 
 class MyPageProfile extends StatelessWidget {
   @override
@@ -184,6 +185,10 @@ class MyPageProfile extends StatelessWidget {
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () {
                           // 로그아웃 로직 추가
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginScreen()),
+                          );
                         },
                       ),
 
