@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'guide.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -16,15 +16,14 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _pwErrorText;
 
   Future<void> _login() async {
-    final studentId = _idController.text.trim();
+    final studentIdInput = _idController.text.trim();
     final password = _pwController.text.trim();
 
     setState(() {
-      _idErrorText = studentId.isEmpty ? '학번을 입력해주세요.' : null;
+      _idErrorText = studentIdInput.isEmpty ? '학번을 입력해주세요.' : null;
       _pwErrorText = password.isEmpty ? '비밀번호를 입력해주세요.' : null;
     });
 
-    // 입력값 하나라도 비어있으면 요청 중단
     if (_idErrorText != null || _pwErrorText != null) return;
 
     final url = Uri.parse('http://10.0.2.2:8080/Rentree/login');
@@ -32,12 +31,18 @@ class _LoginScreenState extends State<LoginScreen> {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'studentNum': studentId, 'password': password}),
+      body: jsonEncode({'studentNum': studentIdInput, 'password': password}),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      // 로그인 성공
+      final prefs = await SharedPreferences.getInstance();
+
+      if (data['id'] != null) {
+        await prefs.setInt('studentId', data['id']);
+        print('✅ 저장된 studentId: ${data['id']}');
+      }
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => GuideScreen()),
