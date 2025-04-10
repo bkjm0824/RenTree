@@ -1,5 +1,6 @@
 // 프로필 상세 화면
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/MyPage/mypage_changeNM.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Home/home.dart';
@@ -68,7 +69,8 @@ class _MyPageProfileState extends State<MyPageProfile> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => HomeScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => HomeScreen()),
                           );
                         },
                       ),
@@ -103,7 +105,8 @@ class _MyPageProfileState extends State<MyPageProfile> {
                     children: [
                       CircleAvatar(
                         radius: 40,
-                        backgroundImage: AssetImage('assets/Profile/hosick.png'),
+                        backgroundImage:
+                            AssetImage('assets/Profile/hosick.png'),
                         backgroundColor: Colors.white,
                       ),
                       SizedBox(width: 16),
@@ -112,20 +115,20 @@ class _MyPageProfileState extends State<MyPageProfile> {
                         children: [
                           Text(
                             _nickname,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
                           Text(
                             '학번: $_studentNum',
-                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.grey[700]),
                           ),
                         ],
                       ),
                     ],
                   ),
-
                   SizedBox(height: 20),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -135,10 +138,12 @@ class _MyPageProfileState extends State<MyPageProfile> {
                             // 프로필 이미지 변경 로직
                           },
                           child: Text('프로필 이미지 변경',
-                              style: TextStyle(color: Colors.black, fontSize: 12)),
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 12)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFEBEBEB),
-                            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 24),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -149,13 +154,19 @@ class _MyPageProfileState extends State<MyPageProfile> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // 닉네임 변경 로직
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => NickNameScreen()),
+                            );
                           },
                           child: Text('닉네임 변경',
-                              style: TextStyle(color: Colors.black, fontSize: 12)),
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 12)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFEBEBEB),
-                            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 24),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -164,9 +175,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
                       ),
                     ],
                   ),
-
                   SizedBox(height: 20),
-
                   Column(
                     children: [
                       ListTile(
@@ -185,7 +194,8 @@ class _MyPageProfileState extends State<MyPageProfile> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => LoginScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => LoginScreen()),
                           );
                         },
                       ),
