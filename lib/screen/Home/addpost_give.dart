@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PostGiveScreen extends StatefulWidget {
   @override
@@ -104,23 +105,41 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
 
     final categoryId = categoryMap[category] ?? 1;
 
-    final today = DateTime.now();
-    final rentalDate = today.toIso8601String().split('T')[0];
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum'); // 🔑 저장된 학번 불러오기
 
-    final rentalStartTime = '${rentalDate}T${startTime}';
-    final rentalEndTime = '${rentalDate}T${endTime}';
+    if (studentNum == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('로그인 정보를 찾을 수 없습니다.')),
+      );
+      return;
+    }
+
+    final today = DateTime.now().toIso8601String().split('T')[0];
+    final rentalStartTime = '${today}T$startTime';
+    final rentalEndTime = '${today}T$endTime';
+
+    // 이미지 업로드 후 URL 수집
+    List<String> photoUrls = [];
+    for (var imageFile in _imageFiles) {
+      final url = await uploadImage(imageFile);
+      if (url != null) {
+        photoUrls.add(url);
+      }
+    }
 
     final body = {
-      "studentId": "20231234",
+      "studentNum": studentNum,
       "title": title,
       "description": description,
       "isFaceToFace": isFaceToFace,
-      "photoUrl": "https://example.com/macbook.jpg",
-      "rentalDate": rentalDate,
       "categoryId": categoryId,
       "rentalStartTime": rentalStartTime,
       "rentalEndTime": rentalEndTime,
+      "photoUrls": photoUrls,
     };
+
+    print("보낼 데이터: $body");
 
     final response = await http.post(
       url,

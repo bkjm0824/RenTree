@@ -55,47 +55,40 @@ class _RequestScreenState extends State<RequestScreen> {
     final startTime = _startTimeController.text.trim();
     final endTime = _endTimeController.text.trim();
     final description = _descriptionController.text.trim();
-    final isPerson = isFaceToFace;
-    final createdAt = DateTime.now().toIso8601String();
 
     final prefs = await SharedPreferences.getInstance();
-    final studentId = prefs.getInt('studentId'); // ✅ 저장된 값만 가져오기
+    final studentNum = prefs.getString('studentNum'); // ✅ string으로 불러오기
 
-    print("불러온 studentId: $studentId");
-    print("불러온 datetime: $createdAt");
-
-    if (studentId == null) {
+    if (studentNum == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('로그인 정보를 찾을 수 없습니다. 다시 로그인해주세요.')),
       );
       return;
     }
 
-    if (title.isEmpty ||
-        startTime.isEmpty ||
-        endTime.isEmpty ||
-        description.isEmpty) {
+    if (title.isEmpty || startTime.isEmpty || endTime.isEmpty || description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('모든 필드를 입력해주세요')),
       );
       return;
     }
 
-    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest');
+    final rentalDate = DateTime.now().toIso8601String().split('T')[0];
+    final rentalStartTime = '${rentalDate}T$startTime';
+    final rentalEndTime = '${rentalDate}T$endTime';
 
-    print('[전송 데이터] isPerson: $isPerson');
+    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest');
 
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
+        'studentNum': studentNum,
         'title': title,
         'description': description,
-        'startTime': startTime,
-        'endTime': endTime,
-        'person': isFaceToFace,
-        'studentId': studentId,
-        'createdAt': createdAt,
+        'rentalStartTime': rentalStartTime,
+        'rentalEndTime': rentalEndTime,
+        'isFaceToFace': isFaceToFace,
       }),
     );
 
