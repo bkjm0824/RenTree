@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,46 +19,43 @@ public class RentalItem {
     private Long id;
 
     @Column(nullable = false, length = 100)
-    private String studentId; // 학번 (외래키, 문자열로 가정)
+    private String studentId;
 
     @Column(nullable = false, length = 255)
-    private String title; // 제목
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String description; // 설명
+    private String description;
 
     @Column(nullable = false)
-    private Boolean isFaceToFace; // 대면 여부
+    private Boolean isFaceToFace;
 
-    @Column(length = 255)
-    private String photoUrl; // 사진 URL
-
-    private LocalDate rentalDate; // 대여 일자
+    private LocalDate rentalDate;
 
     @Column(nullable = false)
-    private Integer viewCount = 0; // 조회수
+    private Integer viewCount = 0;
 
-    @Column(nullable = false)
-    private Long categoryId; // 카테고리 ID (외래키)
+    private LocalDateTime rentalStartTime;
+    private LocalDateTime rentalEndTime;
 
-    private LocalDateTime rentalStartTime; // 대여 시작 시간
-    private LocalDateTime rentalEndTime;   // 대여 종료 시간
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @OneToMany(mappedBy = "rentalItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemImage> images = new ArrayList<>();
 
     protected RentalItem() {}
 
     public RentalItem(String studentId, String title, String description, Boolean isFaceToFace,
-                      String photoUrl, LocalDate rentalDate, Long categoryId,
+                      LocalDate rentalDate, Category category,
                       LocalDateTime rentalStartTime, LocalDateTime rentalEndTime) {
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("제목은 필수 입력 사항입니다.");
-        }
         this.studentId = studentId;
         this.title = title;
         this.description = description;
         this.isFaceToFace = isFaceToFace;
-        this.photoUrl = photoUrl;
         this.rentalDate = rentalDate;
-        this.categoryId = categoryId;
+        this.category = category;
         this.rentalStartTime = rentalStartTime;
         this.rentalEndTime = rentalEndTime;
     }
@@ -64,8 +63,11 @@ public class RentalItem {
     public void incrementViewCount() {
         this.viewCount++;
     }
+
+    public void addImage(String url) {
+        ItemImage image = new ItemImage();
+        image.setUrl(url);
+        image.setRentalItem(this);
+        this.images.add(image);
+    }
 }
-
-
-
-

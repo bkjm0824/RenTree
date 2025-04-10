@@ -28,8 +28,10 @@ public class ItemRequest {
     @Column(nullable = false)
     private int id; // 요청 식별자
 
-    @Column(name = "student_id", nullable = false) // student 테이블의 id를 참조
-    private int studentId; // 학생 식별자 (외래키)
+    // studentNum을 외래키로 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_num", referencedColumnName = "student_num", nullable = false)
+    private Student student;
 
     @Column(nullable = false, length = 255)
     private String title; // 제목
@@ -49,11 +51,11 @@ public class ItemRequest {
     @Column(name = "created_at", updatable = false, insertable = false)
     private Timestamp createdAt; // 요청 시간
 
-    public static ItemRequest fromItemRequestDTO(ItemRequestDTO itemRequestDTO)
+    public static ItemRequest fromItemRequestDTO(ItemRequestDTO itemRequestDTO,Student student)
     {
         return ItemRequest.builder()
                 .id(itemRequestDTO.getId())
-                .studentId(itemRequestDTO.getStudentId())
+                .student(student)
                 .title(itemRequestDTO.getTitle())
                 .description(itemRequestDTO.getDescription())
                 .startTime(itemRequestDTO.getStartTime())

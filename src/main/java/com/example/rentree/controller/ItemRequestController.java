@@ -20,41 +20,50 @@ public class ItemRequestController {
 
     // 글 등록하기
     @PostMapping
-    public void saveItemRequestItem(@RequestBody ItemRequestDTO itemRequestDTO) {
+    public ResponseEntity<String> saveItemRequest(@RequestBody ItemRequestDTO itemRequestDTO) {
         itemRequestService.saveItemRequest(itemRequestDTO);
+        return ResponseEntity.ok("ItemRequest saved");
     }
 
-    // 학번에 맞게 게시글 가져옴
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<ItemRequestDTO>> getItemRequestByStudentId(@PathVariable int studentId) {
-        List<ItemRequest> itemRequests = itemRequestService.getItemRequestByStudentId(studentId);
-        List<ItemRequestDTO> itemRequestDTOS = itemRequests.stream().map(ItemRequestDTO::fromEntity).collect(Collectors.toList());
-        return ResponseEntity.ok(itemRequestDTOS);
+    // 학번(studentNum)에 맞게 게시글 가져오기
+    @GetMapping("/student/{studentNum}")
+    public ResponseEntity<List<ItemRequestDTO>> getItemRequestByStudentNum(@PathVariable String studentNum) {
+        List<ItemRequest> itemRequests = itemRequestService.getItemRequestByStudentNum(studentNum);
+        List<ItemRequestDTO> dtos = itemRequests.stream()
+                .map(ItemRequestDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
-    // 제목에 맞게 게시글 가져옴
+    // 제목에 포함된 단어로 게시글 검색
     @GetMapping("/title/{title}")
     public ResponseEntity<List<ItemRequestDTO>> getItemRequestByTitle(@PathVariable String title) {
-        List<ItemRequestDTO> itemRequestDTOS = itemRequestService.getItemRequestByTitleContaining(title)
+        List<ItemRequestDTO> dtos = itemRequestService.getItemRequestByTitleContaining(title)
                 .stream()
                 .map(ItemRequestDTO::fromEntity)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(itemRequestDTOS);
+        return ResponseEntity.ok(dtos);
     }
 
     // 게시글 수정
     @PutMapping("/{id}")
-    public ResponseEntity<ItemRequest> updateItemRequest(@PathVariable Long id, @RequestBody ItemRequestDTO itemRequestDTO) {
+    public ResponseEntity<ItemRequest> updateItemRequest(
+            @PathVariable Long id,
+            @RequestBody ItemRequestDTO itemRequestDTO
+    ) {
         Optional<ItemRequest> existingItemRequest = itemRequestService.findById(id);
-        if(existingItemRequest.isPresent()) {
+        if (existingItemRequest.isPresent()) {
             ItemRequest itemRequest = existingItemRequest.get();
             itemRequest.setTitle(itemRequestDTO.getTitle());
             itemRequest.setDescription(itemRequestDTO.getDescription());
             itemRequest.setStartTime(itemRequestDTO.getStartTime());
             itemRequest.setEndTime(itemRequestDTO.getEndTime());
             itemRequest.setPerson(itemRequestDTO.isPerson());
-            ItemRequest updateItemRequest = itemRequestService.updateItemRequest(itemRequest);
-            return ResponseEntity.ok(updateItemRequest);
+
+            // student는 수정하지 않음 (필요 시 로직 추가 가능)
+
+            ItemRequest updated = itemRequestService.updateItemRequest(itemRequest);
+            return ResponseEntity.ok(updated);
         } else {
             return ResponseEntity.notFound().build();
         }

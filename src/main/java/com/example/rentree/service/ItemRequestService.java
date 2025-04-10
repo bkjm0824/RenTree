@@ -1,8 +1,10 @@
 package com.example.rentree.service;
 
+import com.example.rentree.domain.Student;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.repository.ItemRequestRepository;
+import com.example.rentree.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +22,19 @@ import java.util.Optional;
 public class ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository; // ItemRequestRepository 객체 주입
+    private final StudentRepository studentRepository;
 
     // 게시글 등록
-    // @param itemRequestDTO : 게시글 정보
-    // @return : 없음
     @Transactional
     public void saveItemRequest(ItemRequestDTO itemRequestDTO) {
+        // 학번으로 학생 엔티티 조회
+        Student student = studentRepository.findByStudentNum(itemRequestDTO.getStudentNum())
+                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다: " + itemRequestDTO.getStudentNum()));
+
+        // ItemRequest 엔티티 생성
         ItemRequest itemRequest = new ItemRequest(
                 itemRequestDTO.getId(),
-                itemRequestDTO.getStudentId(),
+                student,
                 itemRequestDTO.getTitle(),
                 itemRequestDTO.getDescription(),
                 itemRequestDTO.getStartTime(),
@@ -36,6 +42,7 @@ public class ItemRequestService {
                 itemRequestDTO.isPerson(),
                 itemRequestDTO.getCreatedAt()
         );
+
         itemRequestRepository.save(itemRequest);
     }
 
@@ -47,8 +54,8 @@ public class ItemRequestService {
 
     @Transactional(readOnly = true)
     // 학번에 맞게 게시글 가져오기
-    public List<ItemRequest> getItemRequestByStudentId(int studentId) {
-        return itemRequestRepository.findByStudentId(studentId);
+    public List<ItemRequest> getItemRequestByStudentNum(String studentNum) {
+        return itemRequestRepository.findByStudent_StudentNum(studentNum);
     }
 
     @Transactional

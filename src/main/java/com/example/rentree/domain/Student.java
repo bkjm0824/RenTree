@@ -25,7 +25,7 @@ public class Student {
     @Column(nullable = false) // null 값 허용하지 않음
     private int id; // 학생 식별자
 
-    @Column(name = "student_num", nullable = false, length = 100) // null 값 허용하지 않음, 길이 100
+    @Column(name = "student_num", nullable = false, length = 100, unique = true) // null 값 허용하지 않음, 길이 100
     private String studentNum; // 학번
 
     @Column(nullable = false, length = 255) // null 값 허용하지 않음, 길이 255

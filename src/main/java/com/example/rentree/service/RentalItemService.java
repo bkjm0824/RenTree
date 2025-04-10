@@ -1,8 +1,10 @@
 package com.example.rentree.service;
 
+import com.example.rentree.domain.Category;
 import com.example.rentree.domain.RentalItem;
 import com.example.rentree.dto.RentalItemCreateRequest;
 import com.example.rentree.dto.RentalItemUpdateRequest;
+import com.example.rentree.repository.CategoryRepository;
 import com.example.rentree.repository.RentalItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,25 +16,36 @@ import java.util.Optional;
 public class RentalItemService {
 
     private final RentalItemRepository rentalItemRepository;
+    private final CategoryRepository categoryRepository;
 
-    public RentalItemService(RentalItemRepository rentalItemRepository) {
+    public RentalItemService(RentalItemRepository rentalItemRepository,CategoryRepository categoryRepository) {
         this.rentalItemRepository = rentalItemRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional
     public void saveRentalItem(RentalItemCreateRequest request) {
-        RentalItem rentalItem = new RentalItem(
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리 ID입니다."));
+
+        RentalItem item = new RentalItem(
                 request.getStudentId(),
                 request.getTitle(),
                 request.getDescription(),
                 request.getIsFaceToFace(),
-                request.getPhotoUrl(),
                 request.getRentalDate(),
-                request.getCategoryId(),
+                category,
                 request.getRentalStartTime(),
                 request.getRentalEndTime()
         );
-        rentalItemRepository.save(rentalItem);
+
+        if (request.getPhotoUrls() != null) {
+            for (String url : request.getPhotoUrls()) {
+                item.addImage(url);
+            }
+        }
+
+        rentalItemRepository.save(item);
     }
 
     @Transactional(readOnly = true)
@@ -60,18 +73,32 @@ public class RentalItemService {
         RentalItem rentalItem = rentalItemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 물품을 찾을 수 없습니다: " + id));
 
-        // 수정 가능한 필드들 업데이트 (널이 아닐 경우에만 변경)
         if (request.getTitle() != null) rentalItem.setTitle(request.getTitle());
         if (request.getDescription() != null) rentalItem.setDescription(request.getDescription());
         if (request.getIsFaceToFace() != null) rentalItem.setIsFaceToFace(request.getIsFaceToFace());
-        if (request.getPhotoUrl() != null) rentalItem.setPhotoUrl(request.getPhotoUrl());
         if (request.getRentalDate() != null) rentalItem.setRentalDate(request.getRentalDate());
-        if (request.getCategoryId() != null) rentalItem.setCategoryId(request.getCategoryId());
         if (request.getRentalStartTime() != null) rentalItem.setRentalStartTime(request.getRentalStartTime());
         if (request.getRentalEndTime() != null) rentalItem.setRentalEndTime(request.getRentalEndTime());
 
+        // 변경된 부분 시작
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리 ID입니다."));
+            rentalItem.setCategory(category);
+        }
+
+        // 이미지 URL 업데이트 (예: 덮어쓰기 방식)
+        if (request.getPhotoUrls() != null) {
+            rentalItem.getImages().clear(); // 기존 이미지 제거
+            for (String url : request.getPhotoUrls()) {
+                rentalItem.addImage(url);
+            }
+        }
+        // 변경된 부분 끝
+
         rentalItemRepository.save(rentalItem);
     }
+
 
     @Transactional
     public void deleteRentalItem(Long id) {
