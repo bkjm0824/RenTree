@@ -8,7 +8,7 @@ public interface RentalItemRepository extends JpaRepository<RentalItem, Long> {
 
     List<RentalItem> findByTitleContaining(String keyword);
 
-    List<RentalItem> findByStudentId(String studentId);
+    List<RentalItem> findByStudent_StudentNum(String studentNum);
 
     void deleteById(Long id);
 }

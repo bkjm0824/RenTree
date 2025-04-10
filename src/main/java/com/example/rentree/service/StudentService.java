@@ -33,13 +33,6 @@ public class StudentService {
         return student.map(StudentDTO::fromEntity).orElse(null);
     }
 
-    // 로그인 시 비밀번호 비교 (입력한 비밀번호 -> 암호화 -> db와 비교)
-    /*
-    @param studentNum : 학번
-    @param password : 비밀번호
-    @return : 학생 정보 또는 null
-    @throws NoSuchAlgorithmException : SHA-256 암호화 알고리즘이 없을 경우 예외
-     */
     public Student authenticate(String studentNum, String password) throws NoSuchAlgorithmException {
         // 학번으로 학생 정보 가져오기
         Optional<Student> student = studentRepository.findByStudentNum(studentNum);
@@ -53,12 +46,6 @@ public class StudentService {
         return null; // 로그인 실패
     }
 
-    // 비밀번호 암호화 (SHA-2) 하는 메소드
-    /*
-    @param password : 비밀번호
-    @return : 해싱된 비밀번호
-    @throws NoSuchAlgorithmException : SHA-256 암호화 알고리즘이 없을 경우 예외
-     */
     private String hashPassword(String password) throws NoSuchAlgorithmException {
         // SHA-256 해시 알고리즘을 사용하는 MessageDigest 객체 생성
         MessageDigest digest = MessageDigest.getInstance("SHA-256");

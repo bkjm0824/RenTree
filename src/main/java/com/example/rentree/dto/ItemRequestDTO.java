@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /*
@@ -21,15 +23,17 @@ public class ItemRequestDTO {
     private String title; // 제목
     private String description; // 설명
 
-    @JsonFormat(pattern = "HH:mm:ss")  // 시간 포맷 지정
-    private LocalTime startTime; // 요청 시간 From
+    //@JsonFormat(pattern = "HH:mm:ss")  // 시간 포맷 지정
+    private LocalDateTime rentalStartTime; // 요청 시간 From
 
-    @JsonFormat(pattern = "HH:mm:ss")  // 시간 포맷 지정
-    private LocalTime endTime; // 요청 시간 To
+    //@JsonFormat(pattern = "HH:mm:ss")  // 시간 포맷 지정
+    private LocalDateTime rentalEndTime; // 요청 시간 To
 
-    private boolean isPerson; // 대면 여부
+    private boolean isFaceToFace; // 대면 여부
 
     private Timestamp createdAt; // 요청 시간
+
+    //private Integer viewCount = 0; // 조회수
 
     /*
     ItemRequest 객체를 ItemRequestDTO 객체로 변환하는 메서드
@@ -43,9 +47,9 @@ public class ItemRequestDTO {
         dto.setStudentNum(itemRequest.getStudent().getStudentNum());
         dto.setTitle(itemRequest.getTitle());
         dto.setDescription(itemRequest.getDescription());
-        dto.setStartTime(itemRequest.getStartTime());
-        dto.setEndTime(itemRequest.getEndTime());
-        dto.setPerson(itemRequest.isPerson());
+        dto.setRentalStartTime(itemRequest.getRentalStartTime());
+        dto.setRentalEndTime(itemRequest.getRentalEndTime());
+        dto.setFaceToFace(itemRequest.isFaceToFace());
         dto.setCreatedAt(itemRequest.getCreatedAt());
         return dto;
     }

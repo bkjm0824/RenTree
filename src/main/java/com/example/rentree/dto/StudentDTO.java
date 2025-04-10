@@ -14,6 +14,7 @@ public class StudentDTO {
     private int id; // 학생 식별자
     private String studentNum; // 학번
     private String password; // 비밀번호
+    private String nickname; // 닉네임
 
     /*
     Student 객체를 StudentDTO 객체로 변환하는 메서드
@@ -26,6 +27,7 @@ public class StudentDTO {
         studentDTO.setId(student.getId()); // Student 객체의 id 값을 DTO에 설정
         studentDTO.setStudentNum(student.getStudentNum()); // Student 객체의 studentNum 값을 DTO에 설정
         studentDTO.setPassword(student.getPassword()); // Student 객체의 password 값을 DTO에 설정
+        studentDTO.setNickname(student.getNickname()); // Student 객체의 nickname 값을 DTO에 설정
         return studentDTO; // StudentDTO 객체 반환
     }
 }

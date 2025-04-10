@@ -29,9 +29,9 @@ public class RentalItemController {
         return rentalItemService.searchRentalItemsByTitle(keyword);
     }
 
-    @GetMapping("/student/{studentId}") //학번을 통해 목록 보기
-    public List<RentalItem> getRentalItemsByStudentId(@PathVariable String studentId) {
-        return rentalItemService.getRentalItemsByStudentId(studentId);
+    @GetMapping("/student/{studentNum}") //학번을 통해 목록 보기
+    public List<RentalItem> getRentalItemsByStudentNum(@PathVariable String studentNum) {
+        return rentalItemService.getRentalItemsByStudentNum(studentNum);
     }
 
     @GetMapping("/{id}") // 상세 페이지

@@ -1,9 +1,12 @@
 package com.example.rentree.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,8 +21,10 @@ public class RentalItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String studentId;
+    // studentNum을 외래키로 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_num", referencedColumnName = "student_num", nullable = false)
+    private Student student;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -30,7 +35,11 @@ public class RentalItem {
     @Column(nullable = false)
     private Boolean isFaceToFace;
 
-    private LocalDate rentalDate;
+    //private LocalDate rentalDate;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
 
     @Column(nullable = false)
     private Integer viewCount = 0;
@@ -47,14 +56,14 @@ public class RentalItem {
 
     protected RentalItem() {}
 
-    public RentalItem(String studentId, String title, String description, Boolean isFaceToFace,
-                      LocalDate rentalDate, Category category,
+    public RentalItem(Student student, String title, String description, Boolean isFaceToFace,
+                      Timestamp createdAt, Category category,
                       LocalDateTime rentalStartTime, LocalDateTime rentalEndTime) {
-        this.studentId = studentId;
+        this.student = student;
         this.title = title;
         this.description = description;
         this.isFaceToFace = isFaceToFace;
-        this.rentalDate = rentalDate;
+        this.createdAt = createdAt;
         this.category = category;
         this.rentalStartTime = rentalStartTime;
         this.rentalEndTime = rentalEndTime;

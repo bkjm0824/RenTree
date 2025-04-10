@@ -33,16 +33,14 @@ public class ItemRequestService {
 
         // ItemRequest 엔티티 생성
         ItemRequest itemRequest = new ItemRequest(
-                itemRequestDTO.getId(),
                 student,
                 itemRequestDTO.getTitle(),
                 itemRequestDTO.getDescription(),
-                itemRequestDTO.getStartTime(),
-                itemRequestDTO.getEndTime(),
-                itemRequestDTO.isPerson(),
-                itemRequestDTO.getCreatedAt()
+                itemRequestDTO.isFaceToFace(),
+                itemRequestDTO.getCreatedAt(),
+                itemRequestDTO.getRentalStartTime(),
+                itemRequestDTO.getRentalEndTime()
         );
-
         itemRequestRepository.save(itemRequest);
     }
 

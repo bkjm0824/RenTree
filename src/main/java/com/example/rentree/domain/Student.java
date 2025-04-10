@@ -31,6 +31,10 @@ public class Student {
     @Column(nullable = false, length = 255) // null 값 허용하지 않음, 길이 255
     private String password; // 비밀번호
 
+    // 닉네임 컬럼
+    @Column(name = "nickname", nullable = false, length = 255)
+    private String nickname; // 닉네임
+
         /*
         StudentDTO 객체를 Student 객체로 변환하는 메서드
         @param studentDTO : StudentDTO 객체
@@ -43,6 +47,7 @@ public class Student {
                 .id(studentDTO.getId()) // DTO의  id 값을 엔터티에 설정
                 .studentNum(studentDTO.getStudentNum()) // DTO의 studentNum 값을 엔터티에 설정
                 .password(sha2Password) // 해싱된 비밀번호 저장
+                .nickname(studentDTO.getNickname()) // DTO의 nickname 값을 엔터티에 설정
                 .build(); // Student 객체 생성 및 반환
     }
 }

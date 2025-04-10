@@ -2,10 +2,12 @@ package com.example.rentree.service;
 
 import com.example.rentree.domain.Category;
 import com.example.rentree.domain.RentalItem;
+import com.example.rentree.domain.Student;
 import com.example.rentree.dto.RentalItemCreateRequest;
 import com.example.rentree.dto.RentalItemUpdateRequest;
 import com.example.rentree.repository.CategoryRepository;
 import com.example.rentree.repository.RentalItemRepository;
+import com.example.rentree.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,23 +19,28 @@ public class RentalItemService {
 
     private final RentalItemRepository rentalItemRepository;
     private final CategoryRepository categoryRepository;
+    private final StudentRepository studentRepository;
 
-    public RentalItemService(RentalItemRepository rentalItemRepository,CategoryRepository categoryRepository) {
+    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository) {
         this.rentalItemRepository = rentalItemRepository;
         this.categoryRepository = categoryRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Transactional
     public void saveRentalItem(RentalItemCreateRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리 ID입니다."));
+        Student student = studentRepository.findByStudentNum(request.getStudentNum())
+                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다"));
+
 
         RentalItem item = new RentalItem(
-                request.getStudentId(),
+                student,
                 request.getTitle(),
                 request.getDescription(),
                 request.getIsFaceToFace(),
-                request.getRentalDate(),
+                request.getCreatedAt(),
                 category,
                 request.getRentalStartTime(),
                 request.getRentalEndTime()
@@ -54,8 +61,8 @@ public class RentalItemService {
     }
 
     @Transactional(readOnly = true)
-    public List<RentalItem> getRentalItemsByStudentId(String studentId) {
-        return rentalItemRepository.findByStudentId(studentId);
+    public List<RentalItem> getRentalItemsByStudentNum(String studentNum) {
+        return rentalItemRepository.findByStudent_StudentNum(studentNum);
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +83,7 @@ public class RentalItemService {
         if (request.getTitle() != null) rentalItem.setTitle(request.getTitle());
         if (request.getDescription() != null) rentalItem.setDescription(request.getDescription());
         if (request.getIsFaceToFace() != null) rentalItem.setIsFaceToFace(request.getIsFaceToFace());
-        if (request.getRentalDate() != null) rentalItem.setRentalDate(request.getRentalDate());
+        if (request.getCreatedAt() != null) rentalItem.setCreatedAt(request.getCreatedAt());
         if (request.getRentalStartTime() != null) rentalItem.setRentalStartTime(request.getRentalStartTime());
         if (request.getRentalEndTime() != null) rentalItem.setRentalEndTime(request.getRentalEndTime());
 

@@ -4,6 +4,7 @@ import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.service.ItemRequestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,9 +57,9 @@ public class ItemRequestController {
             ItemRequest itemRequest = existingItemRequest.get();
             itemRequest.setTitle(itemRequestDTO.getTitle());
             itemRequest.setDescription(itemRequestDTO.getDescription());
-            itemRequest.setStartTime(itemRequestDTO.getStartTime());
-            itemRequest.setEndTime(itemRequestDTO.getEndTime());
-            itemRequest.setPerson(itemRequestDTO.isPerson());
+            itemRequest.setRentalStartTime(itemRequestDTO.getRentalStartTime());
+            itemRequest.setRentalEndTime(itemRequestDTO.getRentalEndTime());
+            itemRequest.setFaceToFace(itemRequestDTO.isFaceToFace());
 
             // student는 수정하지 않음 (필요 시 로직 추가 가능)
 
@@ -69,9 +70,14 @@ public class ItemRequestController {
         }
     }
 
-    // 게시글 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteItemRequest(@PathVariable Long id) {
+        // 존재 여부 확인
+        if (!itemRequestService.findById(id).isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ItemRequest not found");
+        }
+
+        // 존재하면 삭제
         itemRequestService.deleteItemRequest(id);
         return ResponseEntity.ok("ItemRequest deleted");
     }

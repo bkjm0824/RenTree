@@ -3,8 +3,11 @@ package com.example.rentree.domain;
 import com.example.rentree.dto.ItemRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /*
@@ -40,28 +43,33 @@ public class ItemRequest {
     private String description; // 설명
 
     @Column(name = "start_time", nullable = false)
-    private LocalTime startTime; // 요청 시간 From
+    private LocalDateTime rentalStartTime; // 요청 시간 From
 
     @Column(name = "end_time", nullable = false)
-    private LocalTime endTime; // 요청 시간 To
+    private LocalDateTime rentalEndTime; // 요청 시간 To
 
     @Column(name = "face_to_face", nullable = false)
-    private boolean isPerson;
+    private boolean isFaceToFace;
 
-    @Column(name = "created_at", updatable = false, insertable = false)
-    private Timestamp createdAt; // 요청 시간
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
 
-    public static ItemRequest fromItemRequestDTO(ItemRequestDTO itemRequestDTO,Student student)
-    {
-        return ItemRequest.builder()
-                .id(itemRequestDTO.getId())
-                .student(student)
-                .title(itemRequestDTO.getTitle())
-                .description(itemRequestDTO.getDescription())
-                .startTime(itemRequestDTO.getStartTime())
-                .endTime(itemRequestDTO.getEndTime())
-                .isPerson(itemRequestDTO.isPerson())
-                .createdAt(itemRequestDTO.getCreatedAt())
-                .build();
+    @Column(nullable = false)
+    private Integer viewCount = 0;
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
+
+    public ItemRequest(Student student, String title, String description, Boolean isFaceToFace,
+                       Timestamp createdAt, LocalDateTime rentalStartTime, LocalDateTime rentalEndTime) {
+        this.student = student;
+        this.title = title;
+        this.description = description;
+        this.isFaceToFace = isFaceToFace;
+        this.createdAt = createdAt;
+        this.rentalStartTime = rentalStartTime;
+        this.rentalEndTime = rentalEndTime;
     }
 }
