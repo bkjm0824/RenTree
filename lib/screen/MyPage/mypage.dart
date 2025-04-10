@@ -1,6 +1,8 @@
 // 마이페이지 화면
 import 'package:flutter/material.dart';
 import 'package:rentree/screen/Point/point_first.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
@@ -24,6 +26,22 @@ class MypageScreen extends StatefulWidget {
 
 class _MypageScreenState extends State<MypageScreen> {
   int _selectedIndex = 4;
+  String? _nickname;
+  String? _studentNum;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nickname = prefs.getString('nickname') ?? '사용자';
+      _studentNum = prefs.getString('studentNum') ?? '학번 정보 없음'; // ← 여기 수정
+    });
+  }
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -182,7 +200,6 @@ class _MypageScreenState extends State<MypageScreen> {
     );
   }
 
-  // 🔹 프로필 박스
   Widget ProfileBox() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 32, vertical: 20),
@@ -200,41 +217,34 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
       child: Row(
         children: [
-          // 🔹 프로필 이미지
           CircleAvatar(
             radius: 40,
             backgroundImage: AssetImage('assets/Profile/hosick.png'),
             backgroundColor: Colors.white,
           ),
           SizedBox(width: 16),
-
-          // 🔹 이름 및 추가 정보
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '호식이',
+                  _nickname ?? '', // 저장된 닉네임 출력
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  '2000000',
+                  _studentNum ?? '',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
             ),
           ),
-
-          // 🔹 오른쪽 화살표 아이콘
           IconButton(
-            icon:
-                Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 20),
+            icon: Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 20),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => MyPageProfile()), // 🔥 페이지 이동
+                MaterialPageRoute(builder: (context) => MyPageProfile()),
               );
             },
           ),
@@ -242,6 +252,7 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
     );
   }
+
 
 // 🔹 현재 대여 진행 상태
   Widget CurrentRentalBox(BuildContext context) {
