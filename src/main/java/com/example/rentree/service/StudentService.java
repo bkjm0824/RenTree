@@ -62,4 +62,17 @@ public class StudentService {
         // 해싱된 비밀번호 반환
         return hexString.toString();
     }
+
+    // StudentService.java
+    public void updateStudentNickname(String studentNum, String nickname) {
+        // 학번으로 학생 정보 가져오기
+        Student student = studentRepository.findByStudentNum(studentNum)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with studentNum: " + studentNum));
+
+        // 닉네임 설정
+        student.setNickname(nickname);
+
+        // 변경 사항 저장
+        studentRepository.save(student);
+    }
 }

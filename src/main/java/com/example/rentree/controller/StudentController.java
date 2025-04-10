@@ -45,12 +45,10 @@ public class StudentController {
     // 닉네임 저장 api
     @PutMapping("/nickname/{studentNum}")
     public ResponseEntity<String> saveNickname(@PathVariable String studentNum, @RequestBody String nickname) {
-        // 학번으로 학생 정보 가져오기
-        StudentDTO student = studentService.getStudentByStudentNum(studentNum);
-        if (student != null) { // 학생 정보가 존재할 경우
-            student.setNickname(nickname); // 닉네임 설정
+        try {
+            studentService.updateStudentNickname(studentNum, nickname); // 닉네임 업데이트 및 저장
             return ResponseEntity.ok("Nickname updated successfully"); // 200 OK
-        } else {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build(); // 404 Not Found
         }
     }
