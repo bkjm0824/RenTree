@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'guide.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rentree/screen/nickname.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -40,12 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (data['id'] != null) {
         await prefs.setInt('studentId', data['id']);
+        await prefs.setString('studentNum', studentIdInput);
         print('✅ 저장된 studentId: ${data['id']}');
+        print('✅ 저장된 studentNum: $studentIdInput');
       }
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => GuideScreen()),
+        MaterialPageRoute(builder: (context) => NicknameSetupScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
