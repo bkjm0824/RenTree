@@ -19,7 +19,8 @@ import java.time.LocalTime;
 public class ItemRequestDTO {
 
     private int id; // 요청 식별자
-    private String studentNum; // 학번 (외래키 역할)
+    //private String studentNum; // 학번 (외래키 역할)
+    private String nickname; // 닉네임
     private String title; // 제목
     private String description; // 설명
 
@@ -44,7 +45,8 @@ public class ItemRequestDTO {
     public static ItemRequestDTO fromEntity(ItemRequest itemRequest) {
         ItemRequestDTO dto = new ItemRequestDTO();
         dto.setId(itemRequest.getId());
-        dto.setStudentNum(itemRequest.getStudent().getStudentNum());
+        //dto.setStudentNum(itemRequest.getStudent().getStudentNum());
+        dto.setNickname(itemRequest.getStudent().getNickname());
         dto.setTitle(itemRequest.getTitle());
         dto.setDescription(itemRequest.getDescription());
         dto.setRentalStartTime(itemRequest.getRentalStartTime());

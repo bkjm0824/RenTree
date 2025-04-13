@@ -1,5 +1,6 @@
 package com.example.rentree.controller;
 
+import com.example.rentree.domain.RentalItem;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.service.ItemRequestService;
@@ -21,8 +22,10 @@ public class ItemRequestController {
 
     // 글 등록하기
     @PostMapping
-    public ResponseEntity<String> saveItemRequest(@RequestBody ItemRequestDTO itemRequestDTO) {
-        itemRequestService.saveItemRequest(itemRequestDTO);
+    public ResponseEntity<String> saveItemRequest(
+            @RequestParam String studentNum, // studentNum을 요청 파라미터로 전달
+            @RequestBody ItemRequestDTO itemRequestDTO) {
+        itemRequestService.saveItemRequest(studentNum, itemRequestDTO);
         return ResponseEntity.ok("ItemRequest saved");
     }
 
@@ -39,6 +42,7 @@ public class ItemRequestController {
     // 제목에 포함된 단어로 게시글 검색
     @GetMapping("/title/{title}")
     public ResponseEntity<List<ItemRequestDTO>> getItemRequestByTitle(@PathVariable String title) {
+        System.out.println("검색어: " + title);
         List<ItemRequestDTO> dtos = itemRequestService.getItemRequestByTitleContaining(title)
                 .stream()
                 .map(ItemRequestDTO::fromEntity)
@@ -68,6 +72,11 @@ public class ItemRequestController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{id}") // 상세 페이지
+    public ItemRequest getRentalItemDetails(@PathVariable Long id) {
+        return itemRequestService.getItemRequestDetail(id);
     }
 
     @DeleteMapping("/{id}")

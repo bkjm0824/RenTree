@@ -1,5 +1,6 @@
 package com.example.rentree.service;
 
+import com.example.rentree.domain.RentalItem;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
@@ -26,10 +27,10 @@ public class ItemRequestService {
 
     // 게시글 등록
     @Transactional
-    public void saveItemRequest(ItemRequestDTO itemRequestDTO) {
+    public void saveItemRequest(String studentNum, ItemRequestDTO itemRequestDTO) {
         // 학번으로 학생 엔티티 조회
-        Student student = studentRepository.findByStudentNum(itemRequestDTO.getStudentNum())
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다: " + itemRequestDTO.getStudentNum()));
+        Student student = studentRepository.findByStudentNum(studentNum)
+                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다: " + studentNum));
 
         // ItemRequest 엔티티 생성
         ItemRequest itemRequest = new ItemRequest(
@@ -43,6 +44,16 @@ public class ItemRequestService {
         );
         itemRequestRepository.save(itemRequest);
     }
+
+    @Transactional
+    public ItemRequest getItemRequestDetail(Long id) {
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 물품을 찾을 수 없습니다: " + id));
+        itemRequest.incrementViewCount(); // 조회수 증가
+        itemRequestRepository.save(itemRequest); // 수정된 객체 저장
+        return itemRequest;
+    }
+
 
     @Transactional(readOnly = true)
     // 제목에 맞게 게시글 가져오기

@@ -42,12 +42,11 @@ public class StudentController {
         }
     }
 
-    // 닉네임 저장 api
     @PutMapping("/nickname/{studentNum}")
-    public ResponseEntity<String> saveNickname(@PathVariable String studentNum, @RequestBody String nickname) {
+    public ResponseEntity<String> saveNickname(@PathVariable String studentNum, @RequestBody StudentDTO studentDTO) {
         try {
-            studentService.updateStudentNickname(studentNum, nickname); // 닉네임 업데이트 및 저장
-            return ResponseEntity.ok("Nickname updated successfully"); // 200 OK
+            studentService.updateStudentNickname(studentNum, studentDTO.getNickname()); // 닉네임 업데이트 및 저장
+            return ResponseEntity.ok("닉네임 업데이트 완"); // 200 OK
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build(); // 404 Not Found
         }
