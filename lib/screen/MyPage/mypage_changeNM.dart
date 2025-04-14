@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'mypage_profile.dart'; // ← ✅ 이동할 페이지 import
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'mypage_profile.dart';
 
 class NickNameScreen extends StatefulWidget {
   @override
@@ -35,26 +38,50 @@ class _NickNameScreenState extends State<NickNameScreen> {
           isValidNickname(nickname) ? null : '닉네임은 2~10자의 한글 또는 영문만 사용할 수 있어요.';
     });
 
-    if (_nicknameErrorText == null) {
-      final prefs = await SharedPreferences.getInstance();
+    if (_nicknameErrorText != null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+
+    if (studentNum == null) {
+      setState(() {
+        _nicknameErrorText = '로그인 정보를 찾을 수 없습니다.';
+      });
+      return;
+    }
+
+    // ✅ 서버 요청
+    final url = Uri.parse('http://10.0.2.2:8080/Rentree/nickname/$studentNum');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'nickname': nickname}),
+    );
+
+    if (response.statusCode == 200) {
+      // ✅ SharedPreferences 갱신
       await prefs.setString('nickname', nickname);
 
       setState(() {
         currentNickname = nickname;
       });
 
-      // ✅ MyPageProfile 화면으로 이동
+      // ✅ 마이페이지로 이동
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MyPageProfile()),
       );
+    } else {
+      setState(() {
+        _nicknameErrorText = '서버 오류가 발생했습니다. (${response.statusCode})';
+      });
     }
   }
 
   bool isValidNickname(String nickname) {
     final trimmed = nickname.trim();
     if (trimmed.length < 2 || trimmed.length > 10) return false;
-    final regex = RegExp(r'^[a-zA-Z가-힣]+$');
+    final regex = RegExp(r'^[a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]+$');
     return regex.hasMatch(trimmed);
   }
 
@@ -83,12 +110,9 @@ class _NickNameScreenState extends State<NickNameScreen> {
                     ),
                   ),
                   SizedBox(height: 60),
-
-                  // 🔸 기존 닉네임
-                  Text(
-                    '변경 전 닉네임',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  Text('변경 전 닉네임',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   SizedBox(height: 5),
                   Container(
                     height: 60,
@@ -105,34 +129,33 @@ class _NickNameScreenState extends State<NickNameScreen> {
                     ),
                   ),
                   SizedBox(height: 35),
-
-                  // 🔸 변경 후 닉네임
-                  Text(
-                    '변경 후 닉네임',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  Text('변경 후 닉네임',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   SizedBox(height: 5),
-                  TextField(
-                    controller: _nicknameController,
-                    textInputAction: TextInputAction.done,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
-                      hintText: '2~10자의 한글 또는 영문 닉네임',
-                      hintStyle: TextStyle(fontSize: 14),
-                      filled: true,
-                      fillColor: Color(0xffD9D9D9),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                  SizedBox(
+                    height: 60,
+                    child: TextField(
+                      controller: _nicknameController,
+                      textInputAction: TextInputAction.done,
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        hintText: '2~10자의 한글 또는 영문 닉네임',
+                        hintStyle: TextStyle(fontSize: 14),
+                        filled: true,
+                        fillColor: Color(0xffD9D9D9),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        errorText: _submitted ? _nicknameErrorText : null,
                       ),
-                      errorText: _submitted ? _nicknameErrorText : null,
                     ),
                   ),
                   SizedBox(height: 40),
-
-                  // 🔸 확인 버튼
                   SizedBox(
                     width: double.infinity,
                     height: 60,

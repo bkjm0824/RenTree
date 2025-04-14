@@ -1,8 +1,8 @@
 // 프로필 상세 화면
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/MyPage/mypage.dart';
 import 'package:rentree/screen/MyPage/mypage_changeNM.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../Home/home.dart';
 import '../login.dart';
 
@@ -51,7 +51,11 @@ class _MyPageProfileState extends State<MyPageProfile> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MypageScreen()),
+                          );
                         },
                       ),
                       Text(
@@ -192,10 +196,48 @@ class _MyPageProfileState extends State<MyPageProfile> {
                         title: Text('로그아웃'),
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()),
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('로그아웃'),
+                              content: Text('정말로 로그아웃하시겠습니까?'),
+                              actions: [
+                                TextButton(
+                                  child: Text('취소',
+                                      style: TextStyle(color: Colors.grey)),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.clear(); //공유변수 초기화
+                                    Navigator.pushAndRemoveUntil(
+                                      //초기화 후 로그인 화면 이동
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => LoginScreen()),
+                                      (route) => false,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xff97C663),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 12),
+                                  ),
+                                  child: Text(
+                                    '확인',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
