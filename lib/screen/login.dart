@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'guide.dart';
+import 'Home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rentree/screen/nickname.dart';
 
@@ -15,12 +15,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _pwController = TextEditingController();
   String? _idErrorText;
   String? _pwErrorText;
+  bool _loginAttempted = false;
+  bool _invalidCredentials = false;
 
   Future<void> _login() async {
     final studentIdInput = _idController.text.trim();
     final password = _pwController.text.trim();
 
     setState(() {
+      _loginAttempted = true;
+      _invalidCredentials = false;
+
       _idErrorText = studentIdInput.isEmpty ? '학번을 입력해주세요.' : null;
       _pwErrorText = password.isEmpty ? '비밀번호를 입력해주세요.' : null;
     });
@@ -39,21 +44,35 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
       final prefs = await SharedPreferences.getInstance();
 
-      if (data['id'] != null) {
-        await prefs.setInt('studentId', data['id']);
-        await prefs.setString('studentNum', studentIdInput);
-        print('✅ 저장된 studentId: ${data['id']}');
-        print('✅ 저장된 studentNum: $studentIdInput');
+      final studentId = data['id'];
+      final nickname = data['nickname'] ?? '1';
+      final studentNum = studentIdInput;
+
+      if (studentId != null) {
+        await prefs.setInt('studentId', studentId);
+        await prefs.setString('studentNum', studentNum);
+        await prefs.setString('nickname', nickname);
+
+        print('✅ 저장된 studentId: $studentId');
+        print('✅ 저장된 nickname: $nickname');
       }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => NicknameSetupScreen()),
-      );
+      if (nickname == '1') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NicknameSetupScreen()),
+        );
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+          (route) => false,
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('로그인 실패: 아이디 또는 비밀번호 확인')),
-      );
+      setState(() {
+        _invalidCredentials = true;
+      });
     }
   }
 
@@ -135,6 +154,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+
+              // ✅ 로그인 실패 시 메시지 출력
+              if (_loginAttempted && _invalidCredentials) ...[
+                SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    '❗ 학번 또는 비밀번호가 올바르지 않습니다. ❗',
+                    style: TextStyle(
+                      color: Colors.red[700],
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

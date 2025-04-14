@@ -1,6 +1,8 @@
-// 닉네임 초기 설정 화면
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'guide.dart';
 
 class NicknameSetupScreen extends StatefulWidget {
@@ -16,10 +18,15 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
     final nickname = _nicknameController.text.trim();
 
     setState(() {
-      _nicknameErrorText = nickname.isEmpty ? '닉네임을 입력해주세요.' : null;
+      _nicknameErrorText = null;
     });
 
-    if (_nicknameErrorText != null) return;
+    if (nickname.isEmpty) {
+      setState(() {
+        _nicknameErrorText = '닉네임을 입력해주세요.';
+      });
+      return;
+    }
 
     if (nickname.length < 2 || nickname.length > 10) {
       setState(() {
@@ -29,14 +36,36 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nickname', nickname);
+    final studentNum = prefs.getString('studentNum'); // ✅ studentNum 사용
 
-    print('✅ 저장된 닉네임: $nickname');
+    if (studentNum == null) {
+      setState(() {
+        _nicknameErrorText = '로그인 정보를 찾을 수 없습니다.';
+      });
+      return;
+    }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => GuideScreen()),
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/Rentree/nickname/$studentNum'); // ✅ 에뮬레이터 주소
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'nickname': nickname}),
     );
+
+    if (response.statusCode == 200) {
+      await prefs.setString('nickname', nickname);
+      print('✅ 닉네임 저장 완료: $nickname');
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => GuideScreen()),
+      );
+    } else {
+      setState(() {
+        _nicknameErrorText = '서버 오류가 발생했습니다. (${response.statusCode})';
+      });
+    }
   }
 
   @override
