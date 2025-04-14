@@ -1,13 +1,10 @@
 package com.example.rentree.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +32,6 @@ public class RentalItem {
     @Column(nullable = false)
     private Boolean isFaceToFace;
 
-    //private LocalDate rentalDate;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
@@ -51,8 +46,8 @@ public class RentalItem {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "rentalItem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemImage> images = new ArrayList<>();
+    @Column(nullable = false)
+    private Boolean isAvailable = true;
 
     protected RentalItem() {}
 
@@ -73,10 +68,12 @@ public class RentalItem {
         this.viewCount++;
     }
 
-    public void addImage(String url) {
-        ItemImage image = new ItemImage();
-        image.setUrl(url);
-        image.setRentalItem(this);
-        this.images.add(image);
+    public void markAsRented() {
+        this.isAvailable = false;
     }
+
+    public void markAsAvailable() {
+        this.isAvailable = true;
+    }
+
 }

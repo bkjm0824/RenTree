@@ -46,12 +46,6 @@ public class RentalItemService {
                 request.getRentalEndTime()
         );
 
-        if (request.getPhotoUrls() != null) {
-            for (String url : request.getPhotoUrls()) {
-                item.addImage(url);
-            }
-        }
-
         rentalItemRepository.save(item);
     }
 
@@ -94,15 +88,6 @@ public class RentalItemService {
             rentalItem.setCategory(category);
         }
 
-        // 이미지 URL 업데이트 (예: 덮어쓰기 방식)
-        if (request.getPhotoUrls() != null) {
-            rentalItem.getImages().clear(); // 기존 이미지 제거
-            for (String url : request.getPhotoUrls()) {
-                rentalItem.addImage(url);
-            }
-        }
-        // 변경된 부분 끝
-
         rentalItemRepository.save(rentalItem);
     }
 
@@ -114,4 +99,30 @@ public class RentalItemService {
         rentalItemRepository.deleteById(id);
     }
 
+    // 전체 대여 가능한 아이템만 조회
+    public List<RentalItem> getAvailableItems() {
+        return rentalItemRepository.findByIsAvailableTrue();
+    }
+
+    // 특정 아이템을 대여 완료 처리
+    @Transactional
+    public void markAsRented(Long id) {
+        RentalItem item = rentalItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 물품이 존재하지 않습니다."));
+        item.markAsRented();
+    }
+
+    // (선택) 다시 대여 가능하게
+    @Transactional
+    public void markAsAvailable(Long id) {
+        RentalItem item = rentalItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 물품이 존재하지 않습니다."));
+        item.markAsAvailable();
+    }
+
+    // 카테고리별 대여 가능한 아이템 조회
+    @Transactional(readOnly = true)
+    public List<RentalItem> getAvailableItemsByCategory(Long categoryId) {
+        return rentalItemRepository.findByCategory_IdAndIsAvailableTrue(categoryId);
+    }
 }

@@ -13,11 +13,9 @@ public class RentalItemUpdateRequest {
     private String title;
     private String description;
     private Boolean isFaceToFace;
-    //private LocalDate rentalDate;
     private Timestamp createdAt;
     private Long categoryId;
     private LocalDateTime rentalStartTime;
     private LocalDateTime rentalEndTime;
 
-    private List<String> photoUrls; // 추가
 }

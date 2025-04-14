@@ -1,22 +1,24 @@
 package com.example.rentree.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Entity
 @Getter
 @Setter
-@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ItemImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rental_item_id")
-    private RentalItem rentalItem;
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
 
-    @Column(nullable = false)
-    private String url;
+    @Column(name = "rental_item_id", nullable = false)
+    private Long rentalItemId;
 }
