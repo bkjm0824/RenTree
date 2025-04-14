@@ -4,6 +4,7 @@ import com.example.rentree.domain.RentalItem;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
+import com.example.rentree.dto.ItemRequestResponseDTO;
 import com.example.rentree.repository.ItemRequestRepository;
 import com.example.rentree.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,12 +47,13 @@ public class ItemRequestService {
     }
 
     @Transactional
-    public ItemRequest getItemRequestDetail(Long id) {
+    public ItemRequestResponseDTO getItemRequestDetail(Long id) {
         ItemRequest itemRequest = itemRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 물품을 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new IllegalArgumentException(" : " + id));
         itemRequest.incrementViewCount(); // 조회수 증가
         itemRequestRepository.save(itemRequest); // 수정된 객체 저장
-        return itemRequest;
+
+        return ItemRequestResponseDTO.fromEntity(itemRequest);
     }
 
 

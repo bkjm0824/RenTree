@@ -16,10 +16,10 @@ import java.time.LocalTime;
  */
 
 @Data // getter, setter, toString, equals, hashCode 메서드 자동 생성
-public class ItemRequestDTO {
+public class ItemRequestResponseDTO {
 
     private int id; // 요청 식별자
-    private String studentNum; // 학번 (외래키 역할)
+    //private String studentNum; // 학번 (외래키 역할)
     private String nickname; // 닉네임
     private String title; // 제목
     private String description; // 설명
@@ -42,10 +42,10 @@ public class ItemRequestDTO {
     @return : ItemRequestDTO 객체
      */
 
-    public static ItemRequestDTO fromEntity(ItemRequest itemRequest) {
-        ItemRequestDTO dto = new ItemRequestDTO();
+    public static ItemRequestResponseDTO fromEntity(ItemRequest itemRequest) {
+        ItemRequestResponseDTO dto = new ItemRequestResponseDTO();
         dto.setId(itemRequest.getId());
-        dto.setStudentNum(itemRequest.getStudent().getStudentNum());
+        //dto.setStudentNum(itemRequest.getStudent().getStudentNum());
         dto.setNickname(itemRequest.getStudent().getNickname());
         dto.setTitle(itemRequest.getTitle());
         dto.setDescription(itemRequest.getDescription());
