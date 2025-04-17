@@ -44,13 +44,17 @@ class _SearchScreenState extends State<SearchScreen> {
     _navigateToSearchResult(query);
   }
 
-  void _navigateToSearchResult(String query) {
-    Navigator.push(
+  void _navigateToSearchResult(String query) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SearchResultScreen(searchQuery: query),
       ),
     );
+
+    // 🔥 검색 결과 화면에서 돌아오면 검색 내역 새로고침
+    setState(() {});
+    _searchController.clear();
   }
 
   @override
