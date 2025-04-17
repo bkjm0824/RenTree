@@ -10,22 +10,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
-/*
-학생 정보를 관리하는 서비스 클래스
-학생 정보를 가져오거나 비밀번호를 비교하는 기능을 제공
- */
-
 @Service // 서비스 클래스임을 명시
 @RequiredArgsConstructor // final 필드를 파라미터로 받는 생성자 생성
 public class StudentService {
 
     private final StudentRepository studentRepository; // StudentRepository 객체 주입
 
-    // 학번으로 학생 정보 가져오기
-    /*
-    @param StudentNum : 학번
-    @return : 학생 정보 또는 null
-     */
     public StudentDTO getStudentByStudentNum(String StudentNum) {
         // 학번으로 학생 정보 가져오기
         Optional<Student> student = studentRepository.findByStudentNum(StudentNum);

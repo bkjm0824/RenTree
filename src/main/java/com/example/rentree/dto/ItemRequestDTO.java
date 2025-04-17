@@ -34,7 +34,7 @@ public class ItemRequestDTO {
 
     private Timestamp createdAt; // 요청 시간
 
-    //private Integer viewCount = 0; // 조회수
+    private Integer viewCount;
 
     /*
     ItemRequest 객체를 ItemRequestDTO 객체로 변환하는 메서드
@@ -42,6 +42,7 @@ public class ItemRequestDTO {
     @return : ItemRequestDTO 객체
      */
 
+    // ItemRequest 객체를 ItemRequestDTO 객체로 변환하는 메서드
     public static ItemRequestDTO fromEntity(ItemRequest itemRequest) {
         ItemRequestDTO dto = new ItemRequestDTO();
         dto.setId(itemRequest.getId());
@@ -53,6 +54,7 @@ public class ItemRequestDTO {
         dto.setRentalEndTime(itemRequest.getRentalEndTime());
         dto.setFaceToFace(itemRequest.isFaceToFace());
         dto.setCreatedAt(itemRequest.getCreatedAt());
+        dto.setViewCount(itemRequest.getViewCount());
         return dto;
     }
 

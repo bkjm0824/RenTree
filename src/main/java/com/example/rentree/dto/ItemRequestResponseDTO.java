@@ -42,6 +42,7 @@ public class ItemRequestResponseDTO {
     @return : ItemRequestDTO 객체
      */
 
+    // ItemRequest 객체를 ItemRequestResponseDTO 객체로 변환하는 메서드
     public static ItemRequestResponseDTO fromEntity(ItemRequest itemRequest) {
         ItemRequestResponseDTO dto = new ItemRequestResponseDTO();
         dto.setId(itemRequest.getId());

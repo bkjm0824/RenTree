@@ -1,6 +1,7 @@
 package com.example.rentree.service;
 
 import com.example.rentree.domain.Category;
+import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.domain.RentalItem;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.RentalItemCreateRequest;
@@ -8,6 +9,7 @@ import com.example.rentree.dto.RentalItemUpdateRequest;
 import com.example.rentree.repository.CategoryRepository;
 import com.example.rentree.repository.RentalItemRepository;
 import com.example.rentree.repository.StudentRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,11 @@ public class RentalItemService {
         this.rentalItemRepository = rentalItemRepository;
         this.categoryRepository = categoryRepository;
         this.studentRepository = studentRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RentalItem> getAllRentalItemsSorted(Sort sort) {
+        return rentalItemRepository.findAll(sort); // 페이징 없이 전체 데이터 정렬된 리스트 반환
     }
 
     @Transactional

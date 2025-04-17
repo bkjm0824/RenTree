@@ -8,6 +8,7 @@ import com.example.rentree.dto.ItemRequestResponseDTO;
 import com.example.rentree.repository.ItemRequestRepository;
 import com.example.rentree.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 /*
 게시글 정보를 관리하는 서비스 클래스
-게시글 정보를 가져오거나 수정, 삭제하는 기능을 제공
+서비스는 비즈니스 로직을 처리하는 계층으로, 데이터베이스와의 상호작용을 담당하는 리포지토리와 연결됨
  */
 
 @Service // 서비스 클래스임을 명시
@@ -26,6 +27,12 @@ public class ItemRequestService {
     private final ItemRequestRepository itemRequestRepository; // ItemRequestRepository 객체 주입
     private final StudentRepository studentRepository;
 
+    // 전체 게시글 가져오기 (createdAt이 최신순인 순서로 정렬)
+    @Transactional(readOnly = true)
+    public List<ItemRequest> getAllItemRequestsSorted(Sort sort) {
+        return itemRequestRepository.findAll(sort); // 페이징 없이 전체 데이터 정렬된 리스트 반환
+    }
+
     // 게시글 등록
     @Transactional
     public void saveItemRequest(String studentNum, ItemRequestDTO itemRequestDTO) {
@@ -33,7 +40,7 @@ public class ItemRequestService {
         Student student = studentRepository.findByStudentNum(studentNum)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다: " + studentNum));
 
-        // ItemRequest 엔티티 생성
+        // ItemRequest 엔티티 생성 (DTO에서 받은 정보는 DB에 직접 저장이 불가해 DTO를 엔티티로 변환)
         ItemRequest itemRequest = new ItemRequest(
                 student,
                 itemRequestDTO.getTitle(),
