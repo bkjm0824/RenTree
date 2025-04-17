@@ -280,6 +280,7 @@ class _MypageScreenState extends State<MypageScreen> {
           SizedBox(height: 8),
           _buildRentalItem(
             context,
+            1,
             'assets/box.png',
             '상품 1',
             '3시간 10분 남음',
@@ -293,6 +294,7 @@ class _MypageScreenState extends State<MypageScreen> {
           SizedBox(height: 8),
           _buildRentalItem(
             context,
+            2,
             'assets/box.png',
             '상품 2',
             '5시간 20분 남음',
@@ -305,17 +307,13 @@ class _MypageScreenState extends State<MypageScreen> {
 
 
 // 🔹 대여 물품 아이템
-  Widget _buildRentalItem(BuildContext context, String imagePath, String title, String timeLeft, String description) {
+  Widget _buildRentalItem(BuildContext context, int itemId, String imagePath, String title, String timeLeft, String description) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PostScreen(
-              title: title,
-              description: description,
-              imageUrl: imagePath,
-            ),
+            builder: (context) => PostScreen(itemId: itemId), // 여기만 바꿈!
           ),
         );
       },

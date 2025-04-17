@@ -24,33 +24,35 @@ class _MyPageMypostState extends State<MyPageMypost>
     super.dispose();
   }
 
-  void _navigateToPostScreen(
-      String title, String description, String imageUrl) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostScreen(
-          title: title,
-          description: description,
-          imageUrl: imageUrl,
-        ),
-      ),
-    );
+  List<Map<String, dynamic>> generateFakeList(String type) {
+    return List.generate(4, (index) => {
+      'id': index + 1, // ← 실제 서버에서 받아올 id 대체용
+      'title': '$type 게시글 ${index + 1}',
+      'description': '$type 설명 ${index + 1}',
+      'imageUrl': 'assets/box.png',
+    });
   }
 
+
+
   Widget _buildList(String type) {
+    List<Map<String, dynamic>> fakeList = generateFakeList(type);
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      itemCount: 4,
+      itemCount: fakeList.length,
       itemBuilder: (context, index) {
+        final item = fakeList[index];
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: GestureDetector(
             onTap: () {
-              _navigateToPostScreen(
-                '$type 게시글 ${index + 1}',
-                '$type 설명 ${index + 1}',
-                'assets/box.png',
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PostScreen(itemId: item['id']), // ✅ 핵심!
+                ),
               );
             },
             child: Column(
@@ -61,7 +63,7 @@ class _MyPageMypostState extends State<MyPageMypost>
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.asset(
-                        'assets/box.png',
+                        item['imageUrl'],
                         width: 110,
                         height: 110,
                         fit: BoxFit.cover,
@@ -73,12 +75,12 @@ class _MyPageMypostState extends State<MyPageMypost>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '$type 게시글 ${index + 1}',
+                            item['title'],
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           SizedBox(height: 4),
-                          Text('$type 설명 ${index + 1}',
+                          Text(item['description'],
                               style: TextStyle(color: Colors.grey[700])),
                           SizedBox(height: 8),
                           Row(

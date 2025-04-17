@@ -183,17 +183,14 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                           final title = item['title'] ?? '';
                           final description = item['description'] ?? '';
                           final imageUrl = item['imageUrl'] ?? 'assets/box.png';
+                          final itemId = item['id'];
 
                           return GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PostScreen(
-                                    title: title,
-                                    description: description,
-                                    imageUrl: imageUrl,
-                                  ),
+                                  builder: (context) => PostScreen(itemId: itemId), // ✅ 변경 완료
                                 ),
                               );
                             },

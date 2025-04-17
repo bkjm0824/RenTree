@@ -194,9 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => PostScreen(
-                                title: item['title'],
-                                description: item['description'],
-                                imageUrl: 'assets/box.png',
+                                itemId: item['id'], // 여기가 핵심!!
                               ),
                             ),
                           );
