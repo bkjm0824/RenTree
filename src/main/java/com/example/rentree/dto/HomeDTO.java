@@ -32,7 +32,7 @@ public class HomeDTO {
         this.studentNum = itemRequestDTO.getStudentNum();
         this.title = itemRequestDTO.getTitle();
         this.description = itemRequestDTO.getDescription();
-        this.isFaceToFace = itemRequestDTO.isFaceToFace();
+        this.isFaceToFace = itemRequestDTO.getIsFaceToFace();
         this.createdAt = itemRequestDTO.getCreatedAt();
         this.rentalStartTime = itemRequestDTO.getRentalStartTime();
         this.rentalEndTime = itemRequestDTO.getRentalEndTime();
@@ -48,7 +48,7 @@ public class HomeDTO {
         this.description = itemRequest.getDescription();
         this.studentNum = itemRequest.getStudent().getStudentNum();  // Student 객체에서 학번 가져오기
         this.nickname = itemRequest.getStudent().getNickname();      // Student 객체에서 닉네임 가져오기
-        this.isFaceToFace = itemRequest.isFaceToFace();
+        this.isFaceToFace = itemRequest.getIsFaceToFace();
         this.createdAt = itemRequest.getCreatedAt();
         this.rentalStartTime = itemRequest.getRentalStartTime();     // 필드명이 일치함
         this.rentalEndTime = itemRequest.getRentalEndTime();         // 필드명이 일치함

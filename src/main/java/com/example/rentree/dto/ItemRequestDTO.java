@@ -30,7 +30,7 @@ public class ItemRequestDTO {
     //@JsonFormat(pattern = "HH:mm:ss")  // 시간 포맷 지정
     private LocalDateTime rentalEndTime; // 요청 시간 To
 
-    private boolean isFaceToFace; // 대면 여부
+    private Boolean isFaceToFace; // 대면 여부
 
     private Timestamp createdAt; // 요청 시간
 
@@ -52,7 +52,7 @@ public class ItemRequestDTO {
         dto.setDescription(itemRequest.getDescription());
         dto.setRentalStartTime(itemRequest.getRentalStartTime());
         dto.setRentalEndTime(itemRequest.getRentalEndTime());
-        dto.setFaceToFace(itemRequest.isFaceToFace());
+        dto.setIsFaceToFace(itemRequest.getIsFaceToFace());
         dto.setCreatedAt(itemRequest.getCreatedAt());
         dto.setViewCount(itemRequest.getViewCount());
         return dto;

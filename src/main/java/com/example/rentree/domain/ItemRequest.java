@@ -49,7 +49,7 @@ public class ItemRequest {
     private LocalDateTime rentalEndTime; // 요청 시간 To
 
     @Column(name = "face_to_face", nullable = false)
-    private boolean isFaceToFace;
+    private Boolean isFaceToFace;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

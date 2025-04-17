@@ -86,7 +86,7 @@ public class ItemRequestController {
             itemRequest.setDescription(itemRequestDTO.getDescription());
             itemRequest.setRentalStartTime(itemRequestDTO.getRentalStartTime());
             itemRequest.setRentalEndTime(itemRequestDTO.getRentalEndTime());
-            itemRequest.setFaceToFace(itemRequestDTO.isFaceToFace());
+            itemRequest.setIsFaceToFace(itemRequestDTO.getIsFaceToFace());
 
             // student는 수정하지 않음
 

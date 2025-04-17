@@ -29,7 +29,7 @@ public class RentalItem {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "face_to_face", nullable = false)
     private Boolean isFaceToFace;
 
     @CreationTimestamp

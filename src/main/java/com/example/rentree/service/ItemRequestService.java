@@ -45,7 +45,7 @@ public class ItemRequestService {
                 student,
                 itemRequestDTO.getTitle(),
                 itemRequestDTO.getDescription(),
-                itemRequestDTO.isFaceToFace(),
+                itemRequestDTO.getIsFaceToFace(),
                 itemRequestDTO.getCreatedAt(),
                 itemRequestDTO.getRentalStartTime(),
                 itemRequestDTO.getRentalEndTime()
