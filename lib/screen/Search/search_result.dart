@@ -1,51 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import '../post.dart';
-import 'search.dart';
+
+enum SearchType { rental, request }
 
 class SearchResultScreen extends StatefulWidget {
   final String searchQuery;
-
   SearchResultScreen({required this.searchQuery});
 
   @override
   _SearchResultScreenState createState() => _SearchResultScreenState();
 }
 
-class _SearchResultScreenState extends State<SearchResultScreen> {
+class _SearchResultScreenState extends State<SearchResultScreen>
+    with TickerProviderStateMixin {
   late TextEditingController _searchController;
-  List<String> _searchResults = []; // 실제 검색결과는 백엔드 연동 시 사용
+  late TabController _tabController;
+  List<dynamic> _results = [];
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.searchQuery);
-    _performSearch(widget.searchQuery);
+    _tabController = TabController(length: 2, vsync: this);
+
     _saveSearchQuery(widget.searchQuery);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging == false) {
+        _fetchResults(_searchController.text);
+      }
+    });
+
+    _fetchResults(widget.searchQuery);
   }
 
   Future<void> _saveSearchQuery(String query) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> recentSearches =
-        prefs.getStringList('recentSearches') ?? [];
+        prefs.getStringList('searchHistory') ?? [];
 
-    // 중복 제거 후 맨 앞에 추가
     recentSearches.remove(query);
     recentSearches.insert(0, query);
 
-    // 최대 10개까지만 저장
     if (recentSearches.length > 10) {
       recentSearches.removeLast();
     }
 
-    await prefs.setStringList('recentSearches', recentSearches);
+    await prefs.setStringList('searchHistory', recentSearches);
   }
 
-  void _performSearch(String query) {
-    // 여기에 검색 API 호출 또는 필터링 로직 추가
-    setState(() {
-      _searchResults = List.generate(5, (index) => '$query');
-    });
+  void _fetchResults(String keyword) async {
+    final rentalUrl =
+        Uri.parse('http://10.0.2.2:8080/rental-item/search?keyword=$keyword');
+    final requestUrl =
+        Uri.parse('http://10.0.2.2:8080/ItemRequest/search?keyword=$keyword');
+
+    final rentalResponse = await http.get(rentalUrl);
+    final requestResponse = await http.get(requestUrl);
+
+    final rentalList = rentalResponse.statusCode == 200
+        ? json.decode(utf8.decode(rentalResponse.bodyBytes))
+        : [];
+
+    final requestList = requestResponse.statusCode == 200
+        ? json.decode(utf8.decode(requestResponse.bodyBytes))
+        : [];
+
+    // 탭 자동 전환
+    if (rentalList.isEmpty && requestList.isNotEmpty) {
+      _tabController.index = 0; // 대여 요청 탭
+      setState(() {
+        _results = requestList;
+      });
+    } else if (requestList.isEmpty && rentalList.isNotEmpty) {
+      _tabController.index = 1; // 물품 대여 탭
+      setState(() {
+        _results = rentalList;
+      });
+    } else {
+      // 현재 탭 기준으로 결과 설정
+      setState(() {
+        _results = _tabController.index == 1 ? rentalList : requestList;
+      });
+    }
   }
 
   void _navigateToSearchResult(String query) {
@@ -59,155 +99,186 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xffF4F1F1),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 🔹 상단바 (뒤로가기, 검색창, 검색 버튼)
-            Container(
-              color: Color(0xffF4F1F1),
-              child: Column(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: Color(0xffF4F1F1),
+        body: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: 15),
+              Row(
                 children: [
-                  SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Color(0xffEBEBEB),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: '검색어를 입력하세요.',
-                              hintStyle: TextStyle(color: Color(0xFF848484)),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 15, horizontal: 20),
-                            ),
-                            onSubmitted: (query) {
-                              _navigateToSearchResult(query);
-                            },
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.search, color: Color(0xff97C663)),
-                        onPressed: () {
-                          _navigateToSearchResult(_searchController.text);
-                        },
-                      ),
-                    ],
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new),
+                    color: Color(0xff97C663),
+                    iconSize: 30,
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  SizedBox(height: 10),
-                  Container(height: 1, color: Colors.grey[300]),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Color(0xffEBEBEB),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: '검색어를 입력하세요.',
+                          hintStyle: TextStyle(color: Color(0xFF848484)),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 20),
+                        ),
+                        onSubmitted: (query) {
+                          _navigateToSearchResult(query);
+                        },
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.search, color: Color(0xff97C663)),
+                    onPressed: () {
+                      _navigateToSearchResult(_searchController.text);
+                    },
+                  ),
                 ],
               ),
-            ),
+              SizedBox(height: 10),
 
-            // 🔥 리스트뷰
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: _searchResults.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PostScreen(
-                            title: _searchResults[index],
-                            description: _searchResults[index],
-                            imageUrl: 'assets/box.png',
-                          ),
-                        ),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'assets/box.png',
-                                  width: 110,
-                                  height: 110,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      width: 80,
-                                      height: 80,
-                                      color: Colors.grey[300],
-                                      child: Icon(Icons.image_not_supported,
-                                          color: Colors.grey),
-                                    );
-                                  },
+              // 🔹 TabBar UI
+              Container(
+                color: Color(0xffF4F1F1),
+                child: TabBar(
+                  controller: _tabController,
+                  indicatorColor: Color(0xff97C663),
+                  indicatorWeight: 1.0,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelColor: Color(0xff97C663),
+                  unselectedLabelColor: Color(0xff918B8B),
+                  labelStyle:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  unselectedLabelStyle:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  tabs: [
+                    Tab(text: '대여 요청'),
+                    Tab(text: '물품 대여'),
+                  ],
+                ),
+              ),
+              Container(height: 1, color: Colors.grey[300]),
+
+              // 🔥 리스트뷰
+              Expanded(
+                child: _results.isEmpty
+                    ? Center(
+                        child: Text('검색 결과가 없습니다',
+                            style: TextStyle(color: Colors.grey)))
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        itemCount: _results.length,
+                        itemBuilder: (context, index) {
+                          final item = _results[index];
+                          final title = item['title'] ?? '';
+                          final description = item['description'] ?? '';
+                          final imageUrl = item['imageUrl'] ?? 'assets/box.png';
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PostScreen(
+                                    title: title,
+                                    description: description,
+                                    imageUrl: imageUrl,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _searchResults[index],
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text('${_searchResults[index]}',
-                                        style:
-                                            TextStyle(color: Colors.grey[700])),
-                                    SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          'assets/box.png',
+                                          width: 110,
+                                          height: 110,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              width: 110,
+                                              height: 110,
+                                              color: Colors.grey[300],
+                                              child: Icon(
+                                                  Icons.image_not_supported,
+                                                  color: Colors.grey),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Icon(Icons.favorite_border,
-                                                size: 20, color: Colors.red),
-                                            SizedBox(width: 5),
-                                            Text('좋아요'),
+                                            Text(title,
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16)),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              description,
+                                              style: TextStyle(
+                                                  color: Colors.grey[700]),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2,
+                                            ),
+                                            SizedBox(height: 8),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.favorite_border,
+                                                        size: 20,
+                                                        color: Colors.red),
+                                                    SizedBox(width: 5),
+                                                    Text('좋아요'),
+                                                  ],
+                                                ),
+                                                Text('3시간 전',
+                                                    style: TextStyle(
+                                                        color: Colors.grey)),
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                        Text('3시간 전',
-                                            style:
-                                                TextStyle(color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Divider(height: 1, color: Colors.grey[300]),
-                      ],
-                    ),
-                  );
-                },
+                                Divider(height: 1, color: Colors.grey[300]),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );
