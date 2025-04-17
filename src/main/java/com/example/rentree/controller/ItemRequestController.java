@@ -63,10 +63,10 @@ public class ItemRequestController {
     }
 
     // 제목에 포함된 단어로 게시글 검색
-    @GetMapping("/title/{title}")
-    public ResponseEntity<List<ItemRequestResponseDTO>> getItemRequestByTitle(@PathVariable String title) {
+    @GetMapping("/search")
+    public ResponseEntity<List<ItemRequestResponseDTO>> getItemRequestByTitle(@RequestParam String keyword) {
         //System.out.println("검색어: " + title);
-        List<ItemRequestResponseDTO> dtos = itemRequestService.getItemRequestByTitleContaining(title)
+        List<ItemRequestResponseDTO> dtos = itemRequestService.getItemRequestByTitleContaining(keyword)
                 .stream() // List<ItemRequest>를 stream으로 변환
                 .map(ItemRequestResponseDTO::fromEntity) // 각 ItemRequest를 ItemRequestResponseDTO로 변환
                 .collect(Collectors.toList()); // 변환된 결과를 List로 수집
