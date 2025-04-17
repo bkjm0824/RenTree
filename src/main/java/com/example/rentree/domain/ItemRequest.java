@@ -1,14 +1,11 @@
 package com.example.rentree.domain;
 
-import com.example.rentree.dto.ItemRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 /*
 요청 정보를 담는 엔티티 클래스

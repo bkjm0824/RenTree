@@ -6,6 +6,7 @@ import com.example.rentree.service.ItemImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,9 +18,12 @@ public class ItemImageController {
     private final ItemImageService itemImageService;
 
     @PostMapping
-    public ResponseEntity<String> uploadImage(@RequestBody ImageUploadRequest request) {
-        itemImageService.saveImage(request);
-        return ResponseEntity.ok("Image saved");
+    public ResponseEntity<String> uploadImage(
+            @RequestParam("rentalItemId") Long rentalItemId,
+            @RequestParam("image") MultipartFile imageFile
+    ) {
+        String imageUrl = itemImageService.saveImage(rentalItemId, imageFile);
+        return ResponseEntity.ok("Image saved at URL: " + imageUrl);
     }
 
     @GetMapping("/{rentalItemId}")
@@ -33,5 +37,5 @@ public class ItemImageController {
         itemImageService.deleteImage(id);
         return ResponseEntity.ok("Image deleted");
     }
-
 }
+
