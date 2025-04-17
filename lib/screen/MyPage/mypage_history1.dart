@@ -5,6 +5,16 @@ import '../Home/home.dart';
 import '../post.dart';
 
 class MyPageHistory1 extends StatelessWidget {
+
+  final List<Map<String, dynamic>> rentedItems = List.generate(10, (index) {
+    return {
+      "id": index + 1, // 임시 id
+      "title": "상품 ${index + 1}",
+      "description": "상품 설명 ${index + 1}",
+      "imageUrl": "assets/box.png"
+    };
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,19 +71,16 @@ class MyPageHistory1 extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: 10,
+                itemCount: rentedItems.length,
                 itemBuilder: (context, index) {
+                  final item = rentedItems[index];
+
                   return GestureDetector(
                     onTap: () {
-                      // 해당 아이템 클릭 시 상세 페이지로 이동
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostScreen(
-                            title: '상품 ${index + 1}', // 제목
-                            description: '상품 설명 ${index + 1}', // 설명
-                            imageUrl: 'assets/box.png', // 이미지 URL
-                          ),
+                          builder: (context) => PostScreen(itemId: item['id']),
                         ),
                       );
                     },
@@ -87,7 +94,7 @@ class MyPageHistory1 extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.asset(
-                                  'assets/box.png',
+                                  item['imageUrl'],
                                   width: 110,
                                   height: 110,
                                   fit: BoxFit.cover,
@@ -108,19 +115,16 @@ class MyPageHistory1 extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '상품 ${index + 1}',
+                                      item['title'],
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16),
+                                          fontWeight: FontWeight.bold, fontSize: 16),
                                     ),
                                     SizedBox(height: 4),
-                                    Text('상품 설명 ${index + 1}',
-                                        style:
-                                        TextStyle(color: Colors.grey[700])),
+                                    Text(item['description'],
+                                        style: TextStyle(color: Colors.grey[700])),
                                     SizedBox(height: 8),
                                     Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [

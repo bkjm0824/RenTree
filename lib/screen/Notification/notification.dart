@@ -9,8 +9,34 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  // 알림 데이터 예시
 
+  // 알림 데이터 예시
+  final List<Map<String, dynamic>> notifications = [
+    {
+      "id": 1,
+      "title": "상상북스딱스님과의 대여 후기를 남겨보세요!",
+      "itemTitle": "충전기",
+      "imageUrl": "assets/choongjeonki.png"
+    },
+    {
+      "id": 2,
+      "title": "교환 완료! 리뷰를 작성해보세요!",
+      "itemTitle": "우산",
+      "imageUrl": "assets/box.png"
+    },
+    {
+      "id": 3,
+      "title": "홍길동님의 물품이 반납되었습니다.",
+      "itemTitle": "책가방",
+      "imageUrl": "assets/box.png"
+    },
+    {
+      "id": 4,
+      "title": "이용 감사드립니다!",
+      "itemTitle": "보조배터리",
+      "imageUrl": "assets/box.png"
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -87,72 +113,69 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      // 해당 아이템 클릭 시 상세 페이지로 이동
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PostScreen(
-                            title: '상품 ${index + 1}', // 제목
-                            description: '상품 설명 ${index + 1}', // 설명
-                            imageUrl: 'assets/box.png', // 이미지 URL
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final item = notifications[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostScreen(itemId: item['id']),
                           ),
-                        ),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'assets/choongjeonki.png',
-                                  width: 110,
-                                  height: 110,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      width: 80,
-                                      height: 80,
-                                      color: Colors.grey[300],
-                                      child: Icon(Icons.image_not_supported,
-                                          color: Colors.grey),
-                                    );
-                                  },
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    item['imageUrl'],
+                                    width: 110,
+                                    height: 110,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Colors.grey[300],
+                                        child: Icon(Icons.image_not_supported,
+                                            color: Colors.grey),
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '상상북스딱스님과의 대여 후기를 남겨보세요!',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold, fontSize: 16),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text('충전기',
-                                        style: TextStyle(color: Colors.grey[700])),
-                                    SizedBox(height: 8),
-                                  ],
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item['title'],
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 16),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(item['itemTitle'],
+                                          style: TextStyle(color: Colors.grey[700])),
+                                      SizedBox(height: 8),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        Divider(height: 1, color: Colors.grey[300]),
-                      ],
-                    ),
-                  );
-                },
+                          Divider(height: 1, color: Colors.grey[300]),
+                        ],
+                      ),
+                    );
+                  }
               ),
             )
           ],

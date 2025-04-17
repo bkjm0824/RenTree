@@ -10,10 +10,15 @@ class MyPageHistory2 extends StatefulWidget {
 
 class _MyPageHistory2State extends State<MyPageHistory2> {
   int selectedTabIndex = 0; // 0: 대여중, 1: 대여완료
-  
-  // 더미 데이터
-  List<String> rentalInProgressList = ['상품 A', '상품 B']; // 예시: 2개
-  List<String> rentalCompletedList = ['상품 C']; // 예시: 1개
+
+  List<Map<String, dynamic>> rentalInProgressList = [
+    {"id": 1, "title": "상품 A", "status": "대여중"},
+    {"id": 2, "title": "상품 B", "status": "대여중"},
+  ];
+
+  List<Map<String, dynamic>> rentalCompletedList = [
+    {"id": 3, "title": "상품 C", "status": "반납 완료됨"},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +101,7 @@ class _MyPageHistory2State extends State<MyPageHistory2> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostScreen(
-                            title: item,
-                            description: '$item 설명',
-                            imageUrl: 'assets/box.png',
-                          ),
+                          builder: (context) => PostScreen(itemId: item['id']),
                         ),
                       );
                     },
@@ -125,14 +126,12 @@ class _MyPageHistory2State extends State<MyPageHistory2> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(item,
+                                    Text(item['title'],
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold, fontSize: 16)),
                                     SizedBox(height: 4),
-                                    Text(
-                                      selectedTabIndex == 0 ? '대여중 상태' : '반납 완료됨',
-                                      style: TextStyle(color: Colors.grey[700]),
-                                    ),
+                                    Text(item['status'],
+                                        style: TextStyle(color: Colors.grey[700])),
                                     SizedBox(height: 8),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -161,7 +160,7 @@ class _MyPageHistory2State extends State<MyPageHistory2> {
                   );
                 },
               ),
-            ),
+            )
           ],
         ),
       ),

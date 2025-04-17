@@ -61,20 +61,20 @@ class _LikeScreenState extends State<LikeScreen> {
     }
   }
 
-  // 🔥 리스트뷰에서 아이템 클릭 시 물품 상세 페이지로 이동
-  void _navigateToPostScreen(
-      String title, String description, String imageUrl) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostScreen(
-          title: title,
-          description: description,
-          imageUrl: imageUrl,
-        ),
-      ),
-    );
-  }
+  List<Map<String, dynamic>> likedItems = [
+    {
+      "id": 1,
+      "title": "상품 1",
+      "description": "상품 설명 1",
+      "imageUrl": "assets/box.png",
+    },
+    {
+      "id": 2,
+      "title": "상품 2",
+      "description": "상품 설명 2",
+      "imageUrl": "assets/box.png",
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -137,19 +137,16 @@ class _LikeScreenState extends State<LikeScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: 2,
+              itemCount: likedItems.length,
               itemBuilder: (context, index) {
+                final item = likedItems[index];
+
                 return GestureDetector(
                   onTap: () {
-                    // 해당 아이템 클릭 시 상세 페이지로 이동
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PostScreen(
-                          title: '상품 ${index + 1}', // 제목
-                          description: '상품 설명 ${index + 1}', // 설명
-                          imageUrl: 'assets/box.png', // 이미지 URL
-                        ),
+                        builder: (context) => PostScreen(itemId: item['id']),
                       ),
                     );
                   },
@@ -163,7 +160,7 @@ class _LikeScreenState extends State<LikeScreen> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.asset(
-                                'assets/box.png',
+                                item['imageUrl'],
                                 width: 110,
                                 height: 110,
                                 fit: BoxFit.cover,
@@ -184,46 +181,44 @@ class _LikeScreenState extends State<LikeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '상품 ${index + 1}',
+                                    item['title'],
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
+                                        fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
                                   SizedBox(height: 4),
-                                  Text('상품 설명 ${index + 1}',
-                                      style:
-                                          TextStyle(color: Colors.grey[700])),
+                                  Text(item['description'],
+                                      style: TextStyle(color: Colors.grey[700])),
                                   SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.favorite_border,
-                                                size: 20, color: Colors.red),
-                                            SizedBox(width: 5),
-                                            Text('좋아요'),
-                                          ],
-                                        ),
-                                        Text('3시간 전',
-                                            style: TextStyle(color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(Icons.favorite_border,
+                                              size: 20, color: Colors.red),
+                                          SizedBox(width: 5),
+                                          Text('좋아요'),
+                                        ],
+                                      ),
+                                      Text('3시간 전',
+                                          style: TextStyle(color: Colors.grey)),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Divider(height: 1, color: Colors.grey[300]),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            )
-          ],
+                      ),
+                      Divider(height: 1, color: Colors.grey[300]),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
+
+        ],
         ),
       ),
 
