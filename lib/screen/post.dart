@@ -60,7 +60,8 @@ class PostScreen extends StatelessWidget {
                       width: 250,
                       height: 250,
                       color: Colors.grey[300],
-                      child: Icon(Icons.image_not_supported, color: Colors.grey),
+                      child:
+                          Icon(Icons.image_not_supported, color: Colors.grey),
                     );
                   },
                 ),
@@ -70,12 +71,10 @@ class PostScreen extends StatelessWidget {
             // 🔹 상품 정보 컨테이너
             Expanded(
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(36),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Color(0xffE7E9C8),
-                  borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
@@ -87,22 +86,67 @@ class PostScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 물품 제목
-                    Text(
-                      title, // 물품 제목
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage:
+                              AssetImage('assets/Profile/hosick.png'),
+                          backgroundColor: Colors.white,
+                        ),
+                        SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 10),
+                              Text('작성자 : 닉네임', style: TextStyle(fontSize: 16)),
+                              RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.black),
+                                  children: [
+                                    TextSpan(text: '대여 가능 시간 : 3시간 '),
+                                    TextSpan(
+                                        text: '|',
+                                        style: TextStyle(
+                                            color: Color(0xff918B8B))),
+                                    TextSpan(text: ' 대면 '),
+                                    TextSpan(
+                                        text: '|',
+                                        style: TextStyle(
+                                            color: Color(0xff918B8B))),
+                                    TextSpan(text: ' 2시간 전'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 20),
 
-                    // 물품 설명
-                    Text(
-                      description, // 물품 설명
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
+                    // ✅ 설명 박스는 Row 밖에서 전체 너비를 활용해야 하므로 여기 위치
+                    Container(
+                      width: double.infinity,
+                      height: 150,
+                      margin: EdgeInsets.only(top: 8),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: SingleChildScrollView(
+                        child: Text(
+                          description,
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
                       ),
                     ),
                   ],
@@ -112,7 +156,8 @@ class PostScreen extends StatelessWidget {
 
             // 🔹 하트 아이콘과 채팅하기 버튼을 Row로 묶기
             Container(
-              margin: EdgeInsets.only(top: 10, bottom: 20), // 상단 여백을 줄이고 하단 여백 추가
+              margin:
+                  EdgeInsets.only(top: 10, bottom: 20), // 상단 여백을 줄이고 하단 여백 추가
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -138,7 +183,8 @@ class PostScreen extends StatelessWidget {
                     },
                     child: Text(
                       "채팅하기", // 버튼 텍스트
-                      style: TextStyle(fontSize: 18),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],

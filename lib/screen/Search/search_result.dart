@@ -1,21 +1,66 @@
-// 검색 결과 화면
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../post.dart';
+import 'search.dart';
 
-class SearchResultScreen extends StatelessWidget {
+class SearchResultScreen extends StatefulWidget {
   final String searchQuery;
-  final TextEditingController _searchController = TextEditingController();
 
-  SearchResultScreen({required this.searchQuery}) {
-    // 초기 검색어 설정
-    _searchController.text = searchQuery;
+  SearchResultScreen({required this.searchQuery});
+
+  @override
+  _SearchResultScreenState createState() => _SearchResultScreenState();
+}
+
+class _SearchResultScreenState extends State<SearchResultScreen> {
+  late TextEditingController _searchController;
+  List<String> _searchResults = []; // 실제 검색결과는 백엔드 연동 시 사용
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: widget.searchQuery);
+    _performSearch(widget.searchQuery);
+    _saveSearchQuery(widget.searchQuery);
+  }
+
+  Future<void> _saveSearchQuery(String query) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> recentSearches =
+        prefs.getStringList('recentSearches') ?? [];
+
+    // 중복 제거 후 맨 앞에 추가
+    recentSearches.remove(query);
+    recentSearches.insert(0, query);
+
+    // 최대 10개까지만 저장
+    if (recentSearches.length > 10) {
+      recentSearches.removeLast();
+    }
+
+    await prefs.setStringList('recentSearches', recentSearches);
+  }
+
+  void _performSearch(String query) {
+    // 여기에 검색 API 호출 또는 필터링 로직 추가
+    setState(() {
+      _searchResults = List.generate(5, (index) => '$query');
+    });
+  }
+
+  void _navigateToSearchResult(String query) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchResultScreen(searchQuery: query),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF4F1F1), // 전체 배경색 설정
+      backgroundColor: Color(0xffF4F1F1),
       body: SafeArea(
         child: Column(
           children: [
@@ -28,23 +73,20 @@ class SearchResultScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // 🔹 뒤로가기 버튼
                       IconButton(
                         icon: Icon(Icons.arrow_back_ios_new),
                         color: Color(0xff97C663),
                         iconSize: 30,
                         onPressed: () {
-                          Navigator.pop(context); // 뒤로 가기
+                          Navigator.pop(context);
                         },
                       ),
-
-                      // 🔹 검색창
                       Expanded(
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
                             color: Color(0xffEBEBEB),
-                            borderRadius: BorderRadius.circular(30), // 둥근 모서리
+                            borderRadius: BorderRadius.circular(30),
                           ),
                           child: TextField(
                             controller: _searchController,
@@ -52,27 +94,25 @@ class SearchResultScreen extends StatelessWidget {
                               hintText: '검색어를 입력하세요.',
                               hintStyle: TextStyle(color: Color(0xFF848484)),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // 위아래 간격을 넓게
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 20),
                             ),
                             onSubmitted: (query) {
-                              _navigateToSearchResult(context, query);
+                              _navigateToSearchResult(query);
                             },
                           ),
                         ),
                       ),
-
-                      // 🔹 검색 버튼
                       IconButton(
                         icon: Icon(Icons.search, color: Color(0xff97C663)),
                         onPressed: () {
-                          String query = _searchController.text;
-                          _navigateToSearchResult(context, query);
+                          _navigateToSearchResult(_searchController.text);
                         },
                       ),
                     ],
                   ),
                   SizedBox(height: 10),
-                  Container(height: 1, color: Colors.grey[300]), // 구분선
+                  Container(height: 1, color: Colors.grey[300]),
                 ],
               ),
             ),
@@ -81,18 +121,17 @@ class SearchResultScreen extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: 5,
+                itemCount: _searchResults.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                      // 해당 아이템 클릭 시 상세 페이지로 이동
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PostScreen(
-                            title: '상품 ${index + 1}', // 제목
-                            description: '상품 설명 ${index + 1}', // 설명
-                            imageUrl: 'assets/box.png', // 이미지 URL
+                            title: _searchResults[index],
+                            description: _searchResults[index],
+                            imageUrl: 'assets/box.png',
                           ),
                         ),
                       );
@@ -128,19 +167,19 @@ class SearchResultScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '상품 ${index + 1}',
+                                      _searchResults[index],
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16),
                                     ),
                                     SizedBox(height: 4),
-                                    Text('상품 설명 ${index + 1}',
+                                    Text('${_searchResults[index]}',
                                         style:
-                                        TextStyle(color: Colors.grey[700])),
+                                            TextStyle(color: Colors.grey[700])),
                                     SizedBox(height: 8),
                                     Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [
@@ -151,7 +190,8 @@ class SearchResultScreen extends StatelessWidget {
                                           ],
                                         ),
                                         Text('3시간 전',
-                                            style: TextStyle(color: Colors.grey)),
+                                            style:
+                                                TextStyle(color: Colors.grey)),
                                       ],
                                     ),
                                   ],
@@ -169,16 +209,6 @@ class SearchResultScreen extends StatelessWidget {
             )
           ],
         ),
-      ),
-    );
-  }
-
-  // 검색 결과 화면으로 이동하는 함수
-  void _navigateToSearchResult(BuildContext context, String query) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchResultScreen(searchQuery: query),
       ),
     );
   }

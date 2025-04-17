@@ -1,19 +1,66 @@
-// 검색 화면
+// 🔍 검색 화면 - search.dart
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'search_result.dart';
 
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends StatefulWidget {
+  @override
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+
+  Future<void> _saveSearchQuery(String query) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> searches = prefs.getStringList('searchHistory') ?? [];
+
+    // 중복 제거 및 앞에 삽입
+    searches.remove(query);
+    searches.insert(0, query);
+
+    // 최대 10개까지만 저장
+    if (searches.length > 10) {
+      searches = searches.sublist(0, 10);
+    }
+
+    await prefs.setStringList('searchHistory', searches);
+  }
+
+  Future<List<String>> _getSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('searchHistory') ?? [];
+  }
+
+  Future<void> _clearSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('searchHistory');
+    setState(() {});
+  }
+
+  void _onSearch(String query) async {
+    if (query.trim().isEmpty) return;
+    await _saveSearchQuery(query.trim());
+    _navigateToSearchResult(query);
+  }
+
+  void _navigateToSearchResult(String query) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchResultScreen(searchQuery: query),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF4F1F1), // 전체 배경색 설정
+      backgroundColor: Color(0xffF4F1F1),
       body: SafeArea(
         child: Column(
           children: [
-            // 🔹 상단바 (뒤로가기, 검색창, 검색 버튼)
+            // 상단바
             Container(
               color: Color(0xffF4F1F1),
               child: Column(
@@ -22,23 +69,18 @@ class SearchScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // 🔹 뒤로가기 버튼
                       IconButton(
                         icon: Icon(Icons.arrow_back_ios_new),
                         color: Color(0xff97C663),
                         iconSize: 30,
-                        onPressed: () {
-                          Navigator.pop(context); // 뒤로 가기
-                        },
+                        onPressed: () => Navigator.pop(context),
                       ),
-
-                      // 🔹 검색창
                       Expanded(
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
                             color: Color(0xffEBEBEB),
-                            borderRadius: BorderRadius.circular(30), // 둥근 모서리
+                            borderRadius: BorderRadius.circular(30),
                           ),
                           child: TextField(
                             controller: _searchController,
@@ -46,89 +88,70 @@ class SearchScreen extends StatelessWidget {
                               hintText: '검색어를 입력하세요.',
                               hintStyle: TextStyle(color: Color(0xFF848484)),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // 위아래 간격을 넓게
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 20),
                             ),
-                            onSubmitted: (query) {
-                              _navigateToSearchResult(context, query);
-                            },
+                            onSubmitted: _onSearch,
                           ),
                         ),
                       ),
-
-                      // 🔹 검색 버튼
                       IconButton(
                         icon: Icon(Icons.search, color: Color(0xff97C663)),
-                        onPressed: () {
-                          String query = _searchController.text;
-                          _navigateToSearchResult(context, query);
-                        },
+                        onPressed: () => _onSearch(_searchController.text),
                       ),
                     ],
                   ),
                   SizedBox(height: 10),
-                  Container(height: 1, color: Colors.grey[300]), // 구분선
+                  Container(height: 1, color: Colors.grey[300]),
                 ],
               ),
             ),
-
-            // 🔹 최근 검색과 전체 삭제 문구
+            // 최근 검색어 타이틀
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 최근 검색
-                  Text(
-                    '최근 검색',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  // 전체 삭제
+                  Text('최근 검색',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   TextButton(
-                    onPressed: () {
-                      print('전체 삭제 클릭됨');
-                    },
-                    child: Text(
-                      '전체 삭제',
-                      style: TextStyle(
-                        color: Color(0xff969696),
-                        fontSize: 14,
-                      ),
-                    ),
+                    onPressed: _clearSearchHistory,
+                    child: Text('전체 삭제',
+                        style:
+                            TextStyle(color: Color(0xff969696), fontSize: 14)),
                   ),
                 ],
               ),
             ),
-
-            // 🔹 검색 내역 리스트 (예시 데이터)
+            // 검색 기록 리스트
             Expanded(
-              child: ListView.builder(
-                itemCount: 5, // 예시로 5개 항목을 보여줌
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Icon(Icons.history, color: Color(0xff97C663)),
-                    title: Text('검색 내역 ${index + 1}', style: TextStyle(fontSize: 16)),
-                    onTap: () {
-                      print('검색 내역 ${index + 1} 클릭됨');
+              child: FutureBuilder<List<String>>(
+                future: _getSearchHistory(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+
+                  final history = snapshot.data!;
+                  if (history.isEmpty) {
+                    return Center(child: Text('검색 기록이 없습니다.'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: history.length,
+                    itemBuilder: (context, index) {
+                      final query = history[index];
+                      return ListTile(
+                        leading: Icon(Icons.history, color: Color(0xff97C663)),
+                        title: Text(query, style: TextStyle(fontSize: 16)),
+                        onTap: () => _onSearch(query),
+                      );
                     },
                   );
                 },
               ),
-            ),
+            )
           ],
         ),
-      ),
-    );
-  }
-
-  // 검색 결과 화면으로 이동하는 함수
-  void _navigateToSearchResult(BuildContext context, String query) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchResultScreen(searchQuery: query),
       ),
     );
   }

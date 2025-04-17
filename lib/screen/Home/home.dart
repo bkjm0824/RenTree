@@ -1,5 +1,6 @@
-// 홈 화면
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../Point/point_first.dart';
 import '../Chat/chatlist.dart';
@@ -20,37 +21,38 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
+  Future<List<dynamic>> fetchItems() async {
+    final response =
+        await http.get(Uri.parse('http://10.0.2.2:8080/home/items'));
+    if (response.statusCode == 200) {
+      final decoded = utf8.decode(response.bodyBytes);
+      return jsonDecode(decoded);
+    } else {
+      throw Exception('Failed to load items');
+    }
+  }
+
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
+            context, MaterialPageRoute(builder: (context) => HomeScreen()));
         break;
       case 1:
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LikeScreen()),
-        );
+            context, MaterialPageRoute(builder: (context) => LikeScreen()));
         break;
       case 2:
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PointedScreen()),
-        );
+            context, MaterialPageRoute(builder: (context) => PointedScreen()));
         break;
       case 3:
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ChatScreen()),
-        );
+            context, MaterialPageRoute(builder: (context) => ChatScreen()));
         break;
       case 4:
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MypageScreen()),
-        );
+            context, MaterialPageRoute(builder: (context) => MypageScreen()));
         break;
       default:
         setState(() {
@@ -59,30 +61,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // 🔹 글쓰기 화면 모달 열기
   void _showWriteScreen() {
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          backgroundColor: Colors.transparent, // 배경 없애기
+          backgroundColor: Colors.transparent,
           child: Column(
-            mainAxisSize: MainAxisSize.min, // 내용물 크기에 맞춤
+            mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xff97C663),
                   foregroundColor: Colors.white,
-                  minimumSize: Size(230, 60), // 버튼 크기 설정
+                  minimumSize: Size(230, 60),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
                   _navigateToScreen(RequestScreen());
                 },
-                child: Text(
-                  "대여 요청하기",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+                child: Text("대여 요청하기",
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -95,10 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pop(context);
                   _navigateToScreen(PostGiveScreen());
                 },
-                child: Text(
-                  "물품 등록하기",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+                child: Text("물품 등록하기",
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -122,21 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: screen,
         );
       },
-    );
-  }
-
-  // 🔥 리스트뷰에서 아이템 클릭 시 물품 상세 페이지로 이동
-  void _navigateToPostScreen(
-      String title, String description, String imageUrl) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostScreen(
-          title: title,
-          description: description,
-          imageUrl: imageUrl,
-        ),
-      ),
     );
   }
 
@@ -164,8 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                              builder: (context) => NotificationScreen()),
                         );
                       },
                     ),
@@ -178,7 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
+                          MaterialPageRoute(
+                              builder: (context) => SearchScreen()),
                         );
                       },
                     ),
@@ -189,103 +173,108 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-
-          // 🔥 리스트뷰
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    // 해당 아이템 클릭 시 상세 페이지로 이동
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PostScreen(
-                          title: '상품 ${index + 1}', // 제목
-                          description: '상품 설명 ${index + 1}', // 설명
-                          imageUrl: 'assets/box.png', // 이미지 URL
-                        ),
-                      ),
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                'assets/box.png',
-                                width: 110,
-                                height: 110,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 80,
-                                    height: 80,
-                                    color: Colors.grey[300],
-                                    child: Icon(Icons.image_not_supported,
-                                        color: Colors.grey),
-                                  );
-                                },
+            child: FutureBuilder<List<dynamic>>(
+              future: fetchItems(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('에러 발생: ${snapshot.error}'));
+                } else {
+                  final items = snapshot.data!;
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PostScreen(
+                                title: item['title'],
+                                description: item['description'],
+                                imageUrl: 'assets/box.png',
                               ),
                             ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    '상품 ${index + 1}',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.asset(
+                                      'assets/box.png',
+                                      width: 110,
+                                      height: 110,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                                  SizedBox(height: 4),
-                                  Text('상품 설명 ${index + 1}',
-                                      style:
-                                          TextStyle(color: Colors.grey[700])),
-                                  SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(Icons.favorite_border,
-                                              size: 20, color: Colors.red),
-                                          SizedBox(width: 5),
-                                          Text('좋아요'),
-                                        ],
-                                      ),
-                                      Text('3시간 전',
-                                          style: TextStyle(color: Colors.grey)),
-                                    ],
+                                  SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item['title'],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          item['description'],
+                                          style: TextStyle(
+                                              color: Colors.grey[700]),
+                                        ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(Icons.favorite_border,
+                                                    size: 20,
+                                                    color: Colors.red),
+                                                SizedBox(width: 5),
+                                                Text('좋아요'),
+                                              ],
+                                            ),
+                                            Text('3시간 전',
+                                                style: TextStyle(
+                                                    color: Colors.grey)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
+                            Divider(height: 1, color: Colors.grey[300]),
                           ],
                         ),
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                    ],
-                  ),
-                );
+                      );
+                    },
+                  );
+                }
               },
             ),
           )
         ],
       ),
-
-      // 🔥 하단 네비게이션 바
       bottomNavigationBar: Container(
-        color: Color(0xffEBEBEB), // 배경색 유지
+        color: Color(0xffEBEBEB),
         padding: const EdgeInsets.only(bottom: 5),
         child: BottomNavigationBar(
           backgroundColor: Color(0xffEBEBEB),
@@ -315,15 +304,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-
-      // 🔹 우측 하단 녹색 플러스 버튼 추가
       floatingActionButton: FloatingActionButton(
-        onPressed: _showWriteScreen, // 글쓰기 화면으로 이동
-        backgroundColor: Color(0xff97C663), // 녹색 버튼
+        onPressed: _showWriteScreen,
+        backgroundColor: Color(0xff97C663),
         child: Icon(Icons.add, size: 32, color: Colors.white),
       ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.endFloat, // 우측 하단 배치
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
