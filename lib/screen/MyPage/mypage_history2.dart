@@ -1,7 +1,7 @@
 // 대여해준 내역
 import 'package:flutter/material.dart';
 import '../Home/home.dart';
-import '../post.dart';
+import '../Post/post_rental.dart';
 
 class MyPageHistory2 extends StatefulWidget {
   @override
@@ -101,7 +101,7 @@ class _MyPageHistory2State extends State<MyPageHistory2> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostScreen(itemId: item['id']),
+                          builder: (_) => PostRentalScreen(itemId: item['id']),
                         ),
                       );
                     },

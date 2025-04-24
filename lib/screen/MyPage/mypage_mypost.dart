@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../post.dart';
+import '../Post/post_rental.dart';
 import '../Home/addpost_give.dart';
 import '../Home/addpost_request.dart';
 
@@ -51,7 +51,7 @@ class _MyPageMypostState extends State<MyPageMypost>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PostScreen(itemId: item['id']), // ✅ 핵심!
+                  builder: (_) => PostRentalScreen(itemId: item['id']),
                 ),
               );
             },
