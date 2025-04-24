@@ -7,7 +7,9 @@ import com.example.rentree.service.RentalItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -20,10 +22,12 @@ public class RentalItemController {
         this.rentalItemService = rentalItemService;
     }
 
-    @PostMapping //물품 등록
-    public void saveRentalItem(@RequestBody RentalItemCreateRequest request) {
-        rentalItemService.saveRentalItem(request);
+    @PostMapping
+    public ResponseEntity<RentalItem> saveRentalItem(@RequestBody RentalItemCreateRequest request) {
+        RentalItem savedItem = rentalItemService.saveRentalItem(request);
+        return ResponseEntity.ok(savedItem); // 또는 return new ResponseEntity<>(savedItem, HttpStatus.CREATED);
     }
+
 
     @GetMapping("/search") //물품 검색
     public List<RentalItem> searchRentalItemsByTitle(@RequestParam String keyword) {

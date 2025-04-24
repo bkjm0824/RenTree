@@ -26,7 +26,7 @@ public class ItemRequest {
     @Id // 기본 키임을 명시
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
     @Column(nullable = false)
-    private int id; // 요청 식별자
+    private Long id; // 요청 식별자
 
     // studentNum을 외래키로 연결
     @ManyToOne(fetch = FetchType.LAZY)

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 public class RentalItemUpdateRequest {
-
+    private Long id;
     private String title;
     private String description;
     private Boolean isFaceToFace;

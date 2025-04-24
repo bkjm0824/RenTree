@@ -35,12 +35,11 @@ public class RentalItemService {
     }
 
     @Transactional
-    public void saveRentalItem(RentalItemCreateRequest request) {
+    public RentalItem saveRentalItem(RentalItemCreateRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리 ID입니다."));
         Student student = studentRepository.findByStudentNum(request.getStudentNum())
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다"));
-
 
         RentalItem item = new RentalItem(
                 student,
@@ -53,7 +52,7 @@ public class RentalItemService {
                 request.getRentalEndTime()
         );
 
-        rentalItemRepository.save(item);
+        return rentalItemRepository.save(item); // 저장한 객체 반환!
     }
 
     @Transactional(readOnly = true)
@@ -132,4 +131,5 @@ public class RentalItemService {
     public List<RentalItem> getAvailableItemsByCategory(Long categoryId) {
         return rentalItemRepository.findByCategory_IdAndIsAvailableTrue(categoryId);
     }
+
 }

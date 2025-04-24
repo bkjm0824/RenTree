@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 public class RentalItemCreateRequest {
-
+    private Long id;
     private String studentNum;
     private String title;
     private String description;

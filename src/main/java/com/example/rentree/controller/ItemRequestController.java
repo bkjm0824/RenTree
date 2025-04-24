@@ -97,9 +97,18 @@ public class ItemRequestController {
         }
     }
 
-    @GetMapping("/{id}") // 상세 페이지
-    public ItemRequestResponseDTO getRentalItemDetails(@PathVariable Long id) {
-        return itemRequestService.getItemRequestDetail(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getRentalItemDetails(@PathVariable Long id) {
+        if (id <= 0) {
+            return ResponseEntity.badRequest().body("ID는 1 이상의 양수여야 합니다.");
+        }
+
+        try {
+            ItemRequestResponseDTO dto = itemRequestService.getItemRequestDetail(id);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

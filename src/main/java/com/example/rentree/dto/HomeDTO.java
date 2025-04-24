@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 public class HomeDTO {
 
-    private int id;
+    private Long id;
     private String studentNum;
     private String title;
     private String description;
@@ -57,7 +57,7 @@ public class HomeDTO {
     }
     // RentalItemCreateRequest 생성자
     public HomeDTO(RentalItemCreateRequest rentalItemCreateRequest) {
-        //this.id = rentalItemCreateRequest.getId();
+        this.id = rentalItemCreateRequest.getId();
         this.studentNum = rentalItemCreateRequest.getStudentNum();
         this.title = rentalItemCreateRequest.getTitle();
         this.description = rentalItemCreateRequest.getDescription();
@@ -71,7 +71,7 @@ public class HomeDTO {
 
     // HomeDTO 클래스에 RentalItem 생성자 추가
     public HomeDTO(RentalItem rentalItem) {
-        //this.id = rentalItem.getId();
+        this.id = rentalItem.getId();
         this.studentNum = rentalItem.getStudent().getStudentNum();  // Student 객체에서 학번 가져오기
         this.title = rentalItem.getTitle();
         this.description = rentalItem.getDescription();

@@ -18,7 +18,7 @@ public class ItemImageService {
 
     private final ItemImageRepository itemImageRepository;
 
-    private final String uploadDir = "/Users/jm/Documents"; // 저장 폴더
+    private final String uploadDir = "C:/rentree_upload"; // 저장 폴더
 
     public String saveImage(Long rentalItemId, MultipartFile imageFile) {
         try {

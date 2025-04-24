@@ -18,7 +18,7 @@ import java.time.LocalTime;
 @Data // getter, setter, toString, equals, hashCode 메서드 자동 생성
 public class ItemRequestDTO {
 
-    private int id; // 요청 식별자
+    private Long id; // 요청 식별자
     private String studentNum; // 학번 (외래키 역할)
     private String nickname; // 닉네임
     private String title; // 제목
