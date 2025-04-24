@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../post.dart';
+import '../Post/post_rental.dart';
 
 enum SearchType { rental, request }
 
@@ -190,7 +190,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PostScreen(itemId: itemId), // ✅ 변경 완료
+                                  builder: (_) => PostRentalScreen(itemId: item['id']),
                                 ),
                               );
                             },

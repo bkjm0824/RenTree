@@ -1,7 +1,7 @@
 // 알림 화면
 import 'package:flutter/material.dart';
 import 'notification_keyword.dart';
-import '../post.dart';
+import '../Post/post_rental.dart';
 
 class NotificationScreen extends StatefulWidget {
   @override
@@ -122,7 +122,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PostScreen(itemId: item['id']),
+                            builder: (_) => PostRentalScreen(itemId: item['id']),
                           ),
                         );
                       },

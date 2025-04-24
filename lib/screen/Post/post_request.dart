@@ -1,20 +1,20 @@
+// 대여 요청 글 상세
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class PostScreen extends StatefulWidget {
-  final int itemId; // 물품 ID
+class PostRequestScreen extends StatefulWidget {
+  final int itemId;
 
-  PostScreen({required this.itemId});
+  PostRequestScreen({required this.itemId});
 
   @override
-  _PostScreenState createState() => _PostScreenState();
+  _PostRequestScreenState createState() => _PostRequestScreenState();
 }
 
-class _PostScreenState extends State<PostScreen> {
+class _PostRequestScreenState extends State<PostRequestScreen> {
   String title = '';
   String description = '';
-  String imageUrl = '';
   String nickname = '';
   bool isFaceToFace = true;
   DateTime? rentalStartTime;
@@ -33,31 +33,27 @@ class _PostScreenState extends State<PostScreen> {
   String formatTo24Hour(DateTime time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
-
-    if (minute == 0) {
-      return '${hour}시';
-    } else {
-      return '${hour}시 ${minute}분';
-    }
+    return minute == '00' ? '${hour}시' : '${hour}시 ${minute}분';
   }
 
   Future<void> fetchItemDetail() async {
-    final url = 'http://10.0.2.2:8080/ItemRequest/${widget.itemId}';
+    final baseUrl = 'http://10.0.2.2:8080/ItemRequest/${widget.itemId}';
+
     try {
-      final response = await http.get(Uri.parse(url));
+      print("🔍 요청 URL: $baseUrl");
+      final response = await http.get(Uri.parse(baseUrl));
+      print("📦 응답 상태 코드: ${response.statusCode}");
+      print("📦 응답 바디: ${response.body}");
 
       if (response.statusCode == 200) {
-        // 🔥 여기 핵심 부분
         final decoded = utf8.decode(response.bodyBytes);
         final data = json.decode(decoded);
 
         setState(() {
-          title = data['title'];
-          description = data['description'];
-          imageUrl = data['imageUrl'] ?? '';
-          nickname = data['nickname'];
+          title = data['title'] ?? '제목 없음';
+          description = data['description'] ?? '내용 없음';
+          nickname = data['nickname'] ?? '익명';
           isFaceToFace = data['isFaceToFace'] ?? true;
-          isLoading = false;
           rentalStartTime = DateTime.parse(data['rentalStartTime']);
           rentalEndTime = DateTime.parse(data['rentalEndTime']);
           createdAt = DateTime.parse(data['createdAt']);
@@ -68,7 +64,6 @@ class _PostScreenState extends State<PostScreen> {
           final now = DateTime.now();
           final difference = now.difference(createdAt!);
 
-          // 🔥 시간 차에 따라 텍스트 다르게 설정
           if (difference.inMinutes < 1) {
             timeAgoText = '방금 전';
           } else if (difference.inMinutes < 60) {
@@ -79,15 +74,16 @@ class _PostScreenState extends State<PostScreen> {
             timeAgoText = '${difference.inDays}일 전';
           }
 
+          isLoading = false;
         });
       } else {
         print('불러오기 실패: ${response.statusCode}');
       }
-    } catch (e) {
-      print('에러 발생: $e');
+    } catch (e, stacktrace) {
+      print("❌ 예외 발생: $e");
+      print("❌ 스택트레이스: $stacktrace");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +94,6 @@ class _PostScreenState extends State<PostScreen> {
           : SafeArea(
         child: Column(
           children: [
-            // 🔹 상단바 (뒤로가기 버튼)
             Container(
               color: Color(0xffF4F1F1),
               child: Column(
@@ -123,29 +118,6 @@ class _PostScreenState extends State<PostScreen> {
               ),
             ),
 
-            // 🔹 물품 이미지
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: imageUrl.isNotEmpty
-                    ? Image.network(
-                  imageUrl,
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
-                )
-                    : Container(
-                  width: 250,
-                  height: 250,
-                  color: Colors.grey[300],
-                  child: Icon(Icons.image_not_supported,
-                      color: Colors.grey),
-                ),
-              ),
-            ),
-
-            // 🔹 상품 정보 컨테이너
             Expanded(
               child: Container(
                 padding: EdgeInsets.all(36),
@@ -176,36 +148,37 @@ class _PostScreenState extends State<PostScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                title,
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold),
-                              ),
+                              Text(title,
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold)),
                               SizedBox(height: 10),
                               Text('작성자 : $nickname',
                                   style: TextStyle(fontSize: 16)),
                               SizedBox(height: 4),
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '대여 가능 시간 : $rentalTimeRangeText',
-                                    style: TextStyle(fontSize: 14, color: Colors.black),
-                                    overflow: TextOverflow.visible,
-                                    softWrap: false, // 💥 줄바꿈 금지
-                                    maxLines: 1,     // 💥 한 줄로 고정
-                                  ),
+                                  Text('대여 가능 시간 : $rentalTimeRangeText',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black)),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         '대면 여부 : ${isFaceToFace ? '대면' : '비대면'}',
-                                        style: TextStyle(fontSize: 14, color: Colors.black),
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black),
                                       ),
                                       Text(
                                         timeAgoText,
-                                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey),
                                       ),
                                     ],
                                   ),
@@ -217,11 +190,9 @@ class _PostScreenState extends State<PostScreen> {
                       ],
                     ),
                     SizedBox(height: 20),
-
-                    // ✅ 설명 박스
                     Container(
                       width: double.infinity,
-                      height: 150,
+                      height: 425,
                       margin: EdgeInsets.only(top: 8),
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -242,16 +213,15 @@ class _PostScreenState extends State<PostScreen> {
             ),
             // 🔹 하트 아이콘과 채팅하기 버튼
             Container(
-              margin: EdgeInsets.only(top: 10, bottom: 20),
+              margin: EdgeInsets.only(top: 20, bottom: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Icon(Icons.favorite_border, size: 70),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xff97C663),
                       foregroundColor: Colors.white,
-                      minimumSize: Size(260, 60),
+                      minimumSize: Size(350, 60),
                     ).copyWith(
                       shape: MaterialStateProperty.all(
                         RoundedRectangleBorder(
@@ -271,7 +241,6 @@ class _PostScreenState extends State<PostScreen> {
                 ],
               ),
             )
-
           ],
         ),
       ),

@@ -5,7 +5,7 @@ import 'package:rentree/screen/Point/point_first.dart';
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../MyPage/mypage.dart';
-import '../post.dart';
+import '../Post/post_rental.dart';
 import '../Notification/notification.dart';
 import '../Search/search.dart';
 
@@ -146,7 +146,7 @@ class _LikeScreenState extends State<LikeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PostScreen(itemId: item['id']),
+                        builder: (_) => PostRentalScreen(itemId: item['id']),
                       ),
                     );
                   },

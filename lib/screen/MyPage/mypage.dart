@@ -11,7 +11,7 @@ import '../Notification/notification.dart';
 import '../Search/search.dart';
 import '../Point/point_second.dart';
 import '../guide.dart';
-import '../post.dart';
+import '../Post/post_rental.dart';
 import 'mypage_profile.dart';
 import 'mypage_mypost.dart';
 import 'mypage_history1.dart';
@@ -313,7 +313,7 @@ class _MypageScreenState extends State<MypageScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PostScreen(itemId: itemId), // 여기만 바꿈!
+            builder: (_) => PostRentalScreen(itemId: itemId),
           ),
         );
       },

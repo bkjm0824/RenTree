@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../Home/home.dart';
-import '../post.dart';
+import '../Post/post_rental.dart';
 
 class MyPageHistory1 extends StatelessWidget {
 
@@ -80,7 +80,7 @@ class MyPageHistory1 extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostScreen(itemId: item['id']),
+                          builder: (_) => PostRentalScreen(itemId: item['id']),
                         ),
                       );
                     },

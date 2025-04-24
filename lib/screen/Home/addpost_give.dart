@@ -40,25 +40,23 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     }
   }
 
-  Future<String?> uploadImage(XFile imageFile) async {
-    final uri = Uri.parse('http://10.0.2.2:8080/upload-image'); // 백엔드 업로드용 엔드포인트
-    final request = http.MultipartRequest('POST', uri);
+  Future<void> uploadImagesToServer(int rentalItemId) async {
+    for (var imageFile in _imageFiles) {
+      final uri = Uri.parse('http://10.0.2.2:8080/images/api');
+      final request = http.MultipartRequest('POST', uri);
 
-    request.files.add(
-      await http.MultipartFile.fromPath('file', imageFile.path),
-    );
+      request.fields['rentalItemId'] = rentalItemId.toString();
+      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
 
-    final response = await request.send();
-
-    if (response.statusCode == 200) {
-      final resBody = await response.stream.bytesToString();
-      final data = jsonDecode(resBody);
-      return data['url']; // 서버가 이미지 URL 반환하는 경우
-    } else {
-      print('이미지 업로드 실패: ${response.statusCode}');
-      return null;
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        print("이미지 업로드 성공");
+      } else {
+        print("이미지 업로드 실패: ${response.statusCode}");
+      }
     }
   }
+
 
   Future<void> _selectStartTime() async {
     final TimeOfDay? picked = await showTimePicker(
@@ -87,7 +85,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
   }
 
   Future<void> submitGivePost() async {
-    final url = Uri.parse('http://10.0.2.2:8080/rental-item');
+    final rentalUrl = Uri.parse('http://10.0.2.2:8080/rental-item');
 
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
@@ -102,11 +100,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       '필기도구': 4,
       '양도': 5,
     };
-
     final categoryId = categoryMap[category] ?? 1;
 
     final prefs = await SharedPreferences.getInstance();
-    final studentNum = prefs.getString('studentNum'); // 🔑 저장된 학번 불러오기
+    final studentNum = prefs.getString('studentNum');
 
     if (studentNum == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,15 +116,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     final rentalStartTime = '${today}T$startTime';
     final rentalEndTime = '${today}T$endTime';
 
-    // 이미지 업로드 후 URL 수집
-    List<String> photoUrls = [];
-    for (var imageFile in _imageFiles) {
-      final url = await uploadImage(imageFile);
-      if (url != null) {
-        photoUrls.add(url);
-      }
-    }
-
     final body = {
       "studentNum": studentNum,
       "title": title,
@@ -136,18 +124,22 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       "categoryId": categoryId,
       "rentalStartTime": rentalStartTime,
       "rentalEndTime": rentalEndTime,
-      "photoUrls": photoUrls,
     };
 
-    print("보낼 데이터: $body");
-
     final response = await http.post(
-      url,
+      rentalUrl,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
+    print('응답 본문: "${response.body}"');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseData = jsonDecode(response.body);
+      final rentalItemId = responseData['id']; // 글 등록 후 받은 ID
+
+      // 📌 이미지 업로드 함수 호출!
+      await uploadImagesToServer(rentalItemId);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('등록 성공!')),
       );
@@ -159,6 +151,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
