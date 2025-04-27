@@ -13,6 +13,7 @@ import '../Post/post_rental.dart';
 import '../Post/post_request.dart';
 import '../Notification/notification.dart';
 import '../Search/search.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -21,73 +22,111 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  String _selectedFilter = '최신순';
+  List<Map<String, dynamic>> _allItems = [];
 
-  Future<List<Map<String, dynamic>>> fetchItemsWithImage() async {
+  @override
+  void initState() {
+    super.initState();
+    fetchItemsWithImage();
+  }
+
+  Future<void> fetchItemsWithImage() async {
     final res = await http.get(Uri.parse('http://10.0.2.2:8080/home/items'));
 
     if (res.statusCode == 204) {
-      print('✅ 데이터 없음: 빈 리스트 반환');
-      return [];
+      _allItems = [];
+      setState(() {});
+      return;
     } else if (res.statusCode != 200) {
-      print('❌ 서버 응답 실패: ${res.statusCode}');
-      print('❌ 응답 본문: ${res.body}');
       throw Exception('불러오기 실패');
     }
 
-    final items = List<Map<String, dynamic>>.from(jsonDecode(utf8.decode(res.bodyBytes)));
+    final items =
+        List<Map<String, dynamic>>.from(jsonDecode(utf8.decode(res.bodyBytes)));
 
-    // type 태그 붙이기 (서버에서 이미 itemType으로 구분해주고 있을 것)
     final rentalItems = items
         .where((item) => item['itemType'] == 'RENTAL')
         .map((item) => {...item, 'type': 'rental'})
         .toList();
-
     final requestItems = items
         .where((item) => item['itemType'] == 'REQUEST')
         .map((item) => {...item, 'type': 'request'})
         .toList();
 
-    // rental만 이미지 붙이기
     for (var item in rentalItems) {
       final itemId = item['id'];
-
-      final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/$itemId'));
+      final imageRes =
+          await http.get(Uri.parse('http://10.0.2.2:8080/images/api/$itemId'));
       if (imageRes.statusCode == 200) {
         final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (images.isNotEmpty) {
           item['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
-        } else {
-          print('❌ ${item['title']} - 이미지 없음');
         }
-      } else {
-        print('❗${item['title']} - 이미지 요청 실패: ${imageRes.statusCode}');
       }
+      item['isLiked'] = false; // 🔥 추가
+    }
+    for (var item in requestItems) {
+      item['isLiked'] = false; // 🔥 추가
     }
 
-    final allItems = [...rentalItems, ...requestItems];
-    allItems.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
-
-    return allItems;
+    _allItems = [...rentalItems, ...requestItems];
+    _allItems.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+    setState(() {});
   }
 
+  List<Map<String, dynamic>> getFilteredItems() {
+    if (_selectedFilter == '최신순') {
+      return _allItems;
+    } else if (_selectedFilter == '대여글') {
+      return _allItems.where((item) => item['type'] == 'rental').toList();
+    } else if (_selectedFilter == '요청글') {
+      return _allItems.where((item) => item['type'] == 'request').toList();
+    }
+    return _allItems;
+  }
 
+  String formatTimeDifference(DateTime createdAt) {
+    final now = DateTime.now();
+    final diff = now.difference(createdAt);
+
+    if (diff.inMinutes < 1) return '방금 전';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+    if (diff.inHours < 24) return '${diff.inHours}시간 전';
+    if (diff.inDays < 30) return '${diff.inDays}일 전';
+
+    final months = diff.inDays ~/ 30;
+    if (months < 12) return '${months}달 전';
+
+    return '${createdAt.year}.${createdAt.month.toString().padLeft(2, '0')}.${createdAt.day.toString().padLeft(2, '0')}';
+  }
+
+  String formatDateTime(String dateTimeStr) {
+    final dt = DateTime.parse(dateTimeStr);
+    return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
 
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => HomeScreen()));
         break;
       case 1:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => LikeScreen()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => LikeScreen()));
         break;
       case 2:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => PointedScreen()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => PointedScreen()));
         break;
       case 3:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => ChatScreen()));
         break;
       case 4:
-        Navigator.push(context, MaterialPageRoute(builder: (_) => MypageScreen()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => MypageScreen()));
         break;
     }
   }
@@ -110,7 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pop(context);
                 _navigateToScreen(RequestScreen());
               },
-              child: Text("대여 요청하기", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              child: Text("대여 요청하기",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -123,7 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pop(context);
                 _navigateToScreen(PostGiveScreen());
               },
-              child: Text("물품 등록하기", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              child: Text("물품 등록하기",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -167,7 +208,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xff97C663),
                       iconSize: 30,
                       padding: EdgeInsets.only(left: 10),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationScreen())),
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => NotificationScreen())),
                     ),
                     Image.asset('assets/rentree.png', height: 40),
                     IconButton(
@@ -175,7 +219,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xff97C663),
                       iconSize: 30,
                       padding: EdgeInsets.only(right: 10),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SearchScreen())),
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => SearchScreen())),
                     ),
                   ],
                 ),
@@ -184,105 +229,139 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                DropdownButton2<String>(
+                  value: _selectedFilter,
+                  items: ['최신순', '대여글', '요청글'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFilter = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: fetchItemsWithImage(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('에러 발생: ${snapshot.error}'));
-                } else if (snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text(
-                      '아직 글이 등록되지 않았습니다',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
-                } else {
-                  final items = snapshot.data!;
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    itemCount: items.length,
+            child: _allItems.isEmpty
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    itemCount: getFilteredItems().length,
                     itemBuilder: (context, index) {
-                      final item = items[index];
+                      final item = getFilteredItems()[index];
+                      final createdAt = DateTime.parse(item['createdAt']);
+                      final timeAgo = formatTimeDifference(createdAt);
                       final imageUrl = item['imageUrl'];
 
                       return GestureDetector(
                         onTap: () {
                           if (item['type'] == 'rental') {
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PostRentalScreen(itemId: item['id']),
-                              ),
-                            );
-                          } else if (item['type'] == 'request') {
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        PostRentalScreen(itemId: item['id'])));
+                          } else {
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PostRequestScreen(itemId: item['id']),
-                              ),
-                            );
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        PostRequestScreen(itemId: item['id'])));
                           }
                         },
                         child: Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10.0),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 10.0),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (item['type'] == 'rental')
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: imageUrl != null && imageUrl.toString().isNotEmpty
-                                          ? Image.network(
-                                        imageUrl,
-                                        width: 110,
-                                        height: 110,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          print('❗ 이미지 로딩 실패: $imageUrl');
-                                          print('❗ 에러: $error');
-                                          return Image.asset(
-                                            'assets/box.png',
-                                            width: 110,
-                                            height: 110,
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                          : Image.asset(
-                                        'assets/box.png',
-                                        width: 110,
-                                        height: 110,
-                                        fit: BoxFit.cover,
-                                      ),
+                                  Container(
+                                    width: 90,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffEBEBEB),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  if (item['type'] == 'rental') SizedBox(width: 16),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: item['type'] == 'rental'
+                                          ? (imageUrl != null &&
+                                                  imageUrl.toString().isNotEmpty
+                                              ? Image.network(imageUrl,
+                                                  fit: BoxFit.cover)
+                                              : Image.asset('assets/box.png',
+                                                  fit: BoxFit.cover))
+                                          : Image.asset(
+                                              'assets/requestIcon.png',
+                                              fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
                                   Expanded(
+                                    flex: 3,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(item['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                        Text(item['title'],
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16)),
                                         SizedBox(height: 4),
-                                        Text(item['description'], style: TextStyle(color: Colors.grey[700])),
+                                        Text(
+                                          '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                                          style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 13),
+                                        ),
                                         SizedBox(height: 8),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Row(
-                                              children: [
-                                                Icon(Icons.favorite_border, size: 20, color: Colors.red),
-                                                SizedBox(width: 5),
-                                                Text('좋아요'),
-                                              ],
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  item['isLiked'] =
+                                                      !(item['isLiked'] ??
+                                                          false);
+                                                });
+                                              },
+                                              child: Icon(
+                                                item['isLiked'] == true
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                size: 20,
+                                                color: item['isLiked'] == true
+                                                    ? Colors.red
+                                                    : Colors.grey,
+                                              ),
                                             ),
-                                            Text('3시간 전', style: TextStyle(color: Colors.grey)),
+                                            SizedBox(width: 5),
                                           ],
                                         ),
                                       ],
                                     ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Column(
+                                    children: [
+                                      Text(timeAgo,
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 13)),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -292,16 +371,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       );
                     },
-                  );
-                }
-              },
-            ),
-          )
+                  ),
+          ),
         ],
       ),
-
       bottomNavigationBar: Container(
-        color: Color(0xffEBEBEB), // 배경색 유지
+        color: Color(0xffEBEBEB),
         padding: const EdgeInsets.only(bottom: 5),
         child: BottomNavigationBar(
           backgroundColor: Color(0xffEBEBEB),
@@ -331,7 +406,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: _showWriteScreen,
         backgroundColor: Color(0xff97C663),
