@@ -34,6 +34,13 @@ public class RentalItemService {
         return rentalItemRepository.findAll(sort); // 페이징 없이 전체 데이터 정렬된 리스트 반환
     }
 
+    // LikeController
+    @Transactional(readOnly = true)
+    public RentalItem getRentalItemById(Long id) {
+        return rentalItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 렌탈 아이템을 찾을 수 없습니다: " + id));
+    }
+
     @Transactional
     public RentalItem saveRentalItem(RentalItemCreateRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
