@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Post/post_rental.dart';
-
-enum SearchType { rental, request }
+import '../Post/post_request.dart';
 
 class SearchResultScreen extends StatefulWidget {
   final String searchQuery;
@@ -15,44 +14,52 @@ class SearchResultScreen extends StatefulWidget {
   _SearchResultScreenState createState() => _SearchResultScreenState();
 }
 
-class _SearchResultScreenState extends State<SearchResultScreen>
-    with TickerProviderStateMixin {
+String formatTimeDifference(DateTime createdAt) {
+  final now = DateTime.now();
+  final diff = now.difference(createdAt);
+
+  if (diff.inMinutes < 1) return '방금 전';
+  if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+  if (diff.inHours < 24) return '${diff.inHours}시간 전';
+  if (diff.inDays < 30) return '${diff.inDays}일 전';
+
+  final months = diff.inDays ~/ 30;
+  if (months < 12) return '${months}달 전';
+
+  return '${createdAt.year}.${createdAt.month.toString().padLeft(2, '0')}.${createdAt.day.toString().padLeft(2, '0')}';
+}
+
+String formatDateTime(String dateTimeStr) {
+  final dt = DateTime.parse(dateTimeStr);
+  return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+}
+
+class _SearchResultScreenState extends State<SearchResultScreen> {
   late TextEditingController _searchController;
-  late TabController _tabController;
-  List<dynamic> _results = [];
+  List<Map<String, dynamic>> _results = [];
+  Set<int> likedItemIds = {}; // 좋아요 누른 아이디 저장
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.searchQuery);
-    _tabController = TabController(length: 2, vsync: this);
-
-    _saveSearchQuery(widget.searchQuery);
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging == false) {
-        _fetchResults(_searchController.text);
-      }
-    });
-
-    _fetchResults(widget.searchQuery);
+    _loadLikedItems().then((_) => _fetchResults(widget.searchQuery));
   }
 
-  Future<void> _saveSearchQuery(String query) async {
+  Future<void> _loadLikedItems() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> recentSearches =
-        prefs.getStringList('searchHistory') ?? [];
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
 
-    recentSearches.remove(query);
-    recentSearches.insert(0, query);
-
-    if (recentSearches.length > 10) {
-      recentSearches.removeLast();
+    final res = await http
+        .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+    if (res.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
+      likedItemIds = data.map<int>((e) => e['rentalItemId'] as int).toSet();
     }
-
-    await prefs.setStringList('searchHistory', recentSearches);
   }
 
-  void _fetchResults(String keyword) async {
+  Future<void> _fetchResults(String keyword) async {
     final rentalUrl =
         Uri.parse('http://10.0.2.2:8080/rental-item/search?keyword=$keyword');
     final requestUrl =
@@ -62,220 +69,225 @@ class _SearchResultScreenState extends State<SearchResultScreen>
     final requestResponse = await http.get(requestUrl);
 
     final rentalList = rentalResponse.statusCode == 200
-        ? json.decode(utf8.decode(rentalResponse.bodyBytes))
+        ? List<Map<String, dynamic>>.from(
+            jsonDecode(utf8.decode(rentalResponse.bodyBytes)))
         : [];
 
     final requestList = requestResponse.statusCode == 200
-        ? json.decode(utf8.decode(requestResponse.bodyBytes))
+        ? List<Map<String, dynamic>>.from(
+            jsonDecode(utf8.decode(requestResponse.bodyBytes)))
         : [];
 
-    // 탭 자동 전환
-    if (rentalList.isEmpty && requestList.isNotEmpty) {
-      _tabController.index = 0; // 대여 요청 탭
-      setState(() {
-        _results = requestList;
-      });
-    } else if (requestList.isEmpty && rentalList.isNotEmpty) {
-      _tabController.index = 1; // 물품 대여 탭
-      setState(() {
-        _results = rentalList;
-      });
+    // rental 글에 좋아요 상태 추가
+    for (var item in rentalList) {
+      item['isLiked'] = likedItemIds.contains(item['id']);
+      item['type'] = 'rental';
+      item['likeCount'] = await _fetchLikeCount(item['id']);
+    }
+
+    for (var item in requestList) {
+      item['type'] = 'request';
+    }
+
+    setState(() {
+      _results = [...rentalList, ...requestList];
+    });
+  }
+
+  Future<int> _fetchLikeCount(int rentalItemId) async {
+    final url =
+        Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
+    final res = await http.get(url);
+    if (res.statusCode == 200) {
+      return int.parse(res.body);
     } else {
-      // 현재 탭 기준으로 결과 설정
-      setState(() {
-        _results = _tabController.index == 1 ? rentalList : requestList;
-      });
+      return 0;
     }
   }
 
-  void _navigateToSearchResult(String query) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchResultScreen(searchQuery: query),
-      ),
-    );
+  Future<void> _toggleLike(Map<String, dynamic> item) async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=${item['id']}');
+    final res = await http.post(url);
+
+    if (res.statusCode == 200) {
+      setState(() {
+        item['isLiked'] = !(item['isLiked'] ?? false);
+        item['likeCount'] =
+            (item['likeCount'] ?? 0) + (item['isLiked'] ? 1 : -1);
+      });
+    } else {
+      print('좋아요 토글 실패');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: Color(0xffF4F1F1),
-        body: SafeArea(
-          child: Column(
-            children: [
-              SizedBox(height: 15),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new),
-                    color: Color(0xff97C663),
-                    iconSize: 30,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: Color(0xffEBEBEB),
-                        borderRadius: BorderRadius.circular(30),
+    return Scaffold(
+      backgroundColor: Color(0xffF4F1F1),
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: 15),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new),
+                  color: Color(0xff97C663),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Color(0xffEBEBEB),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: '검색어를 입력하세요',
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                       ),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: '검색어를 입력하세요.',
-                          hintStyle: TextStyle(color: Color(0xFF848484)),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 20),
-                        ),
-                        onSubmitted: (query) {
-                          _navigateToSearchResult(query);
-                        },
-                      ),
+                      onSubmitted: (query) {
+                        _fetchResults(query);
+                      },
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.search, color: Color(0xff97C663)),
-                    onPressed: () {
-                      _navigateToSearchResult(_searchController.text);
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-
-              // 🔹 TabBar UI
-              Container(
-                color: Color(0xffF4F1F1),
-                child: TabBar(
-                  controller: _tabController,
-                  indicatorColor: Color(0xff97C663),
-                  indicatorWeight: 1.0,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: Color(0xff97C663),
-                  unselectedLabelColor: Color(0xff918B8B),
-                  labelStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  tabs: [
-                    Tab(text: '대여 요청'),
-                    Tab(text: '물품 대여'),
-                  ],
                 ),
-              ),
-              Container(height: 1, color: Colors.grey[300]),
+                IconButton(
+                  icon: Icon(Icons.search, color: Color(0xff97C663)),
+                  onPressed: () {
+                    _fetchResults(_searchController.text);
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: _results.isEmpty
+                  ? Center(
+                      child: Text('검색 결과가 없습니다.',
+                          style: TextStyle(color: Colors.grey)))
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      itemCount: _results.length,
+                      itemBuilder: (context, index) {
+                        final item = _results[index];
+                        final createdAt = DateTime.parse(item['createdAt']);
+                        final timeAgo = formatTimeDifference(createdAt);
+                        final imageUrl = item['imageUrl'];
 
-              // 🔥 리스트뷰
-              Expanded(
-                child: _results.isEmpty
-                    ? Center(
-                        child: Text('검색 결과가 없습니다',
-                            style: TextStyle(color: Colors.grey)))
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: _results.length,
-                        itemBuilder: (context, index) {
-                          final item = _results[index];
-                          final title = item['title'] ?? '';
-                          final description = item['description'] ?? '';
-                          final imageUrl = item['imageUrl'] ?? 'assets/box.png';
-                          final itemId = item['id'];
-
-                          return GestureDetector(
-                            onTap: () {
+                        return GestureDetector(
+                          onTap: () {
+                            if (item['type'] == 'rental') {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => PostRentalScreen(itemId: item['id']),
+                                  builder: (_) =>
+                                      PostRentalScreen(itemId: item['id']),
                                 ),
                               );
-                            },
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          'assets/box.png',
-                                          width: 110,
-                                          height: 110,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Container(
-                                              width: 110,
-                                              height: 110,
-                                              color: Colors.grey[300],
-                                              child: Icon(
-                                                  Icons.image_not_supported,
-                                                  color: Colors.grey),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(title,
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16)),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              description,
-                                              style: TextStyle(
-                                                  color: Colors.grey[700]),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 2,
-                                            ),
-                                            SizedBox(height: 8),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.favorite_border,
-                                                        size: 20,
-                                                        color: Colors.red),
-                                                    SizedBox(width: 5),
-                                                    Text('좋아요'),
-                                                  ],
-                                                ),
-                                                Text('3시간 전',
-                                                    style: TextStyle(
-                                                        color: Colors.grey)),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      PostRequestScreen(itemId: item['id']),
                                 ),
-                                Divider(height: 1, color: Colors.grey[300]),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
+                              );
+                            }
+                          },
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: item['type'] == 'rental'
+                                          ? Image.asset('assets/box.png',
+                                              width: 90,
+                                              height: 90,
+                                              fit: BoxFit.cover)
+                                          : Image.asset(
+                                              'assets/requestIcon.png',
+                                              width: 90,
+                                              height: 90,
+                                              fit: BoxFit.cover),
+                                    ),
+                                    SizedBox(width: 20),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(item['title'] ?? '',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16)),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                                            style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 13),
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              if (item['type'] == 'rental') ...[
+                                                GestureDetector(
+                                                  onTap: () =>
+                                                      _toggleLike(item),
+                                                  child: Icon(
+                                                    item['isLiked']
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    size: 20,
+                                                    color: item['isLiked']
+                                                        ? Colors.red
+                                                        : Colors.grey,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                    '${item['likeCount'] ?? 0}'),
+                                              ]
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Column(
+                                      children: [
+                                        Text(timeAgo,
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 13)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Divider(height: 1, color: Colors.grey[300]),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );

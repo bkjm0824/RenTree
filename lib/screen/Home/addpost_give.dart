@@ -18,7 +18,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
 
   final ImagePicker _picker = ImagePicker();
 
-
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
@@ -46,7 +45,8 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['rentalItemId'] = rentalItemId.toString();
-      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+      request.files
+          .add(await http.MultipartFile.fromPath('image', imageFile.path));
 
       final response = await request.send();
       if (response.statusCode == 200) {
@@ -56,7 +56,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       }
     }
   }
-
 
   Future<void> _selectStartTime() async {
     final TimeOfDay? picked = await showTimePicker(
@@ -120,7 +119,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       "studentNum": studentNum,
       "title": title,
       "description": description,
-      "isFaceToFace": isFaceToFace,
+      "isFaceToFace": isFaceToFace, // ✅ true/false 그대로
       "categoryId": categoryId,
       "rentalStartTime": rentalStartTime,
       "rentalEndTime": rentalEndTime,
@@ -132,12 +131,12 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       body: jsonEncode(body),
     );
     print('응답 본문: "${response.body}"');
-
+    print('보내는 body: ${jsonEncode(body)}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       final responseData = jsonDecode(response.body);
       final rentalItemId = responseData['id']; // 글 등록 후 받은 ID
 
-      // 📌 이미지 업로드 함수 호출!
+      // 📌 이미지 업로드 호출
       await uploadImagesToServer(rentalItemId);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -151,7 +150,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -169,12 +167,15 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                   children: [
                     Expanded(
                       child: SingleChildScrollView(
-                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: 70),
-                            Text('대여 물품 등록하기', style: TextStyle(fontSize: 33, fontWeight: FontWeight.bold)),
+                            Text('대여 물품 등록하기',
+                                style: TextStyle(
+                                    fontSize: 33, fontWeight: FontWeight.bold)),
                             SizedBox(height: 30),
                             Container(
                               decoration: BoxDecoration(
@@ -183,26 +184,34 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 15, horizontal: 20),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text('이미지를 첨부하면', style: TextStyle(fontSize: 20)),
-                                        Text('대여가 원활해집니다', style: TextStyle(fontSize: 20)),
+                                        Text('이미지를 첨부하면',
+                                            style: TextStyle(fontSize: 20)),
+                                        Text('대여가 원활해집니다',
+                                            style: TextStyle(fontSize: 20)),
                                         SizedBox(height: 3),
-                                        Text('최대 5장 첨부 가능', style: TextStyle(fontSize: 11)),
+                                        Text('최대 5장 첨부 가능',
+                                            style: TextStyle(fontSize: 11)),
                                       ],
                                     ),
                                     Column(
                                       children: [
                                         IconButton(
-                                          icon: Icon(Icons.camera_alt, size: 40),
+                                          icon:
+                                              Icon(Icons.camera_alt, size: 40),
                                           onPressed: _pickImage,
                                         ),
-                                        Text('${_imageFiles.length}/5', style: TextStyle(fontSize: 14)),
+                                        Text('${_imageFiles.length}/5',
+                                            style: TextStyle(fontSize: 14)),
                                       ],
                                     ),
                                   ],
@@ -218,27 +227,33 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                 hintText: '글 제목',
                                 isDense: true,
                                 hintStyle: TextStyle(fontSize: 14),
-                                contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 20),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(width: 1, color: Color(0xFF888686)),
+                                  borderSide: BorderSide(
+                                      width: 1, color: Color(0xFF888686)),
                                 ),
                               ),
                             ),
                             SizedBox(height: 10),
                             Row(
                               children: [
-                                Text('카테고리를 선택해주세요 : ', style: TextStyle(fontSize: 16)),
+                                Text('카테고리를 선택해주세요 : ',
+                                    style: TextStyle(fontSize: 16)),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
                                     value: selectedCategory,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       isDense: true,
                                       filled: true,
                                       fillColor: Color(0xffEBEBEB),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
                                     ),
                                     onChanged: (String? newValue) {
                                       setState(() {
@@ -246,11 +261,20 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                         isTransfer = newValue == '양도';
                                       });
                                     },
-                                    items: <String>['전자제품', '교재', '생활용품', '필기도구', '양도']
-                                        .map<DropdownMenuItem<String>>((String value) {
+                                    items: <String>[
+                                      '전자제품',
+                                      '교재',
+                                      '생활용품',
+                                      '필기도구',
+                                      '양도'
+                                    ].map<DropdownMenuItem<String>>(
+                                        (String value) {
                                       return DropdownMenuItem<String>(
                                         value: value,
-                                        child: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                                        child: Text(value,
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500)),
                                       );
                                     }).toList(),
                                   ),
@@ -275,10 +299,16 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                             hintText: '시작 시간',
                                             hintStyle: TextStyle(fontSize: 14),
                                             isDense: true,
-                                            contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 5,
+                                                    horizontal: 15),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                              borderSide: BorderSide(width: 1, color: Color(0xFF888686)),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              borderSide: BorderSide(
+                                                  width: 1,
+                                                  color: Color(0xFF888686)),
                                             ),
                                           ),
                                         ),
@@ -300,10 +330,16 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                             isDense: true,
                                             hintText: '종료 시간',
                                             hintStyle: TextStyle(fontSize: 14),
-                                            contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 5,
+                                                    horizontal: 15),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                              borderSide: BorderSide(width: 1, color: Color(0xFF888686)),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              borderSide: BorderSide(
+                                                  width: 1,
+                                                  color: Color(0xFF888686)),
                                             ),
                                           ),
                                         ),
@@ -327,13 +363,15 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                   filled: true,
                                   fillColor: Color(0xffEBEBEB),
                                   hintText: '상품에 대한 설명을 자세하게 적어주세요.',
-                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 15),
                                   alignLabelWithHint: true,
                                   isDense: true,
                                   hintStyle: TextStyle(fontSize: 14),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(width: 1, color: Color(0xFF888686)),
+                                    borderSide: BorderSide(
+                                        width: 1, color: Color(0xFF888686)),
                                   ),
                                 ),
                               ),
@@ -344,7 +382,11 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Text('대면', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xff606060))),
+                                    Text('대면',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xff606060))),
                                     Checkbox(
                                       value: isFaceToFace,
                                       activeColor: Color(0xff97C663),
@@ -364,7 +406,11 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                 SizedBox(width: 5),
                                 Row(
                                   children: [
-                                    Text('비대면', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xff606060))),
+                                    Text('비대면',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xff606060))),
                                     Checkbox(
                                       value: isNonFaceToFace,
                                       activeColor: Color(0xff97C663),
@@ -401,7 +447,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                         ),
                         child: Text(
                           'RenTree에 글 올리기',
-                          style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
