@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../Point/point_first.dart';
@@ -41,6 +42,21 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (res.statusCode != 200) {
       throw Exception('불러오기 실패');
     }
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+
+// ✅ 추가 : 내가 누른 좋아요 목록 받아오기
+    Set<int> likedRentalItemIds = {};
+    if (studentNum != null) {
+      final likeRes = await http
+          .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+      if (likeRes.statusCode == 200) {
+        final List<dynamic> likeData =
+            jsonDecode(utf8.decode(likeRes.bodyBytes));
+        likedRentalItemIds =
+            likeData.map<int>((e) => e['rentalItemId'] as int).toSet();
+      }
+    }
 
     final items =
         List<Map<String, dynamic>>.from(jsonDecode(utf8.decode(res.bodyBytes)));
@@ -56,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (var item in rentalItems) {
       final itemId = item['id'];
+
       final imageRes =
           await http.get(Uri.parse('http://10.0.2.2:8080/images/api/$itemId'));
       if (imageRes.statusCode == 200) {
@@ -64,15 +81,54 @@ class _HomeScreenState extends State<HomeScreen> {
           item['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
         }
       }
-      item['isLiked'] = false; // 🔥 추가
+
+      // 🔥 추가: 좋아요 여부 체크
+      item['isLiked'] = likedRentalItemIds.contains(itemId);
+
+      item['likeCount'] = await fetchLikeCount(itemId);
     }
+
     for (var item in requestItems) {
-      item['isLiked'] = false; // 🔥 추가
+      item['isLiked'] = false;
     }
 
     _allItems = [...rentalItems, ...requestItems];
     _allItems.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
     setState(() {});
+  }
+
+  Future<void> toggleLike(Map<String, dynamic> item) async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=${item['id']}');
+    final res = await http.post(url);
+
+    if (res.statusCode == 200) {
+      setState(() {
+        item['isLiked'] = !(item['isLiked'] ?? false);
+        item['likeCount'] =
+            (item['likeCount'] ?? 0) + (item['isLiked'] ? 1 : -1);
+      });
+    } else {
+      print('❌ 좋아요 토글 실패: ${res.statusCode} ${res.body}');
+    }
+  }
+
+  Future<int> fetchLikeCount(int rentalItemId) async {
+    //좋아요 수 가져오기
+    final url =
+        Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
+    final res = await http.get(url);
+
+    if (res.statusCode == 200) {
+      return int.parse(res.body);
+    } else {
+      print('❌ 좋아요 개수 가져오기 실패: ${res.statusCode}');
+      return 0;
+    }
   }
 
   List<Map<String, dynamic>> getFilteredItems() {
@@ -330,27 +386,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                         SizedBox(height: 8),
                                         Row(
                                           children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  item['isLiked'] =
-                                                      !(item['isLiked'] ??
-                                                          false);
-                                                });
-                                              },
-                                              child: Icon(
-                                                item['isLiked'] == true
-                                                    ? Icons.favorite
-                                                    : Icons.favorite_border,
-                                                size: 20,
-                                                color: item['isLiked'] == true
-                                                    ? Colors.red
-                                                    : Colors.grey,
+                                            if (item['type'] == 'rental') ...[
+                                              GestureDetector(
+                                                onTap: () => toggleLike(item),
+                                                child: Icon(
+                                                  item['isLiked'] == true
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  size: 20,
+                                                  color: item['isLiked'] == true
+                                                      ? Colors.red
+                                                      : Colors.grey,
+                                                ),
                                               ),
-                                            ),
-                                            SizedBox(width: 5),
+                                              SizedBox(width: 5),
+                                              Text('${item['likeCount'] ?? 0}'),
+                                            ],
                                           ],
-                                        ),
+                                        )
                                       ],
                                     ),
                                   ),
