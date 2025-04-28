@@ -1,5 +1,5 @@
-// 물품 대여 글 상세
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -24,16 +24,22 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   String timeAgoText = '';
   bool isLoading = true;
 
+  bool isLiked = false;
+  int likeCount = 0;
+  String? studentNum;
+
   @override
   void initState() {
     super.initState();
     fetchItemDetail();
+    fetchLikeStatus();
+    fetchLikeCount();
   }
 
   String formatTo24Hour(DateTime time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
-    return minute == '00' ? '${hour}시' : '${hour}시 ${minute}분';
+    return '$hour:$minute';
   }
 
   Future<void> fetchItemDetail() async {
@@ -44,7 +50,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
 
-        final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/${widget.itemId}'));
+        final imageRes = await http
+            .get(Uri.parse('http://10.0.2.2:8080/images/api/${widget.itemId}'));
         if (imageRes.statusCode == 200) {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
@@ -62,11 +69,10 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
           createdAt = DateTime.parse(data['createdAt']);
 
           rentalTimeRangeText =
-          '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
+              '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
 
           final now = DateTime.now();
           final difference = now.difference(createdAt!);
-
           if (difference.inMinutes < 1) {
             timeAgoText = '방금 전';
           } else if (difference.inMinutes < 60) {
@@ -85,6 +91,52 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     }
   }
 
+  Future<void> fetchLikeStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final url = Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum');
+    final res = await http.get(url);
+
+    if (res.statusCode == 200) {
+      final List<dynamic> likedList = jsonDecode(utf8.decode(res.bodyBytes));
+      final likedItemIds = likedList.map((e) => e['rentalItemId']).toList();
+      setState(() {
+        isLiked = likedItemIds.contains(widget.itemId);
+      });
+    }
+  }
+
+  Future<void> fetchLikeCount() async {
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/likes/rentalItem/${widget.itemId}/count');
+    final res = await http.get(url);
+
+    if (res.statusCode == 200) {
+      setState(() {
+        likeCount = int.parse(res.body);
+      });
+    }
+  }
+
+  Future<void> toggleLike() async {
+    if (studentNum == null) return;
+
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=${widget.itemId}');
+    final res = await http.post(url);
+
+    if (res.statusCode == 200) {
+      setState(() {
+        isLiked = !isLiked;
+        likeCount += isLiked ? 1 : -1;
+      });
+    } else {
+      print('❌ 좋아요 토글 실패');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,185 +144,191 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SafeArea(
-        child: Column(
-          children: [
-            Container(
-              color: Color(0xffF4F1F1),
               child: Column(
                 children: [
-                  SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // 상단바
+                  // 이미지 + 뒤로가기 버튼을 Stack으로 묶기
+                  Stack(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new),
-                        color: Color(0xff918B8B),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                      // 1. 배경 이미지
+                      Container(
+                        width: double.infinity,
+                        height: 340,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                          color: Colors.grey[300],
+                        ),
+                        child: ClipRRect(
+                          child: imageUrl.isNotEmpty
+                              ? Image.network(
+                                  imageUrl,
+                                  width: double.infinity,
+                                  height: 250,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  color: Colors.grey[300],
+                                  child: Icon(Icons.image_not_supported,
+                                      color: Colors.grey),
+                                ),
+                        ),
+                      ),
+
+                      // 2. 상단바 (투명 배경)
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back_ios_new,
+                              color: Colors.white, size: 30), // 버튼 색상 흰색 추천!
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
-                ],
-              ),
-            ),
 
-            Container(
-              width: 450,
-              height: 250,
-              margin: EdgeInsets.all(16),
-              child: imageUrl.isNotEmpty
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  width: 450,
-                  height: 300,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: Icon(Icons.image_not_supported, color: Colors.grey),
-                    );
-                  },
-                ),
-              )
-                  : Container(
-                color: Colors.grey[300],
-                child: Icon(Icons.image_not_supported, color: Colors.grey),
-              ),
-            ),
-
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(28),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Color(0xffE7E9C8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage:
-                          AssetImage('assets/Profile/hosick.png'),
-                          backgroundColor: Colors.white,
-                        ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  // 본문
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                      padding: EdgeInsets.fromLTRB(15, 15, 15, 5),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Color(0xffE7E9C8),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10),
+                          Row(
                             children: [
-                              Text(title,
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundImage:
+                                    AssetImage('assets/Profile/hosick.png'),
+                                backgroundColor: Colors.white,
+                              ),
+                              SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(title,
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 10),
+                                    Text('작성자 : $nickname',
+                                        style: TextStyle(fontSize: 14)),
+                                    SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        Text('대여시간 : $rentalTimeRangeText',
+                                            style: TextStyle(fontSize: 14)),
+                                        Text(' | ',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Color(0xff747474),
+                                                fontWeight: FontWeight.bold)),
+                                        Text('${isFaceToFace ? '대면' : '비대면'}',
+                                            style: TextStyle(fontSize: 14)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 25),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 210,
+                            child: Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  description,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(' 관심 $likeCount',
                                   style: TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 14, color: Color(0xff747474))),
+                              Text(' | ',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xff747474),
                                       fontWeight: FontWeight.bold)),
-                              SizedBox(height: 10),
-                              Text('작성자 : $nickname',
-                                  style: TextStyle(fontSize: 16)),
-                              SizedBox(height: 4),
-                              Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-                                  Text('대여 가능 시간 : $rentalTimeRangeText',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black)),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '대면 여부 : ${isFaceToFace ? '대면' : '비대면'}',
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black),
-                                      ),
-                                      Text(
-                                        timeAgoText,
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              Text(timeAgoText,
+                                  style: TextStyle(
+                                      fontSize: 14, color: Color(0xff747474))),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 하트 + 채팅하기
+                  Container(
+                    margin: EdgeInsets.only(top: 3, bottom: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        GestureDetector(
+                          onTap: toggleLike,
+                          child: Column(
+                            children: [
+                              Icon(
+                                isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 60,
+                                color: isLiked ? Colors.red : Colors.grey,
                               ),
                             ],
                           ),
                         ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff97C663),
+                            foregroundColor: Colors.white,
+                            minimumSize: Size(270, 60),
+                          ).copyWith(
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            // TODO: 채팅하기 기능 추가
+                          },
+                          child: Text(
+                            "채팅하기",
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ],
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      width: double.infinity,
-                      height: 150,
-                      margin: EdgeInsets.only(top: 8),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          description,
-                          style: TextStyle(
-                              fontSize: 16, color: Colors.black87),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // 🔹 하트 아이콘과 채팅하기 버튼
-            Container(
-              margin: EdgeInsets.only(top: 20, bottom: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(Icons.favorite_border, size: 70),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff97C663),
-                      foregroundColor: Colors.white,
-                      minimumSize: Size(260, 60),
-                    ).copyWith(
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      // TODO: 채팅하기 버튼 기능 추가
-                    },
-                    child: Text(
-                      "채팅하기",
-                      style: TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  )
                 ],
               ),
-            )
-          ],
-        ),
-      ),
+            ),
     );
   }
 }

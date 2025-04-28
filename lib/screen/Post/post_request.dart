@@ -33,7 +33,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   String formatTo24Hour(DateTime time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
-    return minute == '00' ? '${hour}시' : '${hour}시 ${minute}분';
+    return '$hour:$minute';
   }
 
   Future<void> fetchItemDetail() async {
@@ -59,7 +59,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           createdAt = DateTime.parse(data['createdAt']);
 
           rentalTimeRangeText =
-          '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
+              '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
 
           final now = DateTime.now();
           final difference = now.difference(createdAt!);
@@ -92,158 +92,145 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SafeArea(
-        child: Column(
-          children: [
-            Container(
-              color: Color(0xffF4F1F1),
               child: Column(
                 children: [
-                  SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new),
-                        color: Color(0xff918B8B),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                ],
-              ),
-            ),
-
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(36),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Color(0xffE7E9C8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  Container(
+                    color: Color(0xffF4F1F1),
+                    child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage:
-                          AssetImage('assets/Profile/hosick.png'),
-                          backgroundColor: Colors.white,
+                        SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_new),
+                              color: Color(0xff918B8B),
+                              iconSize: 30,
+                              padding: EdgeInsets.only(left: 10),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.fromLTRB(10, 30, 10, 10),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(title,
-                                  style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 10),
-                              Text('작성자 : $nickname',
-                                  style: TextStyle(fontSize: 16)),
-                              SizedBox(height: 4),
-                              Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-                                  Text('대여 가능 시간 : $rentalTimeRangeText',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black)),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '대면 여부 : ${isFaceToFace ? '대면' : '비대면'}',
+                              SizedBox(width: 20),
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundImage:
+                                    AssetImage('assets/Profile/hosick.png'),
+                                backgroundColor: Colors.white,
+                              ),
+                              SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(title,
                                         style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black),
-                                      ),
-                                      Text(
-                                        timeAgoText,
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 10),
+                                    Text('작성자 : $nickname',
+                                        style: TextStyle(fontSize: 16)),
+                                    SizedBox(height: 4),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text('대여시간 : $rentalTimeRangeText',
+                                                style: TextStyle(fontSize: 14)),
+                                            Text(' | ',
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Color(0xff747474),
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(
+                                                '${isFaceToFace ? '대면' : '비대면'}',
+                                                style: TextStyle(fontSize: 14)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
+                          ),
+                          SizedBox(height: 20),
+                          Container(
+                            width: double.infinity,
+                            height: 425,
+                            margin: EdgeInsets.only(top: 8),
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: SingleChildScrollView(
+                              child: Text(
+                                description,
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.black87),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 10, bottom: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff97C663),
+                            foregroundColor: Colors.white,
+                            minimumSize: Size(350, 60),
+                          ).copyWith(
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            // TODO: 채팅하기 버튼 기능 추가
+                          },
+                          child: Text(
+                            "채팅하기",
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      width: double.infinity,
-                      height: 425,
-                      margin: EdgeInsets.only(top: 8),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          description,
-                          style: TextStyle(
-                              fontSize: 16, color: Colors.black87),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // 🔹 하트 아이콘과 채팅하기 버튼
-            Container(
-              margin: EdgeInsets.only(top: 20, bottom: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff97C663),
-                      foregroundColor: Colors.white,
-                      minimumSize: Size(350, 60),
-                    ).copyWith(
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      // TODO: 채팅하기 버튼 기능 추가
-                    },
-                    child: Text(
-                      "채팅하기",
-                      style: TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  )
                 ],
               ),
-            )
-          ],
-        ),
-      ),
+            ),
     );
   }
 }
