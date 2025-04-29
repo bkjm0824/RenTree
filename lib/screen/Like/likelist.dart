@@ -28,6 +28,11 @@ class _LikeScreenState extends State<LikeScreen> {
     loadLikedItems();
   }
 
+  String formatDateTime(String dateTimeStr) {
+    final dt = DateTime.parse(dateTimeStr);
+    return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
   Future<void> loadLikedItems() async {
     final prefs = await SharedPreferences.getInstance();
     studentNum = prefs.getString('studentNum');
@@ -42,7 +47,8 @@ class _LikeScreenState extends State<LikeScreen> {
           .map((e) => {
                 'id': e['rentalItemId'],
                 'title': e['rentalItemTitle'],
-                'description': e['rentalItemDescription'],
+                'rentalStartTime': e['rentalStartTime'],
+                'rentalEndTime': e['rentalEndTime'],
                 'imageUrl': 'assets/box.png',
               })
           .toList();
@@ -222,10 +228,10 @@ class _LikeScreenState extends State<LikeScreen> {
                                                   ),
                                                   SizedBox(height: 4),
                                                   Text(
-                                                    item['description'],
+                                                    '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
                                                     style: TextStyle(
-                                                        color:
-                                                            Colors.grey[700]),
+                                                        color: Colors.grey[700],
+                                                        fontSize: 13),
                                                   ),
                                                 ],
                                               ),
