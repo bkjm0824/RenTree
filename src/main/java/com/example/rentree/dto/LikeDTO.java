@@ -6,6 +6,8 @@ import com.example.rentree.domain.Student;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class LikeDTO {
@@ -15,7 +17,9 @@ public class LikeDTO {
     private Long rentalItemId;
     private boolean liked;
     private String rentalItemTitle;
-    private String rentalItemDescription;
+    private LocalDateTime rentalStartTime;
+    private LocalDateTime rentalEndTime;
+
 
     public static LikeDTO fromEntity(Like like) {
         return LikeDTO.builder()
@@ -24,7 +28,8 @@ public class LikeDTO {
                 .rentalItemId(like.getRentalItem().getId())
                 .liked(true)
                 .rentalItemTitle(like.getRentalItem().getTitle())
-                .rentalItemDescription(like.getRentalItem().getDescription())
+                .rentalStartTime(like.getRentalItem().getRentalStartTime())
+                .rentalEndTime(like.getRentalItem().getRentalEndTime())
                 .build();
     }
 }
