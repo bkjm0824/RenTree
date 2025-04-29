@@ -24,14 +24,14 @@ public class ChatRoomController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    // 채팅방 단건 조회
+    // 채팅방 조회
     @GetMapping("/{roomId}")
     public ResponseEntity<ChatRoomResponseDTO> getChatRoom(@PathVariable Long roomId) {
         ChatRoomResponseDTO responseDTO = chatRoomService.getChatRoom(roomId);
         return ResponseEntity.ok(responseDTO);
     }
 
-    // 채팅방 삭제
+    // 채팅방 나가기
     @DeleteMapping("/{roomId}")
     public ResponseEntity<ChatRoomDeleteResponseDTO> deleteChatRoom(@PathVariable Long roomId) {
         ChatRoomDeleteResponseDTO responseDTO = chatRoomService.deleteChatRoom(roomId);
