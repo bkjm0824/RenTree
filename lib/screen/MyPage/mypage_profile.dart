@@ -14,6 +14,14 @@ class MyPageProfile extends StatefulWidget {
 class _MyPageProfileState extends State<MyPageProfile> {
   String _nickname = '사용자';
   String _studentNum = ''; // 학번 변수 추가
+  String _selectedProfileImage = 'assets/Profile/hosick.png';
+
+  final List<String> profileImages = [
+    'assets/Profile/GgoGgu_profile.png',
+    'assets/Profile/Nyangi_profile.png',
+    'assets/Profile/Sangzzi_profile.png',
+    'assets/Profile/Bugi_profile.png',
+  ];
 
   @override
   void initState() {
@@ -27,6 +35,58 @@ class _MyPageProfileState extends State<MyPageProfile> {
       _nickname = prefs.getString('nickname') ?? '사용자';
       _studentNum = prefs.getString('studentNum') ?? '';
     });
+  }
+
+  void _showProfileImageDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Color(0xffF4F1F1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '프로필 이미지를 선택하세요',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 80, // 높이 조절 (60 x 4줄 등으로 유동 가능)
+                  child: GridView.count(
+                    crossAxisCount: 4, // 한 줄에 4개
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    shrinkWrap: true,
+                    children: profileImages.map((path) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedProfileImage = path;
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: CircleAvatar(
+                          radius: 35,
+                          backgroundImage: AssetImage(path),
+                          backgroundColor: Colors.grey[200],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -109,8 +169,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
                     children: [
                       CircleAvatar(
                         radius: 40,
-                        backgroundImage:
-                            AssetImage('assets/Profile/hosick.png'),
+                        backgroundImage: AssetImage(_selectedProfileImage),
                         backgroundColor: Colors.white,
                       ),
                       SizedBox(width: 16),
@@ -139,7 +198,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // 프로필 이미지 변경 로직
+                            _showProfileImageDialog();
                           },
                           child: Text('프로필 이미지 변경',
                               style:
