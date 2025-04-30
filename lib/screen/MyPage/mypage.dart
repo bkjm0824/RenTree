@@ -219,7 +219,7 @@ class _MypageScreenState extends State<MypageScreen> {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage: AssetImage('assets/Profile/hosick.png'),
+            backgroundImage: AssetImage('assets/Profile/GgoGgu_profile.png'),
             backgroundColor: Colors.white,
           ),
           SizedBox(width: 16),
