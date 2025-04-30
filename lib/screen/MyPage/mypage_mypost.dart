@@ -32,26 +32,79 @@ class _MyPageMypostState extends State<MyPageMypost>
     fetchPosts();
   }
 
-  Future<void> fetchPosts() async {
-    final res = await http.get(Uri.parse('http://10.0.2.2:8080/home/items'));
+  Future<void> toggleLike(int itemId, bool isCurrentlyLiked) async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
 
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=$itemId');
+
+    final res = await http.post(url);
+
+    if (res.statusCode == 200) {
+      setState(() {
+        final item = _allPosts.firstWhere((e) => e['id'] == itemId);
+        item['isLiked'] = !isCurrentlyLiked;
+      });
+    } else {
+      print('❌ 좋아요 토글 실패: ${res.statusCode}');
+    }
+  }
+
+  Future<void> fetchPosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    // 전체 글 불러오기
+    final res = await http.get(Uri.parse('http://10.0.2.2:8080/home/items'));
     if (res.statusCode != 200) {
       throw Exception('서버 통신 실패');
     }
-
     final List<dynamic> decoded = jsonDecode(utf8.decode(res.bodyBytes));
-    final List<Map<String, dynamic>> loadedPosts =
-        decoded.map((e) => Map<String, dynamic>.from(e)).toList();
+    final List<Map<String, dynamic>> allItems =
+    decoded.map((e) => Map<String, dynamic>.from(e)).toList();
 
-    for (var item in loadedPosts) {
-      item['isLiked'] = false;
+    // 좋아요 목록 가져오기
+    final likeRes = await http.get(
+        Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+    Set<int> likedIds = {};
+    if (likeRes.statusCode == 200) {
+      final List<dynamic> likedData =
+      jsonDecode(utf8.decode(likeRes.bodyBytes));
+      likedIds =
+          likedData.map<int>((e) => e['rentalItemId'] as int).toSet();
     }
 
-    _allPosts = loadedPosts
-        .where((post) => post['studentNum'] == myStudentNum)
-        .toList();
-    setState(() {});
+    // 내 글만 필터링 + 이미지 및 좋아요 여부 추가
+    List<Map<String, dynamic>> myPosts = [];
+    for (var item in allItems) {
+      if (item['studentNum'] != studentNum) continue;
+
+      // 이미지 불러오기 (RENTAL만)
+      if (item['itemType'] == 'RENTAL') {
+        final imageRes = await http.get(
+            Uri.parse('http://10.0.2.2:8080/images/api/item/${item['id']}'));
+        if (imageRes.statusCode == 200) {
+          final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
+          if (images.isNotEmpty) {
+            item['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
+          }
+        }
+      }
+
+      // 좋아요 여부
+      item['isLiked'] = likedIds.contains(item['id']);
+
+      myPosts.add(item);
+    }
+
+    setState(() {
+      _allPosts = myPosts;
+    });
   }
+
 
   List<Map<String, dynamic>> getFilteredPosts(String type) {
     if (type == '대여 요청') {
@@ -195,14 +248,17 @@ class _MyPageMypostState extends State<MyPageMypost>
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: GestureDetector(
-        onTap: () {
+        onTap: () async {
           if (isRental) {
-            Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => PostRentalScreen(itemId: item['id']),
               ),
             );
+            if (result == true) {
+              fetchPosts(); // 🔁 다시 서버에서 내 글 목록 불러오기
+            }
           } else {
             Navigator.push(
               context,
@@ -252,21 +308,20 @@ class _MyPageMypostState extends State<MyPageMypost>
                       SizedBox(height: 8),
                       Row(
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                item['isLiked'] = !(item['isLiked'] ?? false);
-                              });
-                            },
-                            child: Icon(
-                              item['isLiked']
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              size: 20,
-                              color: item['isLiked'] ? Colors.red : Colors.grey,
+                          if (isRental) // ✅ RENTAL일 때만 하트 표시
+                            GestureDetector(
+                              onTap: () =>
+                                  toggleLike(item['id'], item['isLiked'] ?? false),
+                              child: Icon(
+                                item['isLiked'] == true
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 20,
+                                color:
+                                item['isLiked'] == true ? Colors.red : Colors.grey,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 5),
+                          if (isRental) SizedBox(width: 5),
                         ],
                       ),
                     ],

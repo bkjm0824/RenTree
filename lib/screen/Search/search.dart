@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'search_result.dart';
+import '../Home/home.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  bool _likedChangedInSearchResult = false;
 
   Future<void> _saveSearchQuery(String query) async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,16 +47,19 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _navigateToSearchResult(String query) async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SearchResultScreen(searchQuery: query),
       ),
     );
 
-    // 🔥 검색 결과 화면에서 돌아오면 검색 내역 새로고침
-    setState(() {});
     _searchController.clear();
+    setState(() {}); // 검색기록 새로고침
+
+    if (result == true) {
+      _likedChangedInSearchResult = true;// 🟢 HomeScreen에 변경 알림
+    }
   }
 
   @override
@@ -77,7 +82,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         icon: Icon(Icons.arrow_back_ios_new),
                         color: Color(0xff97C663),
                         iconSize: 30,
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          Navigator.pop(context, _likedChangedInSearchResult); // 여기서만 pop!
+                        },
                       ),
                       Expanded(
                         child: Container(

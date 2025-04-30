@@ -38,6 +38,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   late TextEditingController _searchController;
   List<Map<String, dynamic>> _results = [];
   Set<int> likedItemIds = {}; // 좋아요 누른 아이디 저장
+  bool _likedChanged = false;
 
   @override
   void initState() {
@@ -83,6 +84,16 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       item['isLiked'] = likedItemIds.contains(item['id']);
       item['type'] = 'rental';
       item['likeCount'] = await _fetchLikeCount(item['id']);
+
+      final imageRes = await http.get(
+        Uri.parse('http://10.0.2.2:8080/images/api/item/${item['id']}'),
+      );
+      if (imageRes.statusCode == 200) {
+        final imageList = jsonDecode(utf8.decode(imageRes.bodyBytes));
+        if (imageList.isNotEmpty) {
+          item['imageUrl'] = 'http://10.0.2.2:8080${imageList[0]['imageUrl']}';
+        }
+      }
     }
 
     for (var item in requestList) {
@@ -119,6 +130,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
         item['isLiked'] = !(item['isLiked'] ?? false);
         item['likeCount'] =
             (item['likeCount'] ?? 0) + (item['isLiked'] ? 1 : -1);
+        _likedChanged = true;
       });
     } else {
       print('좋아요 토글 실패');
@@ -138,7 +150,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                 IconButton(
                   icon: Icon(Icons.arrow_back_ios_new),
                   color: Color(0xff97C663),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context, _likedChanged); // true or false 전달
+                  },
                 ),
                 Expanded(
                   child: Container(
@@ -185,15 +199,20 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                         final imageUrl = item['imageUrl'];
 
                         return GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             if (item['type'] == 'rental') {
-                              Navigator.push(
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      PostRentalScreen(itemId: item['id']),
+                                  builder: (_) => PostRentalScreen(itemId: item['id']),
                                 ),
                               );
+                              if (result == true) {
+                                _loadLikedItems().then((_) {
+                                  _fetchResults(_searchController.text);
+                                  _likedChanged = true; // ✅ 검색 결과에서 뒤로 갈 때도 Home에 전달할 수 있도록
+                                });
+                              }
                             } else {
                               Navigator.push(
                                 context,
@@ -215,15 +234,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: item['type'] == 'rental'
-                                          ? Image.asset('assets/box.png',
-                                              width: 90,
-                                              height: 90,
-                                              fit: BoxFit.cover)
-                                          : Image.asset(
-                                              'assets/requestIcon.png',
-                                              width: 90,
-                                              height: 90,
-                                              fit: BoxFit.cover),
+                                          ? (imageUrl != null && imageUrl.toString().startsWith('http')
+                                          ? Image.network(imageUrl,
+                                          width: 90, height: 90, fit: BoxFit.cover)
+                                          : Image.asset('assets/box.png',
+                                          width: 90, height: 90, fit: BoxFit.cover))
+                                          : Image.asset('assets/requestIcon.png',
+                                          width: 90, height: 90, fit: BoxFit.cover),
                                     ),
                                     SizedBox(width: 20),
                                     Expanded(

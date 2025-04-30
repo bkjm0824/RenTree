@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String _selectedFilter = '최신순';
   List<Map<String, dynamic>> _allItems = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -37,7 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (res.statusCode == 204) {
       _allItems = [];
-      setState(() {});
+      setState(() {
+        _isLoading = false;
+      });
       return;
     } else if (res.statusCode != 200) {
       throw Exception('불러오기 실패');
@@ -74,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final itemId = item['id'];
 
       final imageRes =
-          await http.get(Uri.parse('http://10.0.2.2:8080/images/api/$itemId'));
+          await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
       if (imageRes.statusCode == 200) {
         final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (images.isNotEmpty) {
@@ -92,9 +95,11 @@ class _HomeScreenState extends State<HomeScreen> {
       item['isLiked'] = false;
     }
 
-    _allItems = [...rentalItems, ...requestItems];
-    _allItems.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
-    setState(() {});
+    setState(() {
+      _allItems = [...rentalItems, ...requestItems];
+      _allItems.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+      _isLoading = false;
+    });
   }
 
   Future<void> toggleLike(Map<String, dynamic> item) async {
@@ -275,8 +280,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color(0xff97C663),
                       iconSize: 30,
                       padding: EdgeInsets.only(right: 10),
-                      onPressed: () => Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => SearchScreen())),
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => SearchScreen()),
+                          );
+
+                          if (result == true) {
+                            await fetchItemsWithImage(); // 🔁 찜 반영 새로고침
+                          }
+                        }
                     ),
                   ],
                 ),
@@ -309,8 +322,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: _allItems.isEmpty
+            child: _isLoading
                 ? Center(child: CircularProgressIndicator())
+                : _allItems.isEmpty
+                ? Center(
+              child: Text(
+                "등록된 항목이 없습니다.",
+                style: TextStyle(fontSize: 16),
+              ),
+            )
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     itemCount: getFilteredItems().length,
@@ -321,21 +341,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       final imageUrl = item['imageUrl'];
 
                       return GestureDetector(
-                        onTap: () {
-                          if (item['type'] == 'rental') {
-                            Navigator.push(
+                          onTap: () async {
+                            if (item['type'] == 'rental') {
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        PostRentalScreen(itemId: item['id'])));
-                          } else {
-                            Navigator.push(
+                                  builder: (_) => PostRentalScreen(itemId: item['id']),
+                                ),
+                              );
+                              if (result == true) {
+                                fetchItemsWithImage(); // ✅ 좋아요 변경 시 목록 다시 불러오기
+                              }
+                            } else {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        PostRequestScreen(itemId: item['id'])));
-                          }
-                        },
+                                  builder: (_) => PostRequestScreen(itemId: item['id']),
+                                ),
+                              );
+                            }
+                          },
                         child: Column(
                           children: [
                             Padding(

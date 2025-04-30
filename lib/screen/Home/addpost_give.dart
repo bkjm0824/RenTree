@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../Home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostGiveScreen extends StatefulWidget {
@@ -142,7 +143,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('등록 성공!')),
       );
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
     } else {
       print('등록 실패: ${response.statusCode} - ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
