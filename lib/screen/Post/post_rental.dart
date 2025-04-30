@@ -27,6 +27,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   bool isLiked = false;
   int likeCount = 0;
   String? studentNum;
+  bool likeChanged = false;
 
   @override
   void initState() {
@@ -51,7 +52,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
         final data = json.decode(utf8.decode(response.bodyBytes));
 
         final imageRes = await http
-            .get(Uri.parse('http://10.0.2.2:8080/images/api/${widget.itemId}'));
+            .get(Uri.parse('http://10.0.2.2:8080/images/api/item/${widget.itemId}'));
         if (imageRes.statusCode == 200) {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
@@ -131,6 +132,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       setState(() {
         isLiked = !isLiked;
         likeCount += isLiked ? 1 : -1;
+        likeChanged = true;
       });
     } else {
       print('❌ 좋아요 토글 실패');
@@ -184,7 +186,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                         child: IconButton(
                           icon: Icon(Icons.arrow_back_ios_new,
                               color: Colors.white, size: 30), // 버튼 색상 흰색 추천!
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () => Navigator.pop(context, likeChanged),
                         ),
                       ),
                     ],

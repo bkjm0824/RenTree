@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../Home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RequestScreen extends StatefulWidget {
@@ -96,7 +97,10 @@ class _RequestScreenState extends State<RequestScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('글이 등록되었습니다!')),
       );
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
     } else {
       print('서버 오류: ${response.statusCode} - ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(

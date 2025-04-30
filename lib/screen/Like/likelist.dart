@@ -38,25 +38,42 @@ class _LikeScreenState extends State<LikeScreen> {
     studentNum = prefs.getString('studentNum');
     if (studentNum == null) return;
 
-    final res = await http
-        .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+    final res = await http.get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
 
     if (res.statusCode == 200) {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
-      likedItems = data
-          .map((e) => {
-                'id': e['rentalItemId'],
-                'title': e['rentalItemTitle'],
-                'rentalStartTime': e['rentalStartTime'],
-                'rentalEndTime': e['rentalEndTime'],
-                'imageUrl': 'assets/box.png',
-              })
-          .toList();
-      setState(() {});
+
+      List<Map<String, dynamic>> tempList = [];
+
+      for (var e in data) {
+        final rentalItemId = e['rentalItemId'];
+        String imageUrl = 'assets/box.png';
+
+        final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
+        if (imageRes.statusCode == 200) {
+          final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
+          if (images.isNotEmpty) {
+            imageUrl = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
+          }
+        }
+
+        tempList.add({
+          'id': rentalItemId,
+          'title': e['rentalItemTitle'],
+          'rentalStartTime': e['rentalStartTime'],
+          'rentalEndTime': e['rentalEndTime'],
+          'imageUrl': imageUrl,
+        });
+      }
+
+      setState(() {
+        likedItems = tempList;
+      });
     } else {
       print('❌ 찜 목록 불러오기 실패');
     }
   }
+
 
   Future<void> toggleLike(int rentalItemId) async {
     if (studentNum == null) return;
@@ -157,26 +174,21 @@ class _LikeScreenState extends State<LikeScreen> {
                       itemBuilder: (context, index) {
                         final item = likedItems[index];
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    PostRentalScreen(itemId: item['id']),
-                              ),
-                            );
-                          },
                           child: Column(
                             children: [
                               InkWell(
-                                onTap: () {
-                                  // 상세페이지 이동
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => PostRentalScreen(
-                                            itemId: item['id']),
-                                      ));
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => PostRentalScreen(itemId: item['id']),
+                                    ),
+                                  );
+
+                                  if (result == true) {
+                                    // 찜 상태 변경됨 → 목록 새로고침
+                                    loadLikedItems();
+                                  }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -197,12 +209,9 @@ class _LikeScreenState extends State<LikeScreen> {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          child: Image.asset(
-                                            item['imageUrl'],
-                                            width: 110,
-                                            height: 110,
-                                            fit: BoxFit.cover,
-                                          ),
+                                          child: item['imageUrl'].toString().startsWith('http')
+                                              ? Image.network(item['imageUrl'], fit: BoxFit.cover)
+                                              : Image.asset(item['imageUrl'], fit: BoxFit.cover),
                                         ),
                                       ),
                                       SizedBox(width: 16),
