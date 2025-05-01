@@ -6,9 +6,7 @@ import com.example.rentree.domain.RentalItem;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.RentalItemCreateRequest;
 import com.example.rentree.dto.RentalItemUpdateRequest;
-import com.example.rentree.repository.CategoryRepository;
-import com.example.rentree.repository.RentalItemRepository;
-import com.example.rentree.repository.StudentRepository;
+import com.example.rentree.repository.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +20,17 @@ public class RentalItemService {
     private final RentalItemRepository rentalItemRepository;
     private final CategoryRepository categoryRepository;
     private final StudentRepository studentRepository;
+    private final LikeRepository likeRepository;
+    private final ItemImageService itemImageService;
+    private final ItemImageRepository itemImageRepository;
 
-    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository) {
+    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository, LikeRepository likeRepository, ItemImageService itemImageService, ItemImageRepository itemImageRepository) {
         this.rentalItemRepository = rentalItemRepository;
         this.categoryRepository = categoryRepository;
         this.studentRepository = studentRepository;
+        this.likeRepository = likeRepository;
+        this.itemImageService = itemImageService;
+        this.itemImageRepository = itemImageRepository;
     }
 
     @Transactional(readOnly = true)
@@ -108,8 +112,13 @@ public class RentalItemService {
     @Transactional
     public void deleteRentalItem(Long id) {
         RentalItem rentalItem = rentalItemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 물품을 찾을 수 없습니다: " + id));
-        rentalItemRepository.deleteById(id);
+                .orElseThrow(() -> new RuntimeException("해당 ID의 물품을 찾을 수 없습니다: " + id));
+
+        likeRepository.deleteByRentalItem(rentalItem);
+
+        itemImageRepository.deleteByRentalItemId(id);
+
+        rentalItemRepository.delete(rentalItem);
     }
 
     // 전체 대여 가능한 아이템만 조회

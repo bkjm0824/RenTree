@@ -20,4 +20,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     // 학생과 아이템에 대한 좋아요 조회
     Optional<Like> findByStudentAndRentalItem(Student studentNum, RentalItem rentalItemId);
+
+    // 삭제
+    void deleteByRentalItem(RentalItem rentalItem);
 }
