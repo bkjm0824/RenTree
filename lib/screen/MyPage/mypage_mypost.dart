@@ -46,9 +46,28 @@ class _MyPageMypostState extends State<MyPageMypost>
       setState(() {
         final item = _allPosts.firstWhere((e) => e['id'] == itemId);
         item['isLiked'] = !isCurrentlyLiked;
+        if (item['isLiked']) {
+          item['likeCount'] = (item['likeCount'] ?? 0) + 1;
+        } else {
+          item['likeCount'] = (item['likeCount'] ?? 1) - 1;
+        }
       });
     } else {
       print('❌ 좋아요 토글 실패: ${res.statusCode}');
+    }
+  }
+
+  Future<int> fetchLikeCount(int rentalItemId) async {
+    //좋아요 수 가져오기
+    final url =
+    Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
+    final res = await http.get(url);
+
+    if (res.statusCode == 200) {
+      return int.parse(res.body);
+    } else {
+      print('❌ 좋아요 개수 가져오기 실패: ${res.statusCode}');
+      return 0;
     }
   }
 
@@ -82,8 +101,8 @@ class _MyPageMypostState extends State<MyPageMypost>
     for (var item in allItems) {
       if (item['studentNum'] != studentNum) continue;
 
-      // 이미지 불러오기 (RENTAL만)
       if (item['itemType'] == 'RENTAL') {
+        // 이미지 불러오기
         final imageRes = await http.get(
             Uri.parse('http://10.0.2.2:8080/images/api/item/${item['id']}'));
         if (imageRes.statusCode == 200) {
@@ -92,6 +111,9 @@ class _MyPageMypostState extends State<MyPageMypost>
             item['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
           }
         }
+
+        // 좋아요 수 불러오기
+        item['likeCount'] = await fetchLikeCount(item['id']);
       }
 
       // 좋아요 여부
@@ -104,7 +126,6 @@ class _MyPageMypostState extends State<MyPageMypost>
       _allPosts = myPosts;
     });
   }
-
 
   List<Map<String, dynamic>> getFilteredPosts(String type) {
     if (type == '대여 요청') {
@@ -308,20 +329,23 @@ class _MyPageMypostState extends State<MyPageMypost>
                       SizedBox(height: 8),
                       Row(
                         children: [
-                          if (isRental) // ✅ RENTAL일 때만 하트 표시
+                          if (isRental)
                             GestureDetector(
-                              onTap: () =>
-                                  toggleLike(item['id'], item['isLiked'] ?? false),
+                              onTap: () => toggleLike(item['id'], item['isLiked'] ?? false),
                               child: Icon(
                                 item['isLiked'] == true
                                     ? Icons.favorite
                                     : Icons.favorite_border,
                                 size: 20,
-                                color:
-                                item['isLiked'] == true ? Colors.red : Colors.grey,
+                                color: item['isLiked'] == true ? Colors.red : Colors.grey,
                               ),
                             ),
                           if (isRental) SizedBox(width: 5),
+                          if (isRental)
+                            Text(
+                              '${item['likeCount'] ?? 0}',
+                              style: TextStyle(fontSize: 13),
+                            ),
                         ],
                       ),
                     ],
