@@ -85,6 +85,45 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
     }
   }
 
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("게시글 삭제"),
+          content: Text("정말 삭제하시겠습니까?"),
+          actions: [
+            TextButton(
+              child: Text("취소"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text("삭제", style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deletePost();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deletePost() async {
+    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.itemId}');
+    final res = await http.delete(url);
+
+    if (res.statusCode == 200) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('게시글이 삭제되었습니다.')));
+      Navigator.of(context).pop(); // 이전 화면으로 이동
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('삭제 실패: ${res.statusCode}')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,10 +180,31 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(title,
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold)),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(title,
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold)),
+                                        PopupMenuButton<String>(
+                                          icon: Icon(Icons.more_vert_rounded),
+                                          onSelected: (String value) {
+                                            if (value == 'delete') {
+                                              _confirmDelete();
+                                            }
+                                          },
+                                          itemBuilder: (BuildContext context) =>
+                                              [
+                                            PopupMenuItem<String>(
+                                              value: 'delete',
+                                              child: Text('삭제'),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
                                     SizedBox(height: 10),
                                     Text('작성자 : $nickname',
                                         style: TextStyle(fontSize: 16)),

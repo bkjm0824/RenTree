@@ -76,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
     for (var item in rentalItems) {
       final itemId = item['id'];
 
-      final imageRes =
-          await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
+      final imageRes = await http
+          .get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
       if (imageRes.statusCode == 200) {
         final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (images.isNotEmpty) {
@@ -100,26 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _allItems.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
       _isLoading = false;
     });
-  }
-
-  Future<void> toggleLike(Map<String, dynamic> item) async {
-    final prefs = await SharedPreferences.getInstance();
-    final studentNum = prefs.getString('studentNum');
-    if (studentNum == null) return;
-
-    final url = Uri.parse(
-        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=${item['id']}');
-    final res = await http.post(url);
-
-    if (res.statusCode == 200) {
-      setState(() {
-        item['isLiked'] = !(item['isLiked'] ?? false);
-        item['likeCount'] =
-            (item['likeCount'] ?? 0) + (item['isLiked'] ? 1 : -1);
-      });
-    } else {
-      print('❌ 좋아요 토글 실패: ${res.statusCode} ${res.body}');
-    }
   }
 
   Future<int> fetchLikeCount(int rentalItemId) async {
@@ -276,10 +256,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Image.asset('assets/rentree.png', height: 40),
                     IconButton(
-                      icon: Icon(Icons.search),
-                      color: Color(0xff97C663),
-                      iconSize: 30,
-                      padding: EdgeInsets.only(right: 10),
+                        icon: Icon(Icons.search),
+                        color: Color(0xff97C663),
+                        iconSize: 30,
+                        padding: EdgeInsets.only(right: 10),
                         onPressed: () async {
                           final result = await Navigator.push(
                             context,
@@ -289,8 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (result == true) {
                             await fetchItemsWithImage(); // 🔁 찜 반영 새로고침
                           }
-                        }
-                    ),
+                        }),
                   ],
                 ),
                 SizedBox(height: 10),
@@ -325,131 +304,141 @@ class _HomeScreenState extends State<HomeScreen> {
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _allItems.isEmpty
-                ? Center(
-              child: Text(
-                "등록된 항목이 없습니다.",
-                style: TextStyle(fontSize: 16),
-              ),
-            )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    itemCount: getFilteredItems().length,
-                    itemBuilder: (context, index) {
-                      final item = getFilteredItems()[index];
-                      final createdAt = DateTime.parse(item['createdAt']);
-                      final timeAgo = formatTimeDifference(createdAt);
-                      final imageUrl = item['imageUrl'];
+                    ? Center(
+                        child: Text(
+                          "등록된 항목이 없습니다.",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        itemCount: getFilteredItems().length,
+                        itemBuilder: (context, index) {
+                          final item = getFilteredItems()[index];
+                          final createdAt = DateTime.parse(item['createdAt']);
+                          final timeAgo = formatTimeDifference(createdAt);
+                          final imageUrl = item['imageUrl'];
 
-                      return GestureDetector(
-                          onTap: () async {
-                            if (item['type'] == 'rental') {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => PostRentalScreen(itemId: item['id']),
-                                ),
-                              );
-                              if (result == true) {
-                                fetchItemsWithImage(); // ✅ 좋아요 변경 시 목록 다시 불러오기
+                          return GestureDetector(
+                            onTap: () async {
+                              if (item['type'] == 'rental') {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        PostRentalScreen(itemId: item['id']),
+                                  ),
+                                );
+                                if (result == true) {
+                                  fetchItemsWithImage(); // ✅ 좋아요 변경 시 목록 다시 불러오기
+                                }
+                              } else {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        PostRequestScreen(itemId: item['id']),
+                                  ),
+                                );
                               }
-                            } else {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => PostRequestScreen(itemId: item['id']),
-                                ),
-                              );
-                            }
-                          },
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 15.0, horizontal: 10.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 90,
-                                    height: 90,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffEBEBEB),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: item['type'] == 'rental'
-                                          ? (imageUrl != null &&
-                                                  imageUrl.toString().isNotEmpty
-                                              ? Image.network(imageUrl,
-                                                  fit: BoxFit.cover)
-                                              : Image.asset('assets/box.png',
-                                                  fit: BoxFit.cover))
-                                          : Image.asset(
-                                              'assets/requestIcon.png',
-                                              fit: BoxFit.cover),
-                                    ),
-                                  ),
-                                  SizedBox(width: 20),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(item['title'],
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16)),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
-                                          style: TextStyle(
-                                              color: Colors.grey[700],
-                                              fontSize: 13),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            if (item['type'] == 'rental') ...[
-                                              GestureDetector(
-                                                onTap: () => toggleLike(item),
-                                                child: Icon(
-                                                  item['isLiked'] == true
-                                                      ? Icons.favorite
-                                                      : Icons.favorite_border,
-                                                  size: 20,
-                                                  color: item['isLiked'] == true
-                                                      ? Colors.red
-                                                      : Colors.grey,
-                                                ),
-                                              ),
-                                              SizedBox(width: 5),
-                                              Text('${item['likeCount'] ?? 0}'),
-                                            ],
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Column(
+                            },
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 15.0, horizontal: 10.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(timeAgo,
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 13)),
+                                      Container(
+                                        width: 90,
+                                        height: 90,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffEBEBEB),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: item['type'] == 'rental'
+                                              ? (imageUrl != null &&
+                                                      imageUrl
+                                                          .toString()
+                                                          .isNotEmpty
+                                                  ? Image.network(imageUrl,
+                                                      fit: BoxFit.cover)
+                                                  : Image.asset(
+                                                      'assets/box.png',
+                                                      fit: BoxFit.cover))
+                                              : Image.asset(
+                                                  'assets/requestIcon.png',
+                                                  fit: BoxFit.cover),
+                                        ),
+                                      ),
+                                      SizedBox(width: 20),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item['title'],
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16)),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                                              style: TextStyle(
+                                                  color: Colors.grey[700],
+                                                  fontSize: 13),
+                                            ),
+                                            SizedBox(height: 8),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Container(
+                                        height: 90,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(timeAgo,
+                                                style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 13)),
+                                            Row(
+                                              children: [
+                                                if (item['type'] ==
+                                                    'rental') ...[
+                                                  Icon(
+                                                    Icons.favorite,
+                                                    color: Colors.grey,
+                                                    size: 20,
+                                                  ),
+                                                  SizedBox(width: 2),
+                                                  Text(
+                                                      '${item['likeCount'] ?? 0}'),
+                                                ],
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                Divider(height: 1, color: Colors.grey[300]),
+                              ],
                             ),
-                            Divider(height: 1, color: Colors.grey[300]),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),
