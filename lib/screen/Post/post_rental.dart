@@ -28,6 +28,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   int likeCount = 0;
   String? studentNum;
   bool likeChanged = false;
+  String category = ''; // ← 추가
 
   @override
   void initState() {
@@ -68,6 +69,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
           rentalStartTime = DateTime.parse(data['rentalStartTime']);
           rentalEndTime = DateTime.parse(data['rentalEndTime']);
           createdAt = DateTime.parse(data['createdAt']);
+          category = data['category']['name'] ?? '기타'; // ← 카테고리 이름 파싱
 
           rentalTimeRangeText =
               '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
@@ -325,18 +327,30 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                           ),
                           SizedBox(height: 10),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(' 관심 $likeCount',
                                   style: TextStyle(
                                       fontSize: 14, color: Color(0xff747474))),
-                              Text(' | ',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xff747474),
-                                      fontWeight: FontWeight.bold)),
-                              Text(timeAgoText,
-                                  style: TextStyle(
-                                      fontSize: 14, color: Color(0xff747474))),
+                              Row(
+                                children: [
+                                  Text('${category} ',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xff747474),
+                                        decoration: TextDecoration.underline,
+                                      )),
+                                  Text('| ',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xff747474),
+                                          fontWeight: FontWeight.bold)),
+                                  Text(timeAgoText,
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0xff747474))),
+                                ],
+                              ),
                             ],
                           )
                         ],
