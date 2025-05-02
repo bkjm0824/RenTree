@@ -34,6 +34,8 @@ public class ItemRequestResponseDTO {
 
     private Timestamp createdAt; // 요청 시간
 
+    private Integer profileImage;
+
     //private Integer viewCount = 0; // 조회수
 
     /*
@@ -54,6 +56,7 @@ public class ItemRequestResponseDTO {
         dto.setRentalEndTime(itemRequest.getRentalEndTime());
         dto.setIsFaceToFace(itemRequest.getIsFaceToFace());
         dto.setCreatedAt(itemRequest.getCreatedAt());
+        dto.setProfileImage(itemRequest.getStudent().getProfileImage());
         return dto;
     }
 

@@ -54,13 +54,13 @@ public class ItemRequestService {
     }
 
     @Transactional
-    public ItemRequestResponseDTO getItemRequestDetail(Long id) {
+    public ItemRequestDTO getItemRequestDetail(Long id) {
         ItemRequest itemRequest = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(" : " + id));
         itemRequest.incrementViewCount(); // 조회수 증가
         itemRequestRepository.save(itemRequest); // 수정된 객체 저장
 
-        return ItemRequestResponseDTO.fromEntity(itemRequest);
+        return ItemRequestDTO.fromEntity(itemRequest);
     }
 
 

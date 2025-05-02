@@ -36,6 +36,9 @@ public class ItemRequestDTO {
 
     private Integer viewCount;
 
+    private Integer profileImage;
+
+
     /*
     ItemRequest 객체를 ItemRequestDTO 객체로 변환하는 메서드
     @param itemRequest : ItemRequest 객체
@@ -55,6 +58,7 @@ public class ItemRequestDTO {
         dto.setIsFaceToFace(itemRequest.getIsFaceToFace());
         dto.setCreatedAt(itemRequest.getCreatedAt());
         dto.setViewCount(itemRequest.getViewCount());
+        dto.setProfileImage(itemRequest.getStudent().getProfileImage());
         return dto;
     }
 

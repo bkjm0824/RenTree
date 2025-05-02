@@ -104,7 +104,7 @@ public class ItemRequestController {
         }
 
         try {
-            ItemRequestResponseDTO dto = itemRequestService.getItemRequestDetail(id);
+            ItemRequestDTO dto = itemRequestService.getItemRequestDetail(id);
             return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
