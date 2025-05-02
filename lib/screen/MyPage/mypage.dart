@@ -28,6 +28,8 @@ class _MypageScreenState extends State<MypageScreen> {
   int _selectedIndex = 4;
   String? _nickname;
   String? _studentNum;
+  int? _profileImageIndex = 1;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -35,11 +37,28 @@ class _MypageScreenState extends State<MypageScreen> {
     _loadUserInfo();
   }
 
+  String _mapIndexToProfileFile(int index) {
+    switch (index) {
+      case 1:
+        return 'Bugi_profile.png';
+      case 2:
+        return 'GgoGgu_profile.png';
+      case 3:
+        return 'Nyangi_profile.png';
+      case 4:
+        return 'Sangzzi_profile.png';
+      default:
+        return 'Bugi_profile.png';
+    }
+  }
+
   Future<void> _loadUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _nickname = prefs.getString('nickname') ?? '사용자';
       _studentNum = prefs.getString('studentNum') ?? '학번 정보 없음'; // ← 여기 수정
+      _profileImageIndex = prefs.getInt('profileImage') ?? 1;
+      _isLoading = false;
     });
   }
 
@@ -201,6 +220,10 @@ class _MypageScreenState extends State<MypageScreen> {
   }
 
   Widget ProfileBox() {
+    if (_isLoading) {
+      return SizedBox(height: 100); // 혹은 CircularProgressIndicator()
+    }
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 32, vertical: 20),
       padding: EdgeInsets.all(16),
@@ -219,7 +242,9 @@ class _MypageScreenState extends State<MypageScreen> {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage: AssetImage('assets/Profile/GgoGgu_profile.png'),
+            backgroundImage: AssetImage(
+              'assets/Profile/${_mapIndexToProfileFile(_profileImageIndex ?? 1)}',
+            ),
             backgroundColor: Colors.white,
           ),
           SizedBox(width: 16),
@@ -228,7 +253,7 @@ class _MypageScreenState extends State<MypageScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _nickname ?? '', // 저장된 닉네임 출력
+                  _nickname ?? '',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4),

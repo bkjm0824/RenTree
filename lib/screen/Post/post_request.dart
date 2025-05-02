@@ -23,6 +23,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   DateTime? createdAt;
   String timeAgoText = '';
   bool isLoading = true;
+  String? writerProfileImagePath;
 
   @override
   void initState() {
@@ -34,6 +35,21 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _mapIndexToProfileFile(int index) {
+    switch (index) {
+      case 1:
+        return 'Bugi_profile.png';
+      case 2:
+        return 'GgoGgu_profile.png';
+      case 3:
+        return 'Nyangi_profile.png';
+      case 4:
+        return 'Sangzzi_profile.png';
+      default:
+        return 'Bugi_profile.png';
+    }
   }
 
   Future<void> fetchItemDetail() async {
@@ -57,6 +73,9 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           rentalStartTime = DateTime.parse(data['rentalStartTime']);
           rentalEndTime = DateTime.parse(data['rentalEndTime']);
           createdAt = DateTime.parse(data['createdAt']);
+
+          final profileIndex = data['profileImage'] ?? 1;
+          writerProfileImagePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
 
           rentalTimeRangeText =
               '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
@@ -171,8 +190,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                               SizedBox(width: 20),
                               CircleAvatar(
                                 radius: 40,
-                                backgroundImage:
-                                    AssetImage('assets/Profile/hosick.png'),
+                                backgroundImage: AssetImage(writerProfileImagePath ?? 'assets/Profile/Bugi_profile.png'),
                                 backgroundColor: Colors.white,
                               ),
                               SizedBox(width: 20),
