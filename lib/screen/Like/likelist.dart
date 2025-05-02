@@ -121,7 +121,7 @@ class _LikeScreenState extends State<LikeScreen> {
         break;
       case 3:
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => ChatScreen()));
+            context, MaterialPageRoute(builder: (context) => ChatListScreen()));
         break;
       case 4:
         Navigator.pushReplacement(

@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         '/Like': (context) => LikeScreen(),
         '/Point': (context) => PointedScreen(),
         '/Mypage': (context) => MypageScreen(),
-        '/Chat': (context) => ChatScreen(),
+        '/Chat': (context) => ChatListScreen(),
       },
     );
   }

@@ -472,19 +472,19 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                             final chatRoomId =
                                 await createChatRoom(widget.itemId, studentNum);
                             if (chatRoomId != null) {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => ChatDetailScreen(
-                              //       chatRoomId: chatRoomId,
-                              //       userName: nickname,
-                              //       imageUrl: imageUrl,
-                              //       title: title,
-                              //       rentalTimeText: rentalTimeRangeText,
-                              //       isFaceToFace: isFaceToFace,
-                              //     ),
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatDetailScreen(
+                                    chatRoomId: chatRoomId,
+                                    userName: nickname,
+                                    imageUrl: imageUrl,
+                                    title: title,
+                                    rentalTimeText: rentalTimeRangeText,
+                                    isFaceToFace: isFaceToFace,
+                                  ),
+                                ),
+                              );
                             }
                           },
                           child: Text(

@@ -49,7 +49,7 @@ class _PointedScreenState extends State<PointedScreen> {
         // 채팅
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ChatScreen()),
+          MaterialPageRoute(builder: (context) => ChatListScreen()),
         );
         break;
       case 4:
