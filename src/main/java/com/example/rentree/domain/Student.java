@@ -29,4 +29,8 @@ public class Student {
     @Column(name = "nickname", nullable = false, length = 255)
     private String nickname; // 닉네임
 
+    // 프로필 이미지 난수 컬럼(1~4)
+    @Column(name = "profile_image")
+    private Integer profileImage; // 프로필 이미지 난수
+
 }

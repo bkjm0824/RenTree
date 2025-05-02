@@ -23,6 +23,9 @@ public class StudentController {
         // ResponseEntity 사용 이유는 HTTP 상태 코드와 함께 응답을 보내기 위함 (응답 코드, 헤더, 본문 등을 직접 설정 가능)
         Student student = studentService.authenticate(studentDTO.getStudentNum(), studentDTO.getPassword()); // StudentService를 통해 로그인 시도
         if (student != null) { // 로그인 성공 시
+            if (student.getProfileImage() == null) {
+                studentService.assignRandomProfileImage(student);
+            }
             StudentDTO responseStudentDTO = StudentDTO.fromEntity(student); // Student 객체를 StudentDTO 객체로 변환
             return ResponseEntity.ok(responseStudentDTO); // 로그인 성공 응답 (200 OK)
         } else { // 로그인 실패 시
@@ -49,6 +52,19 @@ public class StudentController {
             return ResponseEntity.ok("닉네임 업데이트 완"); // 200 OK
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+    }
+
+    @PutMapping("/students/profile-image")
+    public ResponseEntity<?> updateProfileImage(
+            @RequestParam String studentNum,
+            @RequestParam Integer profileImage) {
+
+        try {
+            studentService.updateProfileImage(studentNum, profileImage);  // 이미지 업데이트
+            return ResponseEntity.ok("Profile image updated successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

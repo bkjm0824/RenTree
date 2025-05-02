@@ -65,4 +65,23 @@ public class StudentService {
         // 변경 사항 저장
         studentRepository.save(student);
     }
+
+    // 첫 로그인 시 랜덤으로 프로필 이미지 난수 배정(1~4)
+    public void assignRandomProfileImage(Student student) {
+        int randomImage = (int) (Math.random() * 4) + 1;
+        student.setProfileImage(randomImage);
+        studentRepository.save(student);
+    }
+
+    public void updateProfileImage(String studentNum, Integer profileImage) {
+        if (profileImage < 1 || profileImage > 4) {
+            throw new IllegalArgumentException("Invalid profile image value: " + profileImage);
+        }
+        Student student = studentRepository.findByStudentNum(studentNum)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with studentNum: " + studentNum));
+
+        student.setProfileImage(profileImage);
+
+        studentRepository.save(student);
+    }
 }
