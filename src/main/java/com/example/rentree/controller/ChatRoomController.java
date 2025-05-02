@@ -38,10 +38,10 @@ public class ChatRoomController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    // 특정 물품 ID로 채팅방 목록 조회
-    @GetMapping("/rentalItem/{rentalItemId}")
-    public ResponseEntity<List<ChatRoomResponseDTO>> getChatRoomsByRentalItemId(@PathVariable Long rentalItemId) {
-        List<ChatRoomResponseDTO> responseList = chatRoomService.getChatRoomsByRentalItemId(rentalItemId);
+    // 학번으로 채팅방 목록 조회
+    @GetMapping("/student/{studentNum}")
+    public ResponseEntity<List<ChatRoomResponseDTO>> getChatRoomsByStudentNum(@PathVariable String studentNum) {
+        List<ChatRoomResponseDTO> responseList = chatRoomService.getChatRoomsByStudentNum(studentNum);
         return ResponseEntity.ok(responseList);
     }
 }

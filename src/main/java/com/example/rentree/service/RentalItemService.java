@@ -76,7 +76,7 @@ public class RentalItemService {
         return rentalItemRepository.findByStudent_StudentNum(studentNum);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public RentalItem getRentalItemDetails(Long id) {
         RentalItem rentalItem = rentalItemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 물품을 찾을 수 없습니다: " + id));
@@ -84,6 +84,7 @@ public class RentalItemService {
         rentalItemRepository.save(rentalItem);
         return rentalItem;
     }
+
 
 
     @Transactional

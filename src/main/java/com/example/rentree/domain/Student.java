@@ -32,5 +32,5 @@ public class Student {
     // 프로필 이미지 난수 컬럼(1~4)
     @Column(name = "profile_image")
     private Integer profileImage; // 프로필 이미지 난수
-
+    
 }

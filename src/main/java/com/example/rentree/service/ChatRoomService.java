@@ -93,20 +93,19 @@ public class ChatRoomService {
         return new ChatRoomDeleteResponseDTO(roomId, "채팅방이 성공적으로 삭제되었습니다.");
     }
 
-    // 물품 ID로 채팅방 조회
+    // 학번으로 요청자가 생성한 채팅방 목록 조회
     @Transactional(readOnly = true)
-    public List<ChatRoomResponseDTO> getChatRoomsByRentalItemId(Long rentalItemId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByRentalItemId(rentalItemId);
+    public List<ChatRoomResponseDTO> getChatRoomsByStudentNum(String studentNum) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByRequester_StudentNum(studentNum);
 
-        // 채팅방 응답 DTO 리스트 반환
         return chatRooms.stream()
                 .map(chatRoom -> {
-                    RentalItem rentalItem = chatRoom.getRentalItem(); // rentalItem 객체 가져오기
-                    String requesterNickname = chatRoom.getRequester().getNickname(); // 요청자 닉네임 가져오기
+                    RentalItem rentalItem = chatRoom.getRentalItem();
+                    String requesterNickname = chatRoom.getRequester().getNickname();
                     return ChatRoomResponseDTO.builder()
                             .roomId(chatRoom.getId())
-                            .rentalItemId(rentalItem.getId()) // rentalItem ID 반환
-                            .rentalItemTitle(rentalItem.getTitle()) // 물품 제목 반환
+                            .rentalItemId(rentalItem.getId())
+                            .rentalItemTitle(rentalItem.getTitle())
                             .requesterNickname(requesterNickname)
                             .createdAt(chatRoom.getCreatedAt())
                             .build();
