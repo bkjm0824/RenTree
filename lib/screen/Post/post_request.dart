@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:rentree/screen/Post/post_request_Change.dart';
+
 class PostRequestScreen extends StatefulWidget {
   final int itemId;
 
@@ -75,7 +77,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           createdAt = DateTime.parse(data['createdAt']);
 
           final profileIndex = data['profileImage'] ?? 1;
-          writerProfileImagePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+          writerProfileImagePath =
+              'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
 
           rentalTimeRangeText =
               '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
@@ -190,7 +193,9 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                               SizedBox(width: 20),
                               CircleAvatar(
                                 radius: 40,
-                                backgroundImage: AssetImage(writerProfileImagePath ?? 'assets/Profile/Bugi_profile.png'),
+                                backgroundImage: AssetImage(
+                                    writerProfileImagePath ??
+                                        'assets/Profile/Bugi_profile.png'),
                                 backgroundColor: Colors.white,
                               ),
                               SizedBox(width: 20),
@@ -209,12 +214,26 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                         PopupMenuButton<String>(
                                           icon: Icon(Icons.more_vert_rounded),
                                           onSelected: (String value) {
+                                            if (value == 'change') {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      RequestChangeScreen(
+                                                          id: widget.itemId),
+                                                ),
+                                              ).then((_) => fetchItemDetail());
+                                            }
                                             if (value == 'delete') {
                                               _confirmDelete();
                                             }
                                           },
                                           itemBuilder: (BuildContext context) =>
                                               [
+                                            PopupMenuItem<String>(
+                                              value: 'change',
+                                              child: Text('수정'),
+                                            ),
                                             PopupMenuItem<String>(
                                               value: 'delete',
                                               child: Text('삭제'),

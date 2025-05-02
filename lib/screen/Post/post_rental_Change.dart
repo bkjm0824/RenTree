@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -5,18 +7,21 @@ import 'dart:convert';
 import '../Home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PostGiveScreen extends StatefulWidget {
+class rentalChangeScreen extends StatefulWidget {
+  final int id;
+
+  rentalChangeScreen({required this.id});
+
   @override
-  _PostGiveScreenState createState() => _PostGiveScreenState();
+  _rentalChangeState createState() => _rentalChangeState();
 }
 
-class _PostGiveScreenState extends State<PostGiveScreen> {
+class _rentalChangeState extends State<rentalChangeScreen> {
   bool isFaceToFace = false;
   bool isNonFaceToFace = false;
   String? selectedCategory = '전자기기';
   bool isTransfer = false;
   List<XFile> _imageFiles = [];
-
   final ImagePicker _picker = ImagePicker();
 
   final TextEditingController _titleController = TextEditingController();
@@ -24,11 +29,15 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
 
+  List<Map<String, dynamic>> _imageData = [];
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
 
-  String formatTimeOfDay(TimeOfDay time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
+  @override
+  void initState() {
+    super.initState();
+    fetchRentalItemDetail(widget.id);
+    fetchImages(widget.id);
   }
 
   Future<void> _pickImage() async {
@@ -58,6 +67,94 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     }
   }
 
+  Future<void> fetchRentalItemDetail(int id) async {
+    final url = Uri.parse('http://10.0.2.2:8080/rental-item/$id');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      final categoryName = data['category']?['name'] ?? '전자제품';
+      setState(() {
+        final startRaw = data['rentalStartTime'];
+        final endRaw = data['rentalEndTime'];
+
+        if (startRaw != null && endRaw != null) {
+          final start = DateTime.parse(startRaw);
+          final end = DateTime.parse(endRaw);
+          _startTime = TimeOfDay.fromDateTime(start);
+          _endTime = TimeOfDay.fromDateTime(end);
+          _startTimeController.text = formatTimeOfDay(_startTime!);
+          _endTimeController.text = formatTimeOfDay(_endTime!);
+        } else {
+          _startTime = null;
+          _endTime = null;
+          _startTimeController.clear();
+          _endTimeController.clear();
+        }
+        isTransfer = categoryName == '양도(무료 나눔)';
+        _titleController.text = data['title'] ?? '';
+        _descriptionController.text = data['description'] ?? '';
+        selectedCategory = categoryName;
+        isFaceToFace = data['isFaceToFace'] ?? false;
+        isNonFaceToFace = !isFaceToFace;
+
+        final start = DateTime.parse(data['rentalStartTime']);
+        final end = DateTime.parse(data['rentalEndTime']);
+        _startTime = TimeOfDay.fromDateTime(start);
+        _endTime = TimeOfDay.fromDateTime(end);
+        _startTimeController.text = formatTimeOfDay(_startTime!);
+        _endTimeController.text = formatTimeOfDay(_endTime!);
+      });
+    } else {
+      print("❌ 대여글 불러오기 실패: ${response.statusCode}");
+    }
+  }
+
+  Future<void> fetchImages(int itemId) async {
+    final url = Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      setState(() {
+        _imageData = data
+            .where(
+                (e) => e['imageUrl'] != null && e['imageUrl'].startsWith('/'))
+            .map((e) =>
+                {"id": e['id'], "url": 'http://10.0.2.2:8080${e['imageUrl']}'})
+            .toList();
+      });
+    } else {
+      print("❌ 이미지 불러오기 실패: ${response.statusCode}");
+    }
+  }
+
+  Future<void> deleteImageFromServer(int imageId) async {
+    final url = Uri.parse('http://10.0.2.2:8080/images/api/$imageId');
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      print("이미지 삭제 성공");
+    } else {
+      print("❌ 이미지 삭제 실패: ${response.statusCode}");
+    }
+  }
+
+  String _getCategoryNameById(int id) {
+    final reverseMap = {
+      1: '전자기기',
+      2: '학용품',
+      3: '서적',
+      4: '생활용품',
+      5: '양도(무료 나눔)',
+    };
+    return reverseMap[id]!;
+  }
+
+  String formatTimeOfDay(TimeOfDay time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
+  }
+
   Future<void> _selectStartTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -84,21 +181,56 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     }
   }
 
-  Future<void> submitGivePost() async {
-    final rentalUrl = Uri.parse('http://10.0.2.2:8080/rental-item');
+  Widget buildImagePreview(Map<String, dynamic> image, int index) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.network(
+            image["url"],
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: -6,
+          right: -6,
+          child: GestureDetector(
+            onTap: () async {
+              await deleteImageFromServer(image["id"]);
+              setState(() {
+                _imageData.removeAt(index);
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close, size: 14, color: Colors.white),
+            ),
+          ),
+        )
+      ],
+    );
+  }
 
+  Future<void> submitUpdatePost() async {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
     final startTime = _startTimeController.text.trim();
     final endTime = _endTimeController.text.trim();
-    final category = selectedCategory ?? '전자기기';
+    final category = selectedCategory ?? 'categoryId';
 
     final categoryMap = {
       '전자기기': 1,
       '학용품': 2,
       '서적': 3,
       '생활용품': 4,
-      '양도(무료나눔)': 5,
+      '양도(무료 나눔)': 5,
     };
     final categoryId = categoryMap[category] ?? 1;
 
@@ -112,47 +244,44 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       return;
     }
 
-    final today = DateTime.now().toIso8601String().split('T')[0];
-    final rentalStartTime = '${today}T$startTime';
-    final rentalEndTime = '${today}T$endTime';
-
-    final body = {
+    final Map<String, dynamic> body = {
       "studentNum": studentNum,
       "title": title,
       "description": description,
       "isFaceToFace": isFaceToFace,
       "categoryId": categoryId,
-      if (!isTransfer) ...{
-        "rentalStartTime": rentalStartTime,
-        "rentalEndTime": rentalEndTime,
-      }
     };
+    if (isTransfer) {
+      body["rentalStartTime"] = null;
+      body["rentalEndTime"] = null;
+    } else {
+      final today = DateTime.now().toIso8601String().split('T')[0];
+      final rentalStartTime = '${today}T$startTime';
+      final rentalEndTime = '${today}T$endTime';
+      body["rentalStartTime"] = rentalStartTime;
+      body["rentalEndTime"] = rentalEndTime;
+    }
 
-    final response = await http.post(
-      rentalUrl,
+    final url = Uri.parse('http://10.0.2.2:8080/rental-item/${widget.id}');
+    final response = await http.put(
+      url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
-    print('응답 본문: "${response.body}"');
-    print('보내는 body: ${jsonEncode(body)}');
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final responseData = jsonDecode(response.body);
-      final rentalItemId = responseData['id']; // 글 등록 후 받은 ID
 
-      // 📌 이미지 업로드 호출
-      await uploadImagesToServer(rentalItemId);
-
+    if (response.statusCode == 200) {
+      await uploadImagesToServer(widget.id);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('등록 성공!')),
+        SnackBar(content: Text('수정이 완료되었습니다!')),
       );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomeScreen()),
       );
     } else {
-      print('등록 실패: ${response.statusCode} - ${response.body}');
+      print('수정 실패: ${response.statusCode} - ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('등록 실패! 다시 시도해주세요.')),
+        SnackBar(content: Text('수정 실패! 다시 시도해주세요.')),
       );
     }
   }
@@ -178,10 +307,12 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: 70),
-                            Text('대여 물품 등록하기',
-                                style: TextStyle(
-                                    fontSize: 33, fontWeight: FontWeight.bold)),
+                            Center(
+                              child: Text('대여 글 수정하기',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                  )),
+                            ),
                             SizedBox(height: 30),
                             Container(
                               decoration: BoxDecoration(
@@ -191,50 +322,102 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 15, horizontal: 20),
+                                    vertical: 10, horizontal: 20),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('이미지를 첨부하면',
-                                            style: TextStyle(fontSize: 20)),
-                                        Text('대여가 원활해집니다',
-                                            style: TextStyle(fontSize: 20)),
-                                        SizedBox(height: 3),
-                                        Text('최대 5장 첨부 가능',
-                                            style: TextStyle(fontSize: 11)),
-                                      ],
+                                    Container(
+                                      width: 60,
+                                      height: 73,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xffEBEBEB),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.camera_alt,
+                                                size: 36),
+                                            onPressed: _pickImage,
+                                          ),
+                                          Text(
+                                              '${_imageData.length + _imageFiles.length}/5',
+                                              style: TextStyle(fontSize: 14)),
+                                        ],
+                                      ),
                                     ),
-                                    Column(
-                                      children: [
-                                        IconButton(
-                                          icon:
-                                              Icon(Icons.camera_alt, size: 40),
-                                          onPressed: _pickImage,
+                                    SizedBox(width: 12),
+                                    ...List.generate(
+                                      _imageData.length,
+                                      (index) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: buildImagePreview(
+                                            _imageData[index], index),
+                                      ),
+                                    ),
+                                    ...List.generate(
+                                      _imageFiles.length,
+                                      (index) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.file(
+                                                File(_imageFiles[index].path),
+                                                width: 60,
+                                                height: 60,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: -6,
+                                              right: -6,
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    _imageFiles.removeAt(index);
+                                                  });
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(Icons.close,
+                                                      size: 14,
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            )
+                                          ],
                                         ),
-                                        Text('${_imageFiles.length}/5',
-                                            style: TextStyle(fontSize: 14)),
-                                      ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
                             SizedBox(height: 20),
+                            Text(
+                              '제목',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 3),
                             TextField(
                               controller: _titleController,
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Color(0xffEBEBEB),
-                                hintText: '글 제목',
                                 isDense: true,
-                                hintStyle: TextStyle(fontSize: 14),
                                 contentPadding: EdgeInsets.symmetric(
-                                    vertical: 5, horizontal: 20),
+                                    vertical: 7, horizontal: 20),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: BorderSide(
@@ -264,7 +447,15 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedCategory = newValue;
-                                        isTransfer = newValue == '양도(무료나눔)';
+                                        isTransfer = newValue == '양도(무료 나눔)';
+
+                                        if (isTransfer) {
+                                          // 시간 필드 초기화
+                                          _startTime = null;
+                                          _endTime = null;
+                                          _startTimeController.clear();
+                                          _endTimeController.clear();
+                                        }
                                       });
                                     },
                                     items: <String>[
@@ -272,7 +463,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                       '학용품',
                                       '서적',
                                       '생활용품',
-                                      '양도(무료나눔)',
+                                      '양도(무료 나눔)',
                                     ].map<DropdownMenuItem<String>>(
                                         (String value) {
                                       return DropdownMenuItem<String>(
@@ -358,6 +549,11 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                               ),
                               SizedBox(height: 20),
                             ],
+                            Text(
+                              '자세한 설명',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 3),
                             Container(
                               height: 235,
                               child: TextField(
@@ -368,12 +564,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: Color(0xffEBEBEB),
-                                  hintText: '상품에 대한 설명을 자세하게 적어주세요.',
                                   contentPadding: EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 15),
                                   alignLabelWithHint: true,
                                   isDense: true,
-                                  hintStyle: TextStyle(fontSize: 14),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
@@ -443,7 +637,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: submitGivePost,
+                        onPressed: submitUpdatePost,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xff97C663),
                           shape: RoundedRectangleBorder(
@@ -452,7 +646,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                           padding: EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: Text(
-                          'RenTree에 글 올리기',
+                          '수정 완료',
                           style: TextStyle(
                               fontSize: 24,
                               color: Colors.white,

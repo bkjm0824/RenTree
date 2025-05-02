@@ -28,6 +28,21 @@ class _LikeScreenState extends State<LikeScreen> {
     loadLikedItems();
   }
 
+  String formatTimeDifference(DateTime createdAt) {
+    final now = DateTime.now();
+    final diff = now.difference(createdAt);
+
+    if (diff.inMinutes < 1) return '방금 전';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+    if (diff.inHours < 24) return '${diff.inHours}시간 전';
+    if (diff.inDays < 30) return '${diff.inDays}일 전';
+
+    final months = diff.inDays ~/ 30;
+    if (months < 12) return '${months}달 전';
+
+    return '${createdAt.year}.${createdAt.month.toString().padLeft(2, '0')}.${createdAt.day.toString().padLeft(2, '0')}';
+  }
+
   String formatDateTime(String dateTimeStr) {
     final dt = DateTime.parse(dateTimeStr);
     return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
@@ -38,7 +53,8 @@ class _LikeScreenState extends State<LikeScreen> {
     studentNum = prefs.getString('studentNum');
     if (studentNum == null) return;
 
-    final res = await http.get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+    final res = await http
+        .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
 
     if (res.statusCode == 200) {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -49,7 +65,8 @@ class _LikeScreenState extends State<LikeScreen> {
         final rentalItemId = e['rentalItemId'];
         String imageUrl = 'assets/box.png';
 
-        final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
+        final imageRes = await http.get(
+            Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
         if (imageRes.statusCode == 200) {
           final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (images.isNotEmpty) {
@@ -73,7 +90,6 @@ class _LikeScreenState extends State<LikeScreen> {
       print('❌ 찜 목록 불러오기 실패');
     }
   }
-
 
   Future<void> toggleLike(int rentalItemId) async {
     if (studentNum == null) return;
@@ -173,6 +189,7 @@ class _LikeScreenState extends State<LikeScreen> {
                       itemCount: likedItems.length,
                       itemBuilder: (context, index) {
                         final item = likedItems[index];
+                        // final timeAgo = formatTimeDifference(createdAt);
                         return GestureDetector(
                           child: Column(
                             children: [
@@ -181,7 +198,8 @@ class _LikeScreenState extends State<LikeScreen> {
                                   final result = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => PostRentalScreen(itemId: item['id']),
+                                      builder: (_) =>
+                                          PostRentalScreen(itemId: item['id']),
                                     ),
                                   );
 
@@ -209,9 +227,13 @@ class _LikeScreenState extends State<LikeScreen> {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          child: item['imageUrl'].toString().startsWith('http')
-                                              ? Image.network(item['imageUrl'], fit: BoxFit.cover)
-                                              : Image.asset(item['imageUrl'], fit: BoxFit.cover),
+                                          child: item['imageUrl']
+                                                  .toString()
+                                                  .startsWith('http')
+                                              ? Image.network(item['imageUrl'],
+                                                  fit: BoxFit.cover)
+                                              : Image.asset(item['imageUrl'],
+                                                  fit: BoxFit.cover),
                                         ),
                                       ),
                                       SizedBox(width: 16),
@@ -237,10 +259,16 @@ class _LikeScreenState extends State<LikeScreen> {
                                                   ),
                                                   SizedBox(height: 4),
                                                   Text(
-                                                    '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                                                    (item['rentalStartTime'] ??
+                                                                item[
+                                                                    'startTime']) ==
+                                                            null
+                                                        ? '양도(무료나눔)'
+                                                        : '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
                                                     style: TextStyle(
-                                                        color: Colors.grey[700],
-                                                        fontSize: 13),
+                                                      color: Colors.grey[700],
+                                                      fontSize: 13,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -249,7 +277,7 @@ class _LikeScreenState extends State<LikeScreen> {
                                             Expanded(
                                               flex: 1,
                                               child: Container(
-                                                height: 90, // 아이템 높이랑 비슷하게 맞춰주자
+                                                height: 90,
                                                 child: Column(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -266,10 +294,10 @@ class _LikeScreenState extends State<LikeScreen> {
                                                           size: 30,
                                                           color: Colors.red),
                                                     ),
-                                                    Text('3시간 전',
-                                                        style: TextStyle(
-                                                            color: Colors.grey,
-                                                            fontSize: 12)),
+                                                    // Text(timeAgo,
+                                                    //     style: TextStyle(
+                                                    //         color: Colors.grey,
+                                                    //         fontSize: 13)),
                                                   ],
                                                 ),
                                               ),

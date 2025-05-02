@@ -60,7 +60,7 @@ class _MyPageMypostState extends State<MyPageMypost>
   Future<int> fetchLikeCount(int rentalItemId) async {
     //좋아요 수 가져오기
     final url =
-    Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
+        Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -83,17 +83,16 @@ class _MyPageMypostState extends State<MyPageMypost>
     }
     final List<dynamic> decoded = jsonDecode(utf8.decode(res.bodyBytes));
     final List<Map<String, dynamic>> allItems =
-    decoded.map((e) => Map<String, dynamic>.from(e)).toList();
+        decoded.map((e) => Map<String, dynamic>.from(e)).toList();
 
     // 좋아요 목록 가져오기
-    final likeRes = await http.get(
-        Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+    final likeRes = await http
+        .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
     Set<int> likedIds = {};
     if (likeRes.statusCode == 200) {
       final List<dynamic> likedData =
-      jsonDecode(utf8.decode(likeRes.bodyBytes));
-      likedIds =
-          likedData.map<int>((e) => e['rentalItemId'] as int).toSet();
+          jsonDecode(utf8.decode(likeRes.bodyBytes));
+      likedIds = likedData.map<int>((e) => e['rentalItemId'] as int).toSet();
     }
 
     // 내 글만 필터링 + 이미지 및 좋아요 여부 추가
@@ -323,21 +322,29 @@ class _MyPageMypostState extends State<MyPageMypost>
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
-                        style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                        (item['rentalStartTime'] ?? item['startTime']) == null
+                            ? '양도(무료나눔)'
+                            : '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 13,
+                        ),
                       ),
                       SizedBox(height: 8),
                       Row(
                         children: [
                           if (isRental)
                             GestureDetector(
-                              onTap: () => toggleLike(item['id'], item['isLiked'] ?? false),
+                              onTap: () => toggleLike(
+                                  item['id'], item['isLiked'] ?? false),
                               child: Icon(
                                 item['isLiked'] == true
                                     ? Icons.favorite
                                     : Icons.favorite_border,
                                 size: 20,
-                                color: item['isLiked'] == true ? Colors.red : Colors.grey,
+                                color: item['isLiked'] == true
+                                    ? Colors.red
+                                    : Colors.grey,
                               ),
                             ),
                           if (isRental) SizedBox(width: 5),

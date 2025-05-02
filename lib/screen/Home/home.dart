@@ -390,10 +390,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     fontSize: 16)),
                                             SizedBox(height: 4),
                                             Text(
-                                              '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                                              (item['rentalStartTime'] ??
+                                                          item['startTime']) ==
+                                                      null
+                                                  ? '양도(무료나눔)'
+                                                  : '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
                                               style: TextStyle(
-                                                  color: Colors.grey[700],
-                                                  fontSize: 13),
+                                                color: Colors.grey[700],
+                                                fontSize: 13,
+                                              ),
                                             ),
                                             SizedBox(height: 8),
                                           ],
