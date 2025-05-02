@@ -47,14 +47,23 @@ class _LoginScreenState extends State<LoginScreen> {
       final studentId = data['id'];
       final nickname = data['nickname'] ?? '1';
       final studentNum = studentIdInput;
+      final profileImage = data['profileImage'];
+      print('🎯 받은 프로필 이미지 값: $profileImage');
+      if (profileImage != null) {
+        await prefs.setInt('profileImage', profileImage);
+      } else {
+        print('❌ 서버 응답에 profileImage가 없음!');
+      }
 
       if (studentId != null) {
         await prefs.setInt('studentId', studentId);
         await prefs.setString('studentNum', studentNum);
         await prefs.setString('nickname', nickname);
+        await prefs.setInt('profileImage', data['profileImage']);
 
         print('✅ 저장된 studentId: $studentId');
         print('✅ 저장된 nickname: $nickname');
+        print('🎯 로그인 응답 데이터: $data');
       }
 
       if (nickname == '1') {
