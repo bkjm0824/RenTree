@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -196,18 +198,85 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('이미지를 첨부하면',
-                                            style: TextStyle(fontSize: 20)),
-                                        Text('대여가 원활해집니다',
-                                            style: TextStyle(fontSize: 20)),
-                                        SizedBox(height: 3),
-                                        Text('최대 5장 첨부 가능',
-                                            style: TextStyle(fontSize: 11)),
-                                      ],
+                                    Expanded(
+                                      child: _imageFiles.isEmpty
+                                          ? Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('이미지를 첨부하면',
+                                                    style: TextStyle(
+                                                        fontSize: 20)),
+                                                Text('대여가 원활해집니다',
+                                                    style: TextStyle(
+                                                        fontSize: 20)),
+                                                SizedBox(height: 3),
+                                                Text('최대 5장 첨부 가능',
+                                                    style: TextStyle(
+                                                        fontSize: 11)),
+                                              ],
+                                            )
+                                          : SizedBox(
+                                              height: 80,
+                                              child: ListView.builder(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                itemCount: _imageFiles.length,
+                                                itemBuilder: (context, index) {
+                                                  return Stack(
+                                                    children: [
+                                                      Container(
+                                                        margin: EdgeInsets.only(
+                                                            right: 10),
+                                                        width: 80,
+                                                        height: 80,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                          image:
+                                                              DecorationImage(
+                                                            image: FileImage(
+                                                                File(_imageFiles[
+                                                                        index]
+                                                                    .path)),
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Positioned(
+                                                        top: 5,
+                                                        right: 5,
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {
+                                                              _imageFiles
+                                                                  .removeAt(
+                                                                      index);
+                                                            });
+                                                          },
+                                                          child: Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .black54,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                            ),
+                                                            child: Icon(
+                                                                Icons.close,
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 18),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              ),
+                                            ),
                                     ),
                                     Column(
                                       children: [
