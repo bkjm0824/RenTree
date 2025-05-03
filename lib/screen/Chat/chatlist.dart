@@ -32,11 +32,59 @@ class _ChatScreenState extends State<ChatListScreen> {
     final studentNum = prefs.getString('studentNum');
     if (studentNum == null) return;
 
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/rentalItem/$studentNum');
+    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
-      final data = jsonDecode(utf8.decode(res.bodyBytes));
+      final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes)); // ✅ 여기에 data 선언!
+
+      for (var room in data) {
+        if (room['rentalItemId'] != null) {
+          final itemId = room['rentalItemId'];
+          final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
+          final itemRes = await http.get(Uri.parse('http://10.0.2.2:8080/rental-item/$itemId'));
+
+          if (imageRes.statusCode == 200) {
+            final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
+            if (images.isNotEmpty) {
+              room['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
+            }
+          }
+
+          if (itemRes.statusCode == 200) {
+            final itemData = jsonDecode(utf8.decode(itemRes.bodyBytes));
+
+            final start = itemData['rentalStartTime'];
+            final end = itemData['rentalEndTime'];
+            final isFaceToFace = itemData['isFaceToFace'] ?? true;
+            final writerNickname = itemData['student']?['nickname'] ?? '작성자';
+
+            room['writerNickname'] = writerNickname;
+
+            if (start != null && end != null) {
+              final startDt = DateTime.parse(start);
+              final endDt = DateTime.parse(end);
+              final startStr = '${startDt.hour.toString().padLeft(2, '0')}:${startDt.minute.toString().padLeft(2, '0')}';
+              final endStr = '${endDt.hour.toString().padLeft(2, '0')}:${endDt.minute.toString().padLeft(2, '0')}';
+              room['rentalTimeText'] = '$startStr ~ $endStr';
+            } else {
+              room['rentalTimeText'] = '양도(무료 나눔)';
+            }
+
+            room['isFaceToFace'] = isFaceToFace;
+            room['rentalItemTitle'] = itemData['title'] ?? '제목 없음'; // 안전하게
+          }
+        }
+        final lastMsg = await getLastMessageForRoom(room['roomId']);
+        room['lastMessage'] = lastMsg ?? '메시지 없음';
+      }
+
+      data.sort((a, b) {
+        final aDate = DateTime.parse(a['lastMessageTime'] ?? a['createdAt']);
+        final bDate = DateTime.parse(b['lastMessageTime'] ?? b['createdAt']);
+        return bDate.compareTo(aDate); // 최신 메시지 순
+      });
+
       setState(() {
         _chatRooms = data;
         isLoading = false;
@@ -47,6 +95,20 @@ class _ChatScreenState extends State<ChatListScreen> {
         isLoading = false;
       });
     }
+  }
+
+  Future<String?> getLastMessageForRoom(int chatRoomId) async {
+    final url = Uri.parse('http://10.0.2.2:8080/chatmessages/room/$chatRoomId');
+    final res = await http.get(url);
+
+    if (res.statusCode == 200) {
+      final List<dynamic> messages = jsonDecode(utf8.decode(res.bodyBytes));
+      if (messages.isNotEmpty) {
+        final lastMessage = messages.last; // 시간순 정렬되어 있다고 가정
+        return lastMessage['message'];
+      }
+    }
+    return null;
   }
 
   void _onItemTapped(int index) {
@@ -156,10 +218,10 @@ class _ChatScreenState extends State<ChatListScreen> {
                   : _chatRooms.isEmpty
                   ? Center(child: Text('채팅 목록이 없습니다.'))
                   : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: _chatRooms.length,
                   itemBuilder: (context, index) {
                     final room = _chatRooms[index];
-
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -167,11 +229,11 @@ class _ChatScreenState extends State<ChatListScreen> {
                           MaterialPageRoute(
                             builder: (context) => ChatDetailScreen(
                               chatRoomId: room['roomId'],
-                              userName: room['requesterNickname'],
-                              title: room['rentalItemTitle'],
-                              rentalTimeText: '시간 정보 없음',
-                              isFaceToFace: true,
-                              imageUrl: '', // 필요 시 서버 연동
+                              userName: room['writerNickname'] ?? '익명',
+                              title: room['rentalItemTitle'] ?? '제목 없음',
+                              rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
+                              isFaceToFace: room['isFaceToFace'] ?? true,
+                              imageUrl: room['imageUrl'] ?? '',
                             ),
                           ),
                         );
@@ -179,49 +241,64 @@ class _ChatScreenState extends State<ChatListScreen> {
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 16), // 🔼 더 여유 있게
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 // 물품 이미지
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.asset(
-                                    'assets/box.png', // 추후 network 이미지로 교체 가능
-                                    width: 60,
-                                    height: 60,
+                                  child: room['imageUrl'] != null
+                                      ? Image.network(
+                                    room['imageUrl'],
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        'assets/box.png',
+                                        width: 70,
+                                        height: 70,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  )
+                                      : Image.asset(
+                                    'assets/box.png',
+                                    width: 70,
+                                    height: 70,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                SizedBox(width: 12),
+                                SizedBox(width: 16), // 🔼 이미지-텍스트 간격 넓힘
                                 // 텍스트 정보
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        room['requesterNickname'] ?? '익명',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                        room['writerNickname'] ?? '익명',
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17), // 🔼 폰트 크기
+                                      ),
+                                      SizedBox(height: 6), // 🔼 간격 조금 더 줌
+                                      Text(
+                                        room['rentalItemTitle'] ?? '제목 없음',
+                                        style: TextStyle(fontSize: 15),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       SizedBox(height: 4),
                                       Text(
-                                        room['rentalItemTitle'] ?? '제목 없음',
-                                        style: TextStyle(fontSize: 14),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        room['lastMessage'] ?? '메시지 없음', // 백엔드에서 추가 필요
-                                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                                        room['lastMessage'] ?? '메시지 없음',
+                                        style: TextStyle(fontSize: 13, color: Colors.grey),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
                                 ),
-                                SizedBox(width: 6),
+                                SizedBox(width: 8),
                                 // 날짜
                                 Text(
-                                  room['createdAt'].toString().substring(5, 10), // MM-DD만 표시
+                                  room['createdAt'].toString().substring(5, 10),
                                   style: TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                               ],

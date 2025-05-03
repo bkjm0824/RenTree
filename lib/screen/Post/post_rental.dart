@@ -636,7 +636,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                   builder: (context) => ChatDetailScreen(
                                     chatRoomId: chatRoomId,
                                     userName: nickname,
-                                    imageUrl: imageUrl,
+                                    imageUrl: imageUrls[0],
                                     title: title,
                                     rentalTimeText: rentalTimeRangeText,
                                     isFaceToFace: isFaceToFace,
