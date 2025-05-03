@@ -13,11 +13,104 @@ class PostRentalScreen extends StatefulWidget {
   _PostRentalScreenState createState() => _PostRentalScreenState();
 }
 
+class ImageViewerScreen extends StatefulWidget {
+  final List<String> imageUrls;
+  final int initialIndex;
+
+  const ImageViewerScreen(
+      {Key? key, required this.imageUrls, required this.initialIndex})
+      : super(key: key);
+
+  @override
+  _ImageViewerScreenState createState() => _ImageViewerScreenState();
+}
+
+class _ImageViewerScreenState extends State<ImageViewerScreen> {
+  late PageController controller;
+  int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = PageController(initialPage: widget.initialIndex);
+    currentIndex = widget.initialIndex;
+    controller.addListener(() {
+      if (controller.page != null) {
+        setState(() {
+          currentIndex = controller.page!.round();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: controller,
+            itemCount: widget.imageUrls.length,
+            itemBuilder: (context, index) {
+              return Center(
+                child: InteractiveViewer(
+                  child: Image.network(
+                    widget.imageUrls[index],
+                    fit: BoxFit.contain,
+                    width: MediaQuery.of(context).size.width,
+                  ),
+                ),
+              );
+            },
+          ),
+          Positioned(
+            bottom: 35,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                widget.imageUrls.length,
+                (index) => Container(
+                  width: 8,
+                  height: 8,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: currentIndex == index
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.4),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.close, color: Colors.white, size: 37),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PostRentalScreenState extends State<PostRentalScreen> {
   String title = '';
   String description = '';
-  String imageUrl = '';
   String nickname = '';
+  List<String> imageUrls = [];
   bool isFaceToFace = true;
   DateTime? rentalStartTime;
   DateTime? rentalEndTime;
@@ -30,7 +123,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   int likeCount = 0;
   String? studentNum;
   bool likeChanged = false;
-  String category = ''; // ← 추가
+  String category = '';
+  int currentImageIndex = 0;
 
   @override
   void initState() {
@@ -59,7 +153,9 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
         if (imageRes.statusCode == 200) {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
-            imageUrl = 'http://10.0.2.2:8080${imageData[0]['imageUrl']}';
+            imageUrls = imageData
+                .map<String>((e) => 'http://10.0.2.2:8080${e['imageUrl']}')
+                .toList();
           }
         }
 
@@ -228,6 +324,72 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     }
   }
 
+  Widget buildImageSlider() {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 340,
+          child: PageView.builder(
+            itemCount: imageUrls.length,
+            controller: PageController(viewportFraction: 1),
+            onPageChanged: (index) {
+              setState(() {
+                currentImageIndex = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ImageViewerScreen(
+                      imageUrls: imageUrls,
+                      initialIndex: index,
+                    ),
+                  ),
+                ),
+                child: Image.network(
+                  imageUrls[index],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              );
+            },
+          ),
+        ),
+        if (imageUrls.length > 1)
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    imageUrls.length,
+                    (index) => Container(
+                      width: 8,
+                      height: 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: currentImageIndex == index
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.4),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,13 +412,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                           ),
                           color: Colors.grey[300],
                         ),
-                        child: imageUrl.isNotEmpty
-                            ? Image.network(
-                                imageUrl,
-                                width: double.infinity,
-                                height: 250,
-                                fit: BoxFit.cover,
-                              )
+                        child: imageUrls.isNotEmpty
+                            ? buildImageSlider()
                             : Container(
                                 color: Colors.grey[300],
                                 child: Icon(Icons.image_not_supported,
@@ -268,7 +425,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                         left: 10,
                         child: IconButton(
                           icon: Icon(Icons.arrow_back_ios_new,
-                              color: Colors.white, size: 30),
+                              color: Colors.grey, size: 30),
                           onPressed: () => Navigator.pop(context, likeChanged),
                         ),
                       ),
@@ -435,6 +592,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                 ),
                               ],
                             ),
+                            SizedBox(height: 10),
                           ],
                         ),
                       ),
