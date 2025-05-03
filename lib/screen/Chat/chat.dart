@@ -8,13 +8,15 @@ import 'package:http/http.dart' as http;
 class ChatMessage {
   final String content;
   final bool isMe;
+  final DateTime? sentAt;
 
-  ChatMessage({required this.content, required this.isMe});
+  ChatMessage({required this.content, required this.isMe, this.sentAt});
 
   factory ChatMessage.fromJson(Map<String, dynamic> json, String myStudentNum) {
     return ChatMessage(
       content: json['message'],
       isMe: json['senderStudentNum'] == myStudentNum,
+      sentAt: json['sentAt'] != null ? DateTime.parse(json['sentAt']) : null,
     );
   }
 }
@@ -49,7 +51,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void initState() {
     super.initState();
     _loadStudentNumAndConnect();
-    fetchChatRoomAndItem();
+    _loadPreviousMessages(); // 🔥 이거 꼭 추가
   }
 
   Future<void> _loadStudentNumAndConnect() async {
@@ -57,47 +59,48 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final studentNum = prefs.getString('studentNum') ?? '';
 
     ChatService.connect(
+      isMounted: () => mounted,
       onMessageReceived: (String body) {
+        if (!mounted) return; // 👈 이거 꼭 필요함!!
         final decoded = jsonDecode(body);
         final message = ChatMessage.fromJson(decoded, studentNum);
-        setState(() {
-          _messages.add(message);
-        });
+
+        // try-catch로 안전하게 감싸기
+        try {
+          if (mounted) {
+            setState(() {
+              _messages.add(message);
+            });
+          }
+        } catch (e) {
+          print("⚠️ setState 에러 발생: $e");
+        }
       },
     );
   }
 
-  Future<void> fetchChatRoomAndItem() async {
-    final roomUrl = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
-    final roomRes = await http.get(roomUrl);
+  Future<void> _loadPreviousMessages() async {
+    final url = Uri.parse('http://10.0.2.2:8080/chatmessages/room/${widget.chatRoomId}');
+    final res = await http.get(url);
 
-    String title = '';
-    String imageUrl = '';
-    String timeRange = '';
-    bool isFaceToFace = true;
-    bool isLoading = true;
+    if (res.statusCode == 200) {
+      final prefs = await SharedPreferences.getInstance();
+      final studentNum = prefs.getString('studentNum') ?? '';
+      final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
-    if (roomRes.statusCode == 200) {
-      final roomData = jsonDecode(utf8.decode(roomRes.bodyBytes));
-      final rentalItemId = roomData['rentalItemId'];
-
-      final itemUrl = Uri.parse('http://10.0.2.2:8080/rental-item/$rentalItemId');
-      final itemRes = await http.get(itemUrl);
-
-      if (itemRes.statusCode == 200) {
-        final itemData = jsonDecode(utf8.decode(itemRes.bodyBytes));
-        final start = DateTime.parse(itemData['rentalStartTime']);
-        final end = DateTime.parse(itemData['rentalEndTime']);
-
-        setState(() {
-          title = itemData['title'];
-          imageUrl = itemData['imageUrl'] ?? ''; // 너가 별도로 /images 호출했다면 여기에 적용
-          timeRange = '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')} ~ ${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
-          isFaceToFace = itemData['isFaceToFace'];
-          isLoading = false;
-        });
-      }
+      setState(() {
+        _messages = data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+      });
+    } else {
+      print("❌ 메시지 불러오기 실패: ${res.statusCode}");
     }
+  }
+
+  @override
+  void dispose() {
+    ChatService.disconnect(); // ✅ 연결 완전히 종료 + 콜백 끊기
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -179,7 +182,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       SizedBox(height: 5),
                       Text(
                         '대여시간: ${widget.rentalTimeText} | ${widget.isFaceToFace ? '대면' : '비대면'}',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
