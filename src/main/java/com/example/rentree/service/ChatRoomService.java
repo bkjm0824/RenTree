@@ -40,7 +40,15 @@ public class ChatRoomService {
         RentalItem rentalItem = rentalItemRepository.findById(request.getRentalItemId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 렌탈 아이템을 찾을 수 없습니다."));
 
-        // 채팅방 생성
+        // 중복 채팅방 여부 확인
+        Optional<ChatRoom> existingChatRoom = chatRoomRepository
+                .findByRequester_IdAndRentalItem_Id(requester.getId(), rentalItem.getId());
+
+        if (existingChatRoom.isPresent()) {
+            throw new IllegalStateException("이미 해당 물품에 대해 채팅방이 존재합니다.");
+        }
+
+        // 새 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .rentalItem(rentalItem)
                 .requester(requester)
@@ -57,6 +65,7 @@ public class ChatRoomService {
                 .createdAt(savedChatRoom.getCreatedAt())
                 .build();
     }
+
 
     // 채팅방 조회
     @Transactional(readOnly = true)

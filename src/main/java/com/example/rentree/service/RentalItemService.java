@@ -96,10 +96,8 @@ public class RentalItemService {
         if (request.getDescription() != null) rentalItem.setDescription(request.getDescription());
         if (request.getIsFaceToFace() != null) rentalItem.setIsFaceToFace(request.getIsFaceToFace());
         if (request.getCreatedAt() != null) rentalItem.setCreatedAt(request.getCreatedAt());
-        if (request.getRentalStartTime() != null) rentalItem.setRentalStartTime(request.getRentalStartTime());
-        if (request.getRentalEndTime() != null) rentalItem.setRentalEndTime(request.getRentalEndTime());
-
-        // 변경된 부분 시작
+        rentalItem.setRentalStartTime(request.getRentalStartTime());
+        rentalItem.setRentalEndTime(request.getRentalEndTime());
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리 ID입니다."));
@@ -108,6 +106,7 @@ public class RentalItemService {
 
         rentalItemRepository.save(rentalItem);
     }
+
 
 
     @Transactional
