@@ -20,6 +20,7 @@ class _ChatScreenState extends State<ChatListScreen> {
   int _selectedIndex = 3;
   List<dynamic> _chatRooms = [];
   bool isLoading = true;
+  String? _myStudentNum;
 
   @override
   void initState() {
@@ -30,6 +31,8 @@ class _ChatScreenState extends State<ChatListScreen> {
   Future<void> _fetchChatRooms() async {
     final prefs = await SharedPreferences.getInstance();
     final studentNum = prefs.getString('studentNum');
+    _myStudentNum = prefs.getString('studentNum');
+    if (_myStudentNum == null) return;
     if (studentNum == null) return;
 
     final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
@@ -39,6 +42,7 @@ class _ChatScreenState extends State<ChatListScreen> {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes)); // ✅ 여기에 data 선언!
 
       for (var room in data) {
+        print('📦 받은 채팅방 데이터: $room');
         if (room['rentalItemId'] != null) {
           final itemId = room['rentalItemId'];
           final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
@@ -60,7 +64,8 @@ class _ChatScreenState extends State<ChatListScreen> {
             final writerNickname = itemData['student']?['nickname'] ?? '작성자';
 
             room['writerNickname'] = writerNickname;
-
+            room['writerStudentNum'] = itemData['student']?['studentNum'] ?? '';
+            room['responderStudentNum'] = room['responderStudentNum'] ?? room['responderStudentNum'];
             if (start != null && end != null) {
               final startDt = DateTime.parse(start);
               final endDt = DateTime.parse(end);
@@ -229,14 +234,25 @@ class _ChatScreenState extends State<ChatListScreen> {
                           MaterialPageRoute(
                             builder: (context) => ChatDetailScreen(
                               chatRoomId: room['roomId'],
-                              userName: room['writerNickname'] ?? '익명',
+                              userName: (_myStudentNum == room['writerStudentNum'])
+                                  ? room['requesterNickname']
+                                  : room['writerNickname'],
                               title: room['rentalItemTitle'] ?? '제목 없음',
                               rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
                               isFaceToFace: room['isFaceToFace'] ?? true,
                               imageUrl: room['imageUrl'] ?? '',
+                              writerStudentNum: room['writerStudentNum'] ?? '',
+                              requesterStudentNum: room['requesterStudentNum'] ?? '', // 👈 수정 필수
+                              receiverStudentNum: (_myStudentNum == room['writerStudentNum'])
+                                  ? room['requesterStudentNum']
+                                  : room['writerStudentNum'], // 🔥🔥🔥 가장 중요한 수정!
                             ),
                           ),
-                        );
+                        ).then((value) {
+                          if (value == true) {
+                            _fetchChatRooms(); // ✅ pop(true)로 돌아왔을 때 새로고침
+                          }
+                        });
                       },
                       child: Column(
                         children: [

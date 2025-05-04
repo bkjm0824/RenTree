@@ -28,6 +28,9 @@ class ChatDetailScreen extends StatefulWidget {
   final String rentalTimeText;
   final bool isFaceToFace;
   final int chatRoomId;
+  final String writerStudentNum;       // 글 작성자 학번
+  final String requesterStudentNum;
+  final String receiverStudentNum;
 
   ChatDetailScreen({
     required this.userName,
@@ -36,6 +39,9 @@ class ChatDetailScreen extends StatefulWidget {
     required this.title,
     required this.rentalTimeText,
     required this.isFaceToFace,
+    required this.writerStudentNum,          // ✅ 추가
+    required this.requesterStudentNum,
+    required this.receiverStudentNum,
   });
 
 
@@ -46,6 +52,8 @@ class ChatDetailScreen extends StatefulWidget {
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
   TextEditingController _messageController = TextEditingController();
   List<ChatMessage> _messages = [];
+  String? _myStudentNum;
+  String? _receiverStudentNum;
 
   @override
   void initState() {
@@ -56,14 +64,22 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Future<void> _loadStudentNumAndConnect() async {
     final prefs = await SharedPreferences.getInstance();
-    final studentNum = prefs.getString('studentNum') ?? '';
+    final myStudentNum = prefs.getString('studentNum') ?? '';
+    _myStudentNum = myStudentNum;
+
+    // 상대방 학번 계산
+    _receiverStudentNum = (_myStudentNum == widget.requesterStudentNum)
+        ? widget.receiverStudentNum
+        : widget.requesterStudentNum;
 
     ChatService.connect(
+      chatRoomId: widget.chatRoomId,
+      myStudentNum: myStudentNum,
       isMounted: () => mounted,
       onMessageReceived: (String body) {
         if (!mounted) return; // 👈 이거 꼭 필요함!!
         final decoded = jsonDecode(body);
-        final message = ChatMessage.fromJson(decoded, studentNum);
+        final message = ChatMessage.fromJson(decoded, myStudentNum);
 
         // try-catch로 안전하게 감싸기
         try {
@@ -96,6 +112,45 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     }
   }
 
+  void _confirmDeleteChatRoom() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('채팅방 나가기'),
+        content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('취소'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // 다이얼로그 닫기
+              await _deleteChatRoom(); // 삭제 요청
+            },
+            child: Text('확인', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteChatRoom() async {
+    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final res = await http.delete(url);
+
+    if (res.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('채팅방이 삭제되었습니다.')),
+      );
+      Navigator.of(context).pop(true); // ✅ true 반환
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('삭제 실패: ${res.statusCode}')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     ChatService.disconnect(); // ✅ 연결 완전히 종료 + 콜백 끊기
@@ -125,7 +180,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pop(context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
                         },
                       ),
                       Text(
@@ -136,11 +191,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.search),
-                        color: Color(0xff97C663),
+                        icon: const Icon(Icons.delete_outline_rounded),
+                        color: Colors.redAccent,
                         iconSize: 30,
                         padding: EdgeInsets.only(right: 10),
-                        onPressed: () {},
+                        onPressed: _confirmDeleteChatRoom, // 👇 함수로 분리
                       ),
                     ],
                   ),
@@ -259,16 +314,31 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   ),
                   IconButton(
                     icon: Icon(Icons.send, color: Color(0xff97C663)),
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        final senderStudentNum = prefs.getString('studentNum') ?? '';
-                        final text = _messageController.text.trim();
-                        if (text.isNotEmpty) {
-                          ChatService.sendMessage(widget.chatRoomId, senderStudentNum, text); // 채팅방ID는 필요에 따라 넘겨줘야 해
-                          _messageController.clear();
-                        }
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      final senderStudentNum = prefs.getString('studentNum') ?? '';
+
+                      final text = _messageController.text.trim();
+                      if (text.isNotEmpty) {
+                        // ✅ 동적으로 receiver 설정
+                        final receiverStudentNum =
+                        (senderStudentNum == widget.writerStudentNum)
+                            ? widget.requesterStudentNum
+                            : widget.writerStudentNum;
+
+                        ChatService.sendMessage(
+                          widget.chatRoomId,
+                          _myStudentNum!,
+                          _receiverStudentNum!, // ✅ receiver는 위에서 계산된 값을 사용
+                          text,
+                        );
+
+                        _messageController.clear();
+                        FocusScope.of(context).unfocus();
                       }
+                    },
                   ),
+
                 ],
               ),
             ),
