@@ -15,6 +15,7 @@ public class ChatRoomResponseDTO {
     private String rentalItemTitle;     // 물품 제목
     private String requesterNickname;   // 요청자 닉네임 (학번 대신 닉네임 사용)
     private String responderNickname;   // 응답자 닉네임 (학번 대신 닉네임 사용)
+    private String requesterStudentNum;
     private String responderStudentNum; // 응답자 학번
     private LocalDateTime createdAt;    // 채팅방 생성 시간
 }

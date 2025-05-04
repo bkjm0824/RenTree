@@ -32,13 +32,16 @@ public class ChatMessageService {
 
         // 발신자(학생) 찾기
         Student sender = studentRepository.findByStudentNum(requestDTO.getSenderStudentNum())
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("발신자 학번의 학생을 찾을 수 없습니다."));
+
+        Student receiver = studentRepository.findByStudentNum(requestDTO.getReceiverStudentNum())
+                .orElseThrow(() -> new IllegalArgumentException("수신자 학번의 학생을 찾을 수 없습니다."));
 
         // 메시지 엔티티 생성
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
-                .receiver(chatRoom.getResponder()) // 수신자는 채팅방의 응답자
+                .receiver(receiver) // 수신자는 채팅방의 응답자
                 .message(requestDTO.getMessage())
                 .build();
 
@@ -50,8 +53,8 @@ public class ChatMessageService {
                 .chatRoomId(chatRoom.getId())
                 .senderStudentNum(sender.getStudentNum())
                 .senderNickname(sender.getNickname())
-                .receiverStudentNum(chatRoom.getResponder().getStudentNum())
-                .receiverNickname(chatRoom.getResponder().getNickname())
+                .receiverStudentNum(receiver.getStudentNum()) // ✅ receiver 설정 수정됨
+                .receiverNickname(receiver.getNickname())     // ✅ receiver 설정 수정됨
                 .message(savedMessage.getMessage())
                 .sentAt(savedMessage.getSentAt())
                 .build();
@@ -68,6 +71,8 @@ public class ChatMessageService {
                         .chatRoomId(msg.getChatRoom().getId())
                         .senderStudentNum(msg.getSender().getStudentNum())
                         .senderNickname(msg.getSender().getNickname())
+                        .receiverStudentNum(msg.getReceiver().getStudentNum())
+                        .receiverNickname(msg.getReceiver().getNickname())
                         .message(msg.getMessage())
                         .sentAt(msg.getSentAt())
                         .build())

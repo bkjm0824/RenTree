@@ -67,6 +67,7 @@ public class ChatRoomService {
                 .rentalItemTitle(rentalItem.getTitle())
                 .requesterNickname(requester.getNickname())
                 .responderNickname(responder.getNickname())
+                .requesterStudentNum(requester.getStudentNum())
                 .responderStudentNum(responder.getStudentNum())
                 .createdAt(savedChatRoom.getCreatedAt())
                 .build();
@@ -94,6 +95,8 @@ public class ChatRoomService {
                 .rentalItemTitle(rentalItem.getTitle()) // 물품 제목 반환
                 .requesterNickname(requesterNickname)
                 .responderNickname(responderNickname)
+                .requesterStudentNum(chatRoom.getRequester().getStudentNum())   // ✅ 추가
+                .responderStudentNum(chatRoom.getResponder().getStudentNum())
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }
@@ -127,6 +130,8 @@ public class ChatRoomService {
                             .rentalItemTitle(rentalItem.getTitle())
                             .requesterNickname(requesterNickname)
                             .responderNickname(responderNickname)
+                            .requesterStudentNum(chatRoom.getRequester().getStudentNum())
+                            .responderStudentNum(chatRoom.getResponder().getStudentNum())
                             .createdAt(chatRoom.getCreatedAt())
                             .build();
                 })
