@@ -30,9 +30,13 @@ public class ChatSocketService {
         Student sender = studentRepository.findByStudentNum(requestDTO.getSenderStudentNum())
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다."));
 
+        // 수신자 찾기
+        Student receiver = studentRepository.findByStudentNum(requestDTO.getReceiverStudentNum())
+                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다."));
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
+                .receiver(receiver) // 수신자는 채팅방의 응답자
                 .message(requestDTO.getMessage())
                 .build();
 
@@ -43,12 +47,15 @@ public class ChatSocketService {
                 .chatRoomId(chatRoom.getId())
                 .senderStudentNum(sender.getStudentNum())
                 .senderNickname(sender.getNickname())
+                .receiverStudentNum(receiver.getStudentNum())
+                .receiverNickname(receiver.getNickname())
                 .message(savedMessage.getMessage())
                 .sentAt(savedMessage.getSentAt())
                 .build();
 
-        // 동적으로 특정 채팅방에 메시지 전송
-        messagingTemplate.convertAndSend("/topic/chat/" + chatRoom.getId(), responseDTO);
+        // 발신자와 수신자에게 메시지 전송
+        messagingTemplate.convertAndSend("/user/" + sender.getStudentNum() + "/queue/messages", responseDTO); // 발신자에게도 전송
+        messagingTemplate.convertAndSend("/user/" + receiver.getStudentNum() + "/queue/messages", responseDTO); // 수신자에게 전송
 
         return responseDTO;
     }

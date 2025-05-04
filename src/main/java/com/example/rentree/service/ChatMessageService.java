@@ -38,6 +38,7 @@ public class ChatMessageService {
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
+                .receiver(chatRoom.getResponder()) // 수신자는 채팅방의 응답자
                 .message(requestDTO.getMessage())
                 .build();
 
@@ -49,6 +50,8 @@ public class ChatMessageService {
                 .chatRoomId(chatRoom.getId())
                 .senderStudentNum(sender.getStudentNum())
                 .senderNickname(sender.getNickname())
+                .receiverStudentNum(chatRoom.getResponder().getStudentNum())
+                .receiverNickname(chatRoom.getResponder().getNickname())
                 .message(savedMessage.getMessage())
                 .sentAt(savedMessage.getSentAt())
                 .build();

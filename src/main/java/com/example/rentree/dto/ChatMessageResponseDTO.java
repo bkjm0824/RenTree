@@ -15,6 +15,8 @@ public class ChatMessageResponseDTO {
     private Long chatRoomId;            // 채팅방 ID
     private String senderStudentNum;    // 발신자 학번
     private String senderNickname;      // 발신자 닉네임
+    private String receiverStudentNum;  // 수신자 학번
+    private String receiverNickname;    // 수신자 닉네임
     private String message;             // 메시지 내용
     private LocalDateTime sentAt;       // 보낸 시간
 }

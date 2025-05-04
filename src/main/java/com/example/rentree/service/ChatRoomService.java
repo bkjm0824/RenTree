@@ -40,6 +40,9 @@ public class ChatRoomService {
         RentalItem rentalItem = rentalItemRepository.findById(request.getRentalItemId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 렌탈 아이템을 찾을 수 없습니다."));
 
+        // 요청자가 물품의 소유자인지 확인
+        Student responder = rentalItem.getResponder();
+
         // 중복 채팅방 여부 확인
         Optional<ChatRoom> existingChatRoom = chatRoomRepository
                 .findByRequester_IdAndRentalItem_Id(requester.getId(), rentalItem.getId());
@@ -52,6 +55,7 @@ public class ChatRoomService {
         ChatRoom chatRoom = ChatRoom.builder()
                 .rentalItem(rentalItem)
                 .requester(requester)
+                .responder(responder)
                 .createdAt(java.time.LocalDateTime.now())
                 .build();
 
@@ -62,6 +66,8 @@ public class ChatRoomService {
                 .rentalItemId(rentalItem.getId())
                 .rentalItemTitle(rentalItem.getTitle())
                 .requesterNickname(requester.getNickname())
+                .responderNickname(responder.getNickname())
+                .responderStudentNum(responder.getStudentNum())
                 .createdAt(savedChatRoom.getCreatedAt())
                 .build();
     }
@@ -77,6 +83,9 @@ public class ChatRoomService {
         // 요청자의 닉네임 조회
         String requesterNickname = chatRoom.getRequester().getNickname();
 
+        // 응답자의 닉네임 조회
+        String responderNickname = chatRoom.getResponder().getNickname();
+
         // 채팅방 응답 DTO 생성
         RentalItem rentalItem = chatRoom.getRentalItem(); // rentalItem 객체 가져오기
         return ChatRoomResponseDTO.builder()
@@ -84,6 +93,7 @@ public class ChatRoomService {
                 .rentalItemId(rentalItem.getId()) // rentalItem ID 반환
                 .rentalItemTitle(rentalItem.getTitle()) // 물품 제목 반환
                 .requesterNickname(requesterNickname)
+                .responderNickname(responderNickname)
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }
@@ -105,17 +115,18 @@ public class ChatRoomService {
     // 학번으로 요청자가 생성한 채팅방 목록 조회
     @Transactional(readOnly = true)
     public List<ChatRoomResponseDTO> getChatRoomsByStudentNum(String studentNum) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByRequester_StudentNum(studentNum);
-
+        List<ChatRoom> chatRooms = chatRoomRepository.findByRequester_StudentNumOrResponder_StudentNum(studentNum, studentNum);
         return chatRooms.stream()
                 .map(chatRoom -> {
                     RentalItem rentalItem = chatRoom.getRentalItem();
                     String requesterNickname = chatRoom.getRequester().getNickname();
+                    String responderNickname = chatRoom.getResponder().getNickname();
                     return ChatRoomResponseDTO.builder()
                             .roomId(chatRoom.getId())
                             .rentalItemId(rentalItem.getId())
                             .rentalItemTitle(rentalItem.getTitle())
                             .requesterNickname(requesterNickname)
+                            .responderNickname(responderNickname)
                             .createdAt(chatRoom.getCreatedAt())
                             .build();
                 })

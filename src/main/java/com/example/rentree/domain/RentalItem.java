@@ -76,4 +76,7 @@ public class RentalItem {
         this.isAvailable = true;
     }
 
+    public Student getResponder() {
+        return this.student;
+    }
 }

@@ -26,6 +26,10 @@ public class ChatRoom {
     @JoinColumn(name = "requester_id", nullable = false)
     private Student requester;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responder_id", nullable = false)
+    private Student responder;
+
     @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -28,6 +28,11 @@ public class ChatMessage {
     @JoinColumn(name = "sender_student_num", referencedColumnName = "student_num", nullable = false)
     private Student sender;
 
+    // 수신자: studentNum으로 외래키 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_student_num", referencedColumnName = "student_num", nullable = false)
+    private Student receiver;
+
     // 메시지 내용
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
