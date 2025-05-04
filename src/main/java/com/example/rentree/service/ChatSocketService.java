@@ -30,13 +30,17 @@ public class ChatSocketService {
         Student sender = studentRepository.findByStudentNum(requestDTO.getSenderStudentNum())
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다."));
 
-        // 수신자 찾기
-        Student receiver = studentRepository.findByStudentNum(requestDTO.getReceiverStudentNum())
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다."));
+
+        Student receiver = chatRoom.getParticipants().stream()
+                .filter(p -> p instanceof Student && !((Student)p).getStudentNum().equals(sender.getStudentNum())) // Student 타입으로 캐스팅
+                .map(p -> (Student)p)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("상대방을 찾을 수 없습니다."));
+
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
-                .receiver(receiver) // 수신자는 채팅방의 응답자
+                .receiver(receiver) // 채팅방에서 유추한 수신자
                 .message(requestDTO.getMessage())
                 .build();
 

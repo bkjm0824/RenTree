@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,4 +35,8 @@ public class ChatRoom {
     @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public Collection<Object> getParticipants() {
+        return List.of(requester, responder);
+    }
 }
