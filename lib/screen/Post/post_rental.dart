@@ -17,13 +17,14 @@ class ImageViewerScreen extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;
 
+
   const ImageViewerScreen(
       {Key? key, required this.imageUrls, required this.initialIndex})
       : super(key: key);
 
   @override
   _ImageViewerScreenState createState() => _ImageViewerScreenState();
-}
+  }
 
 class _ImageViewerScreenState extends State<ImageViewerScreen> {
   late PageController controller;
@@ -125,6 +126,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   bool likeChanged = false;
   String category = '';
   int currentImageIndex = 0;
+  String writerStudentNum = '';
 
   @override
   void initState() {
@@ -169,7 +171,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
           final profileIndex = data['student']['profileImage'] ?? 1;
           writerProfileImagePath =
               'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
-
+          writerStudentNum = data['student']['studentNum'] ?? '';
+          print('🧑‍🎓 writerStudentNum: $writerStudentNum');
           if (category == '양도(무료 나눔)' ||
               data['rentalStartTime'] == null ||
               data['rentalEndTime'] == null) {
@@ -265,10 +268,26 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     }
   }
 
-  Future<int?> createChatRoom(int rentalItemId, String studentNum) async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms');
-    final response = await http.post(
-      url,
+  Future<Map<String, dynamic>?> getOrCreateChatRoom(int rentalItemId, String studentNum) async {
+    final existingUrl = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+    final existingRes = await http.get(existingUrl);
+
+    if (existingRes.statusCode == 200) {
+      final List<dynamic> existingRooms = jsonDecode(utf8.decode(existingRes.bodyBytes));
+      for (var room in existingRooms) {
+        if (room['rentalItemId'] == rentalItemId) {
+          return {
+            'chatRoomId': room['roomId'],
+            'responderStudentNum': room['responderStudentNum'], // ✅ 이 값도
+            'requesterStudentNum': room['requesterStudentNum'],
+          };
+        }
+      }
+    }
+
+    final createUrl = Uri.parse('http://10.0.2.2:8080/chatrooms');
+    final createRes = await http.post(
+      createUrl,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'rentalItemId': rentalItemId,
@@ -276,14 +295,19 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       }),
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(utf8.decode(response.bodyBytes));
-      return data['roomId']; // 생성된 chatRoomId 반환
-    } else {
-      print('❌ 채팅방 생성 실패: ${response.statusCode}');
-      return null;
+    if (createRes.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(createRes.bodyBytes));
+      return {
+        'chatRoomId': data['roomId'],
+        'responderStudentNum': data['responderStudentNum'], // ✅
+      };
     }
+
+    print('❌ 채팅방 생성 실패: ${createRes.statusCode}');
+    return null;
   }
+
+
 
   void _confirmDelete() {
     showDialog(
@@ -626,20 +650,27 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                             final prefs = await SharedPreferences.getInstance();
                             final studentNum = prefs.getString('studentNum');
                             if (studentNum == null) return;
+                            print('📦 studentNum from SharedPreferences: $studentNum');
+                            print('🧑‍🎓 writerStudentNum: $writerStudentNum');
+                            final result = await getOrCreateChatRoom(widget.itemId, studentNum);
+                            if (result != null) {
+                              final chatRoomId = result['chatRoomId'];
 
-                            final chatRoomId =
-                                await createChatRoom(widget.itemId, studentNum);
-                            if (chatRoomId != null) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ChatDetailScreen(
                                     chatRoomId: chatRoomId,
                                     userName: nickname,
-                                    imageUrl: imageUrls[0],
+                                    imageUrl: imageUrls.isNotEmpty ? imageUrls[0] : '',
                                     title: title,
                                     rentalTimeText: rentalTimeRangeText,
                                     isFaceToFace: isFaceToFace,
+                                    writerStudentNum: writerStudentNum,
+                                    requesterStudentNum: studentNum!,
+                                    receiverStudentNum: studentNum! == writerStudentNum
+                                        ? result['requesterStudentNum']  // 내가 글쓴이면, 상대는 요청자
+                                        : writerStudentNum,              // 내가 요청자면, 상대는 글쓴이
                                   ),
                                 ),
                               );

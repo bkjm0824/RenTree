@@ -14,6 +14,8 @@ class ChatService {
   static void Function()? _unsubscribe;
 
   static void connect({
+    required int chatRoomId,
+    required String myStudentNum, // 👈 추가
     required Function(String) onMessageReceived,
     required bool Function() isMounted,
   }) {
@@ -22,9 +24,13 @@ class ChatService {
         url: 'http://10.0.2.2:8080/ws-chat',
         onConnect: (frame) {
           print('✅ WebSocket 연결 성공');
+
+          final destination = '/user/$myStudentNum/queue/messages'; // 👈 변경된 경로
+          print('📡 구독 시작: $destination');
           _unsubscribe = stompClient.subscribe(
-            destination: '/topic/chatroom',
+            destination: destination,
             callback: (frame) {
+              print('📩 메시지 수신함');
               if (frame.body != null && isMounted()) {
                 onMessageReceived(frame.body!);
               }
@@ -38,6 +44,7 @@ class ChatService {
     stompClient.activate();
   }
 
+
   static void disconnect() {
     print("🧹 ChatService.disconnect() 호출됨");
     try {
@@ -49,12 +56,20 @@ class ChatService {
   }
 
 
-  static void sendMessage(int chatRoomId, String senderStudentNum, String message) {
+  static void sendMessage(
+      int chatRoomId,
+      String senderStudentNum,
+      String receiverStudentNum, // 🔥 추가
+      String message,
+      ) {
     final msg = {
       'chatRoomId': chatRoomId,
       'senderStudentNum': senderStudentNum,
+      'receiverStudentNum': receiverStudentNum, // 🔥 반드시 포함
       'message': message,
     };
+
+    print('🚀 보낼 메시지: $msg');
 
     stompClient.send(
       destination: '/app/chat/send',
