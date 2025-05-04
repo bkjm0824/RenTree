@@ -57,9 +57,12 @@ public class ChatSocketService {
                 .sentAt(savedMessage.getSentAt())
                 .build();
 
-        // 발신자와 수신자에게 메시지 전송
-        messagingTemplate.convertAndSend("/user/" + sender.getStudentNum() + "/queue/messages", responseDTO); // 발신자에게도 전송
-        messagingTemplate.convertAndSend("/user/" + receiver.getStudentNum() + "/queue/messages", responseDTO); // 수신자에게 전송
+        // 발신자 및 수신자에게 메시지 전송
+        messagingTemplate.convertAndSendToUser(
+                sender.getStudentNum().toString(), "/queue/messages", responseDTO);
+
+        messagingTemplate.convertAndSendToUser(
+                receiver.getStudentNum().toString(), "/queue/messages", responseDTO);
 
         return responseDTO;
     }
