@@ -32,31 +32,6 @@ class _MyPageMypostState extends State<MyPageMypost>
     fetchPosts();
   }
 
-  Future<void> toggleLike(int itemId, bool isCurrentlyLiked) async {
-    final prefs = await SharedPreferences.getInstance();
-    final studentNum = prefs.getString('studentNum');
-    if (studentNum == null) return;
-
-    final url = Uri.parse(
-        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=$itemId');
-
-    final res = await http.post(url);
-
-    if (res.statusCode == 200) {
-      setState(() {
-        final item = _allPosts.firstWhere((e) => e['id'] == itemId);
-        item['isLiked'] = !isCurrentlyLiked;
-        if (item['isLiked']) {
-          item['likeCount'] = (item['likeCount'] ?? 0) + 1;
-        } else {
-          item['likeCount'] = (item['likeCount'] ?? 1) - 1;
-        }
-      });
-    } else {
-      print('❌ 좋아요 토글 실패: ${res.statusCode}');
-    }
-  }
-
   Future<int> fetchLikeCount(int rentalItemId) async {
     //좋아요 수 가져오기
     final url =
@@ -330,40 +305,33 @@ class _MyPageMypostState extends State<MyPageMypost>
                           fontSize: 13,
                         ),
                       ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (isRental)
-                            GestureDetector(
-                              onTap: () => toggleLike(
-                                  item['id'], item['isLiked'] ?? false),
-                              child: Icon(
-                                item['isLiked'] == true
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                size: 20,
-                                color: item['isLiked'] == true
-                                    ? Colors.red
-                                    : Colors.grey,
-                              ),
-                            ),
-                          if (isRental) SizedBox(width: 5),
-                          if (isRental)
-                            Text(
-                              '${item['likeCount'] ?? 0}',
-                              style: TextStyle(fontSize: 13),
-                            ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
                 SizedBox(width: 10),
-                Column(
-                  children: [
-                    Text(formatTimeDifference(item['createdAt']),
-                        style: TextStyle(color: Colors.grey, fontSize: 13)),
-                  ],
+                Container(
+                  height: 90,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(formatTimeDifference(item['createdAt']),
+                          style: TextStyle(color: Colors.grey, fontSize: 13)),
+                      Row(
+                        children: [
+                          if (isRental) ...[
+                            Icon(
+                              Icons.favorite,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                            SizedBox(width: 2),
+                            Text('${item['likeCount'] ?? 0}'),
+                          ],
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ],
             ),

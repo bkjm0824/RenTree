@@ -116,27 +116,6 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     }
   }
 
-  Future<void> _toggleLike(Map<String, dynamic> item) async {
-    final prefs = await SharedPreferences.getInstance();
-    final studentNum = prefs.getString('studentNum');
-    if (studentNum == null) return;
-
-    final url = Uri.parse(
-        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=${item['id']}');
-    final res = await http.post(url);
-
-    if (res.statusCode == 200) {
-      setState(() {
-        item['isLiked'] = !(item['isLiked'] ?? false);
-        item['likeCount'] =
-            (item['likeCount'] ?? 0) + (item['isLiked'] ? 1 : -1);
-        _likedChanged = true;
-      });
-    } else {
-      print('좋아요 토글 실패');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,13 +183,15 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => PostRentalScreen(itemId: item['id']),
+                                  builder: (_) =>
+                                      PostRentalScreen(itemId: item['id']),
                                 ),
                               );
                               if (result == true) {
                                 _loadLikedItems().then((_) {
                                   _fetchResults(_searchController.text);
-                                  _likedChanged = true; // ✅ 검색 결과에서 뒤로 갈 때도 Home에 전달할 수 있도록
+                                  _likedChanged =
+                                      true; // ✅ 검색 결과에서 뒤로 갈 때도 Home에 전달할 수 있도록
                                 });
                               }
                             } else {
@@ -234,13 +215,23 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: item['type'] == 'rental'
-                                          ? (imageUrl != null && imageUrl.toString().startsWith('http')
-                                          ? Image.network(imageUrl,
-                                          width: 90, height: 90, fit: BoxFit.cover)
-                                          : Image.asset('assets/box.png',
-                                          width: 90, height: 90, fit: BoxFit.cover))
-                                          : Image.asset('assets/requestIcon.png',
-                                          width: 90, height: 90, fit: BoxFit.cover),
+                                          ? (imageUrl != null &&
+                                                  imageUrl
+                                                      .toString()
+                                                      .startsWith('http')
+                                              ? Image.network(imageUrl,
+                                                  width: 90,
+                                                  height: 90,
+                                                  fit: BoxFit.cover)
+                                              : Image.asset('assets/box.png',
+                                                  width: 90,
+                                                  height: 90,
+                                                  fit: BoxFit.cover))
+                                          : Image.asset(
+                                              'assets/requestIcon.png',
+                                              width: 90,
+                                              height: 90,
+                                              fit: BoxFit.cover),
                                     ),
                                     SizedBox(width: 20),
                                     Expanded(
@@ -254,45 +245,48 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                                   fontSize: 16)),
                                           SizedBox(height: 4),
                                           Text(
-                                            '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
+                                            (item['rentalStartTime'] ??
+                                                        item['startTime']) ==
+                                                    null
+                                                ? '양도(무료나눔)'
+                                                : '${formatDateTime(item['rentalStartTime'] ?? item['startTime'])} ~ ${formatDateTime(item['rentalEndTime'] ?? item['endTime'])}',
                                             style: TextStyle(
-                                                color: Colors.grey[700],
-                                                fontSize: 13),
-                                          ),
-                                          SizedBox(height: 8),
-                                          Row(
-                                            children: [
-                                              if (item['type'] == 'rental') ...[
-                                                GestureDetector(
-                                                  onTap: () =>
-                                                      _toggleLike(item),
-                                                  child: Icon(
-                                                    item['isLiked']
-                                                        ? Icons.favorite
-                                                        : Icons.favorite_border,
-                                                    size: 20,
-                                                    color: item['isLiked']
-                                                        ? Colors.red
-                                                        : Colors.grey,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 5),
-                                                Text(
-                                                    '${item['likeCount'] ?? 0}'),
-                                              ]
-                                            ],
+                                              color: Colors.grey[700],
+                                              fontSize: 13,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     SizedBox(width: 10),
-                                    Column(
-                                      children: [
-                                        Text(timeAgo,
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 13)),
-                                      ],
+                                    Container(
+                                      height: 90,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(timeAgo,
+                                              style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 13)),
+                                          Row(
+                                            children: [
+                                              if (item['type'] == 'rental') ...[
+                                                Icon(
+                                                  Icons.favorite,
+                                                  color: Colors.grey,
+                                                  size: 20,
+                                                ),
+                                                SizedBox(width: 2),
+                                                Text(
+                                                    '${item['likeCount'] ?? 0}'),
+                                              ],
+                                            ],
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
