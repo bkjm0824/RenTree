@@ -21,6 +21,7 @@ class _ChatScreenState extends State<ChatListScreen> {
   List<dynamic> _chatRooms = [];
   bool isLoading = true;
   String? _myStudentNum;
+  int selectedFilter = 0; // 0: 전체, 1: 대여글, 2: 요청글
 
   @override
   void initState() {
@@ -39,14 +40,17 @@ class _ChatScreenState extends State<ChatListScreen> {
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes)); // ✅ 여기에 data 선언!
+      final List<dynamic> data =
+          jsonDecode(utf8.decode(res.bodyBytes)); // ✅ 여기에 data 선언!
 
       for (var room in data) {
         print('📦 받은 채팅방 데이터: $room');
         if (room['rentalItemId'] != null) {
           final itemId = room['rentalItemId'];
-          final imageRes = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
-          final itemRes = await http.get(Uri.parse('http://10.0.2.2:8080/rental-item/$itemId'));
+          final imageRes = await http
+              .get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
+          final itemRes = await http
+              .get(Uri.parse('http://10.0.2.2:8080/rental-item/$itemId'));
 
           if (imageRes.statusCode == 200) {
             final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
@@ -65,12 +69,15 @@ class _ChatScreenState extends State<ChatListScreen> {
 
             room['writerNickname'] = writerNickname;
             room['writerStudentNum'] = itemData['student']?['studentNum'] ?? '';
-            room['responderStudentNum'] = room['responderStudentNum'] ?? room['responderStudentNum'];
+            room['responderStudentNum'] =
+                room['responderStudentNum'] ?? room['responderStudentNum'];
             if (start != null && end != null) {
               final startDt = DateTime.parse(start);
               final endDt = DateTime.parse(end);
-              final startStr = '${startDt.hour.toString().padLeft(2, '0')}:${startDt.minute.toString().padLeft(2, '0')}';
-              final endStr = '${endDt.hour.toString().padLeft(2, '0')}:${endDt.minute.toString().padLeft(2, '0')}';
+              final startStr =
+                  '${startDt.hour.toString().padLeft(2, '0')}:${startDt.minute.toString().padLeft(2, '0')}';
+              final endStr =
+                  '${endDt.hour.toString().padLeft(2, '0')}:${endDt.minute.toString().padLeft(2, '0')}';
               room['rentalTimeText'] = '$startStr ~ $endStr';
             } else {
               room['rentalTimeText'] = '양도(무료 나눔)';
@@ -160,6 +167,40 @@ class _ChatScreenState extends State<ChatListScreen> {
     }
   }
 
+  String formatTimeDifference(String createdAt) {
+    final created = DateTime.parse(createdAt);
+    final now = DateTime.now();
+    final diff = now.difference(created);
+
+    if (diff.inMinutes < 1) return '방금 전';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+    if (diff.inHours < 24) return '${diff.inHours}시간 전';
+    if (diff.inDays < 30) return '${diff.inDays}일 전';
+    final months = diff.inDays ~/ 30;
+    if (months < 12) return '${months}달 전';
+    return '${created.year}.${created.month.toString().padLeft(2, '0')}.${created.day.toString().padLeft(2, '0')}';
+  }
+
+  String formatDateTime(String dateTimeStr) {
+    final dt = DateTime.parse(dateTimeStr);
+    return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  List<dynamic> get _filteredChatRooms {
+    switch (selectedFilter) {
+      case 1: // 대여글
+        return _chatRooms
+            .where((room) => room['rentalItemId'] != null)
+            .toList();
+      case 2: // 요청글
+        return _chatRooms
+            .where((room) => room['rentalItemId'] == null)
+            .toList();
+      default:
+        return _chatRooms;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,47 +214,69 @@ class _ChatScreenState extends State<ChatListScreen> {
               child: Column(
                 children: [
                   SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.notifications_rounded),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
-                          );
-                        },
-                      ),
-                      Text(
-                        '채팅 목록',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '채팅',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(right: 10),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
-                          );
-                        },
-                      ),
-                    ],
+                        IconButton(
+                          icon: const Icon(Icons.notifications_none_rounded),
+                          color: Color(0xff97C663),
+                          iconSize: 35,
+                          padding: EdgeInsets.only(left: 10),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 10),
-                  Container(height: 1, color: Colors.grey[300]), // 구분선
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: List.generate(3, (index) {
+                  final labels = ['전체', '대여글', '요청글'];
+                  final isSelected = selectedFilter == index;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedFilter = index;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            isSelected ? Color(0xff97C663) : Colors.grey[300],
+                        foregroundColor:
+                            isSelected ? Colors.white : Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      child: Text(labels[index]),
+                    ),
+                  );
+                }),
               ),
             ),
 
@@ -221,111 +284,147 @@ class _ChatScreenState extends State<ChatListScreen> {
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : _chatRooms.isEmpty
-                  ? Center(child: Text('채팅 목록이 없습니다.'))
-                  : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  itemCount: _chatRooms.length,
-                  itemBuilder: (context, index) {
-                    final room = _chatRooms[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatDetailScreen(
-                              chatRoomId: room['roomId'],
-                              userName: (_myStudentNum == room['writerStudentNum'])
-                                  ? room['requesterNickname']
-                                  : room['writerNickname'],
-                              title: room['rentalItemTitle'] ?? '제목 없음',
-                              rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
-                              isFaceToFace: room['isFaceToFace'] ?? true,
-                              imageUrl: room['imageUrl'] ?? '',
-                              writerStudentNum: room['writerStudentNum'] ?? '',
-                              requesterStudentNum: room['requesterStudentNum'] ?? '', // 👈 수정 필수
-                              receiverStudentNum: (_myStudentNum == room['writerStudentNum'])
-                                  ? room['requesterStudentNum']
-                                  : room['writerStudentNum'], // 🔥🔥🔥 가장 중요한 수정!
-                            ),
-                          ),
-                        ).then((value) {
-                          if (value == true) {
-                            _fetchChatRooms(); // ✅ pop(true)로 돌아왔을 때 새로고침
-                          }
-                        });
-                      },
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16), // 🔼 더 여유 있게
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // 물품 이미지
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: room['imageUrl'] != null
-                                      ? Image.network(
-                                    room['imageUrl'],
-                                    width: 70,
-                                    height: 70,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Image.asset(
-                                        'assets/box.png',
-                                        width: 70,
-                                        height: 70,
-                                        fit: BoxFit.cover,
-                                      );
-                                    },
-                                  )
-                                      : Image.asset(
-                                    'assets/box.png',
-                                    width: 70,
-                                    height: 70,
-                                    fit: BoxFit.cover,
+                      ? Center(child: Text('채팅 목록이 없습니다.'))
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          itemCount: _filteredChatRooms.length,
+                          itemBuilder: (context, index) {
+                            final room = _filteredChatRooms[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatDetailScreen(
+                                      chatRoomId: room[
+                                          'r.............................................oomId'],
+                                      userName: (_myStudentNum ==
+                                              room['writerStudentNum'])
+                                          ? room['requesterNickname']
+                                          : room['writerNickname'],
+                                      title: room['rentalItemTitle'] ?? '제목 없음',
+                                      rentalTimeText:
+                                          room['rentalTimeText'] ?? '시간 정보 없음',
+                                      isFaceToFace:
+                                          room['isFaceToFace'] ?? true,
+                                      imageUrl: room['imageUrl'] ?? '',
+                                      writerStudentNum:
+                                          room['writerStudentNum'] ?? '',
+                                      requesterStudentNum:
+                                          room['requesterStudentNum'] ??
+                                              '', // 👈 수정 필수
+                                      receiverStudentNum: (_myStudentNum ==
+                                              room['writerStudentNum'])
+                                          ? room['requesterStudentNum']
+                                          : room[
+                                              'writerStudentNum'], // 🔥🔥🔥 가장 중요한 수정!
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 16), // 🔼 이미지-텍스트 간격 넓힘
-                                // 텍스트 정보
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        room['writerNickname'] ?? '익명',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17), // 🔼 폰트 크기
-                                      ),
-                                      SizedBox(height: 6), // 🔼 간격 조금 더 줌
-                                      Text(
-                                        room['rentalItemTitle'] ?? '제목 없음',
-                                        style: TextStyle(fontSize: 15),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        room['lastMessage'] ?? '메시지 없음',
-                                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                ).then((value) {
+                                  if (value == true) {
+                                    _fetchChatRooms(); // ✅ pop(true)로 돌아왔을 때 새로고침
+                                  }
+                                });
+                              },
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16), // 🔼 더 여유 있게
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        // 물품 이미지
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: room['imageUrl'] != null
+                                              ? Image.network(
+                                                  room['imageUrl'],
+                                                  width: 70,
+                                                  height: 70,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return Image.asset(
+                                                      'assets/box.png',
+                                                      width: 70,
+                                                      height: 70,
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  },
+                                                )
+                                              : Image.asset(
+                                                  'assets/box.png',
+                                                  width: 70,
+                                                  height: 70,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                        ),
+                                        SizedBox(width: 16), // 🔼 이미지-텍스트 간격 넓힘
+                                        // 텍스트 정보
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    room['writerNickname'] ??
+                                                        '익명',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize:
+                                                            18), // 🔼 폰트 크기
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  Text(
+                                                    room['rentalItemTitle'] ??
+                                                        '제목 없음',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      color: Color(0xff7c7c7c),
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  Text(' | ',
+                                                      style: TextStyle(
+                                                          color:
+                                                              Color(0xff7c7c7c),
+                                                          fontSize: 17)),
+                                                  Text(
+                                                      formatTimeDifference(
+                                                          room['createdAt']),
+                                                      style: TextStyle(
+                                                          color:
+                                                              Color(0xff7c7c7c),
+                                                          fontSize: 15)),
+                                                ],
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                room['lastMessage'] ?? '메시지 없음',
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.grey),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        // 날짜
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 8),
-                                // 날짜
-                                Text(
-                                  room['createdAt'].toString().substring(5, 10),
-                                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Divider(height: 1, color: Colors.grey[300]),
-                        ],
-                      ),
-                    );
-                  }
-              ),
+                                  Divider(height: 1, color: Colors.grey[300]),
+                                ],
+                              ),
+                            );
+                          }),
             ),
           ],
         ),
@@ -366,4 +465,3 @@ class _ChatScreenState extends State<ChatListScreen> {
     );
   }
 }
-
