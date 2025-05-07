@@ -17,14 +17,13 @@ class ImageViewerScreen extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;
 
-
   const ImageViewerScreen(
       {Key? key, required this.imageUrls, required this.initialIndex})
       : super(key: key);
 
   @override
   _ImageViewerScreenState createState() => _ImageViewerScreenState();
-  }
+}
 
 class _ImageViewerScreenState extends State<ImageViewerScreen> {
   late PageController controller;
@@ -127,6 +126,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   String category = '';
   int currentImageIndex = 0;
   String writerStudentNum = '';
+  int chatRoomCount = 0;
 
   @override
   void initState() {
@@ -142,6 +142,30 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     return '$hour:$minute';
   }
 
+  Future<void> fetchChatRoomCountByWriter() async {
+    if (writerStudentNum.isEmpty) return;
+
+    final url =
+        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
+        final count =
+            rooms.where((room) => room['rentalItemId'] == widget.itemId).length;
+
+        setState(() {
+          chatRoomCount = count;
+        });
+      } else {
+        print('❌ 채팅방 조회 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ 예외 발생: $e');
+    }
+  }
+
   Future<void> fetchItemDetail() async {
     final baseUrl = 'http://10.0.2.2:8080/rental-item/${widget.itemId}';
 
@@ -155,9 +179,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
         if (imageRes.statusCode == 200) {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
-            imageUrls = imageData
-                .map<String>((e) => e['imageUrl'].toString())
-                .toList();
+            imageUrls =
+                imageData.map<String>((e) => e['imageUrl'].toString()).toList();
           }
         }
 
@@ -200,6 +223,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
 
           isLoading = false;
         });
+        await fetchChatRoomCountByWriter();
       }
     } catch (e) {
       print("❌ 예외 발생: $e");
@@ -268,12 +292,15 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     }
   }
 
-  Future<Map<String, dynamic>?> getOrCreateChatRoom(int rentalItemId, String studentNum) async {
-    final existingUrl = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+  Future<Map<String, dynamic>?> getOrCreateChatRoom(
+      int rentalItemId, String studentNum) async {
+    final existingUrl =
+        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
     final existingRes = await http.get(existingUrl);
 
     if (existingRes.statusCode == 200) {
-      final List<dynamic> existingRooms = jsonDecode(utf8.decode(existingRes.bodyBytes));
+      final List<dynamic> existingRooms =
+          jsonDecode(utf8.decode(existingRes.bodyBytes));
       for (var room in existingRooms) {
         if (room['rentalItemId'] == rentalItemId) {
           return {
@@ -306,8 +333,6 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     print('❌ 채팅방 생성 실패: ${createRes.statusCode}');
     return null;
   }
-
-
 
   void _confirmDelete() {
     showDialog(
@@ -500,36 +525,42 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                               ),
                                             ),
                                           ),
-                                          PopupMenuButton<String>(
-                                            icon: Icon(Icons.more_vert_rounded),
-                                            onSelected: (String value) {
-                                              if (value == 'change') {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        rentalChangeScreen(
-                                                            id: widget.itemId),
-                                                  ),
-                                                ).then(
-                                                    (_) => fetchItemDetail());
-                                              }
-                                              if (value == 'delete') {
-                                                _confirmDelete();
-                                              }
-                                            },
-                                            itemBuilder:
-                                                (BuildContext context) => [
-                                              PopupMenuItem<String>(
-                                                value: 'change',
-                                                child: Text('수정'),
-                                              ),
-                                              PopupMenuItem<String>(
-                                                value: 'delete',
-                                                child: Text('삭제'),
-                                              ),
-                                            ],
-                                          ),
+                                          // 변경된 코드
+                                          if (writerStudentNum == studentNum)
+                                            PopupMenuButton<String>(
+                                              icon:
+                                                  Icon(Icons.more_vert_rounded),
+                                              onSelected: (String value) {
+                                                if (value == 'change') {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          rentalChangeScreen(
+                                                              id: widget
+                                                                  .itemId),
+                                                    ),
+                                                  ).then(
+                                                      (_) => fetchItemDetail());
+                                                }
+                                                if (value == 'delete') {
+                                                  _confirmDelete();
+                                                }
+                                              },
+                                              itemBuilder:
+                                                  (BuildContext context) => [
+                                                PopupMenuItem<String>(
+                                                  value: 'change',
+                                                  child: Text('수정'),
+                                                ),
+                                                PopupMenuItem<String>(
+                                                  value: 'delete',
+                                                  child: Text('삭제'),
+                                                ),
+                                              ],
+                                            )
+                                          else
+                                            SizedBox.shrink(),
                                         ],
                                       ),
                                       SizedBox(height: 5),
@@ -624,6 +655,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                   ),
 
                   // 🔽 고정된 하단 좋아요/채팅 버튼
+                  // 기존 버튼 부분 수정
                   Container(
                     margin: EdgeInsets.only(top: 3, bottom: 20),
                     child: Row(
@@ -637,54 +669,80 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                             color: isLiked ? Colors.red : Colors.grey,
                           ),
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff97C663),
-                            foregroundColor: Colors.white,
-                            minimumSize: Size(270, 60),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                          ),
-                          onPressed: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            final studentNum = prefs.getString('studentNum');
-                            if (studentNum == null) return;
-                            print('📦 studentNum from SharedPreferences: $studentNum');
-                            print('🧑‍🎓 writerStudentNum: $writerStudentNum');
-                            final result = await getOrCreateChatRoom(widget.itemId, studentNum);
-                            if (result != null) {
-                              final chatRoomId = result['chatRoomId'];
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatDetailScreen(
-                                    chatRoomId: chatRoomId,
-                                    userName: nickname,
-                                    imageUrl: imageUrls.isNotEmpty ? imageUrls[0] : '',
-                                    title: title,
-                                    rentalTimeText: rentalTimeRangeText,
-                                    isFaceToFace: isFaceToFace,
-                                    writerStudentNum: writerStudentNum,
-                                    requesterStudentNum: studentNum!,
-                                    receiverStudentNum: studentNum! == writerStudentNum
-                                        ? result['requesterStudentNum']  // 내가 글쓴이면, 상대는 요청자
-                                        : writerStudentNum,              // 내가 요청자면, 상대는 글쓴이
+                        (studentNum == writerStudentNum)
+                            ? ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xff97C663),
+                                  foregroundColor: Colors.white,
+                                  minimumSize: Size(270, 60),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                              );
-                            }
-                          },
-                          child: Text(
-                            "채팅하기",
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                                onPressed: () {
+                                  // TODO: ChatListScreen으로 이동 등 추가 가능
+                                },
+                                child: Text(
+                                  "대화 중인 채팅 $chatRoomCount",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xff97C663),
+                                  foregroundColor: Colors.white,
+                                  minimumSize: Size(270, 60),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  final studentNum =
+                                      prefs.getString('studentNum');
+                                  if (studentNum == null) return;
+
+                                  final result = await getOrCreateChatRoom(
+                                      widget.itemId, studentNum);
+                                  if (result != null) {
+                                    final chatRoomId = result['chatRoomId'];
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatDetailScreen(
+                                          chatRoomId: chatRoomId,
+                                          userName: nickname,
+                                          imageUrl: imageUrls.isNotEmpty
+                                              ? imageUrls[0]
+                                              : '',
+                                          title: title,
+                                          rentalTimeText: rentalTimeRangeText,
+                                          isFaceToFace: isFaceToFace,
+                                          writerStudentNum: writerStudentNum,
+                                          requesterStudentNum: studentNum!,
+                                          receiverStudentNum: studentNum! ==
+                                                  writerStudentNum
+                                              ? result['requesterStudentNum']
+                                              : writerStudentNum,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Text(
+                                  "채팅하기",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                       ],
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
