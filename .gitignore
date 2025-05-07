@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# aws 비밀키 무시
+src/main/resources/application-secret.properties
+
+# 환경변수 무시
+.env
