@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (imageRes.statusCode == 200) {
         final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (images.isNotEmpty) {
-          item['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
+          item['imageUrl'] = images[0]['imageUrl'];
         }
       }
 

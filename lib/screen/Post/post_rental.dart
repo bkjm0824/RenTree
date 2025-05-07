@@ -156,7 +156,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
             imageUrls = imageData
-                .map<String>((e) => 'http://10.0.2.2:8080${e['imageUrl']}')
+                .map<String>((e) => e['imageUrl'].toString())
                 .toList();
           }
         }
