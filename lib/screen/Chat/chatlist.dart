@@ -293,6 +293,9 @@ class _ChatScreenState extends State<ChatListScreen> {
                           itemCount: _filteredChatRooms.length,
                           itemBuilder: (context, index) {
                             final room = _filteredChatRooms[index];
+                            final opponentNickname = (_myStudentNum == room['writerStudentNum'])
+                                ? room['requesterNickname']
+                                : room['writerNickname'];
                             return GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -305,6 +308,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                           ? room['requesterNickname']
                                           : room['writerNickname'],
                                       title: room['rentalItemTitle'] ?? '제목 없음',
+                                      rentalItemId: room['rentalItemId'],
                                       rentalTimeText:
                                           room['rentalTimeText'] ?? '시간 정보 없음',
                                       isFaceToFace:
@@ -374,13 +378,11 @@ class _ChatScreenState extends State<ChatListScreen> {
                                               Row(
                                                 children: [
                                                   Text(
-                                                    room['writerNickname'] ??
-                                                        '익명',
+                                                    opponentNickname ?? '익명',
                                                     style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize:
-                                                            18), // 🔼 폰트 크기
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 18,
+                                                    ),
                                                   ),
                                                   SizedBox(width: 5),
                                                   Text(
