@@ -723,8 +723,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                           rentalTimeText: rentalTimeRangeText,
                                           isFaceToFace: isFaceToFace,
                                           writerStudentNum: writerStudentNum,
-                                          requesterStudentNum: studentNum!,
-                                          receiverStudentNum: studentNum! ==
+                                          requesterStudentNum: studentNum,
+                                          receiverStudentNum: studentNum ==
                                                   writerStudentNum
                                               ? result['requesterStudentNum']
                                               : writerStudentNum,
