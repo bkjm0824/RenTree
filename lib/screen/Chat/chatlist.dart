@@ -55,7 +55,10 @@ class _ChatScreenState extends State<ChatListScreen> {
           if (imageRes.statusCode == 200) {
             final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
             if (images.isNotEmpty) {
-              room['imageUrl'] = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
+              final rawUrl = images[0]['imageUrl'];
+              room['imageUrl'] = rawUrl.toString().startsWith('http')
+                  ? rawUrl
+                  : 'http://10.0.2.2:8080$rawUrl';
             }
           }
 
@@ -296,8 +299,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => ChatDetailScreen(
-                                      chatRoomId: room[
-                                          'r.............................................oomId'],
+                                      chatRoomId: room['roomId'],
                                       userName: (_myStudentNum ==
                                               room['writerStudentNum'])
                                           ? room['requesterNickname']

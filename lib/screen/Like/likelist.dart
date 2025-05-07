@@ -70,7 +70,11 @@ class _LikeScreenState extends State<LikeScreen> {
         if (imageRes.statusCode == 200) {
           final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (images.isNotEmpty) {
-            imageUrl = 'http://10.0.2.2:8080${images[0]['imageUrl']}';
+            final rawUrl = images[0]['imageUrl'];
+            // ✅ 절대경로 vs 상대경로 판단
+            imageUrl = rawUrl.toString().startsWith('http')
+                ? rawUrl
+                : 'http://10.0.2.2:8080$rawUrl';
           }
         }
 
