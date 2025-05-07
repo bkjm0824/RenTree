@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import '../Chat/chat.dart';
 import 'package:rentree/screen/Post/post_request_Change.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PostRequestScreen extends StatefulWidget {
   final int itemId;
@@ -26,6 +27,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   String timeAgoText = '';
   bool isLoading = true;
   String? writerProfileImagePath;
+  String writerStudentNum = '';
 
   @override
   void initState() {
@@ -75,6 +77,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           rentalStartTime = DateTime.parse(data['rentalStartTime']);
           rentalEndTime = DateTime.parse(data['rentalEndTime']);
           createdAt = DateTime.parse(data['createdAt']);
+          writerStudentNum = data['studentNum'] ?? '';
 
           final profileIndex = data['profileImage'] ?? 1;
           writerProfileImagePath =
@@ -145,6 +148,49 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           .showSnackBar(SnackBar(content: Text('삭제 실패: ${res.statusCode}')));
     }
   }
+
+  Future<Map<String, dynamic>?> getOrCreateChatRoom(
+      int requestItemId, String studentNum) async {
+    final existingUrl =
+    Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+    final existingRes = await http.get(existingUrl);
+
+    if (existingRes.statusCode == 200) {
+      final List<dynamic> existingRooms =
+      jsonDecode(utf8.decode(existingRes.bodyBytes));
+      for (var room in existingRooms) {
+        if (room['rentalItemId'] == requestItemId) {
+          return {
+            'chatRoomId': room['roomId'],
+            'responderStudentNum': room['responderStudentNum'],
+            'requesterStudentNum': room['requesterStudentNum'],
+          };
+        }
+      }
+    }
+
+    final createUrl = Uri.parse('http://10.0.2.2:8080/chatrooms');
+    final createRes = await http.post(
+      createUrl,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'rentalItemId': requestItemId,
+        'requesterStudentNum': studentNum,
+      }),
+    );
+
+    if (createRes.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(createRes.bodyBytes));
+      return {
+        'chatRoomId': data['roomId'],
+        'responderStudentNum': data['responderStudentNum'],
+      };
+    }
+
+    print('❌ 채팅방 생성 실패: ${createRes.statusCode}');
+    return null;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -313,8 +359,35 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                               ),
                             ),
                           ),
-                          onPressed: () {
-                            // TODO: 채팅하기 버튼 기능 추가
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            final studentNum = prefs.getString('studentNum');
+                            if (studentNum == null) return;
+
+                            final result = await getOrCreateChatRoom(widget.itemId, studentNum);
+                            if (result != null) {
+                              final chatRoomId = result['chatRoomId'];
+
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => ChatDetailScreen(
+                              //       chatRoomId: chatRoomId,
+                              //       userName: nickname,
+                              //       imageUrl: '', // 요청글에는 이미지 없음
+                              //       title: title,
+                              //       rentalTimeText: rentalTimeRangeText,
+                              //       isFaceToFace: isFaceToFace,
+                              //       writerStudentNum: writerStudentNum,
+                              //       requesterStudentNum: studentNum,
+                              //       receiverStudentNum: studentNum ==
+                              //           writerStudentNum
+                              //           ? result['requesterStudentNum']
+                              //           : writerStudentNum,
+                              //     ),
+                              //   ),
+                              // );
+                            }
                           },
                           child: Text(
                             "채팅하기",

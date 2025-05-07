@@ -4,6 +4,7 @@ import 'chat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../Post/post_rental.dart';
 
 class ChatMessage {
   final String content;
@@ -31,6 +32,7 @@ class ChatDetailScreen extends StatefulWidget {
   final String writerStudentNum;       // 글 작성자 학번
   final String requesterStudentNum;
   final String receiverStudentNum;
+  final int rentalItemId;
 
   ChatDetailScreen({
     required this.userName,
@@ -42,6 +44,7 @@ class ChatDetailScreen extends StatefulWidget {
     required this.writerStudentNum,          // ✅ 추가
     required this.requesterStudentNum,
     required this.receiverStudentNum,
+    required this.rentalItemId,
   });
 
 
@@ -210,20 +213,30 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: widget.imageUrl.isNotEmpty
-                        ? Image.network(
-                      widget.imageUrl,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    )
-                        : Image.asset(
-                      'assets/box.png',
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostRentalScreen(itemId: widget.rentalItemId),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: widget.imageUrl.isNotEmpty
+                          ? Image.network(
+                        widget.imageUrl,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      )
+                          : Image.asset(
+                        'assets/box.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   SizedBox(width: 16),

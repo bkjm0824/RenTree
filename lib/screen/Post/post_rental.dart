@@ -720,6 +720,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                               ? imageUrls[0]
                                               : '',
                                           title: title,
+                                          rentalItemId: widget.itemId,
                                           rentalTimeText: rentalTimeRangeText,
                                           isFaceToFace: isFaceToFace,
                                           writerStudentNum: writerStudentNum,
