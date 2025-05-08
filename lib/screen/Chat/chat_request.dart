@@ -1,10 +1,10 @@
-// 채팅 화면
+// 대여 요청 채팅
 import 'package:flutter/material.dart';
 import 'chat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../Post/post_rental.dart';
+import '../Post/post_request.dart';
 
 class ChatMessage {
   final String content;
@@ -16,10 +16,9 @@ class ChatMessage {
   factory ChatMessage.fromJson(Map<String, dynamic> json, String myStudentNum) {
     DateTime? parsedSentAt;
     try {
-      // 마이크로초 자르기
       final rawSentAt = json['sentAt'] as String?;
       if (rawSentAt != null) {
-        final trimmed = rawSentAt.split('.').first; // "2025-05-08T14:25:18"
+        final trimmed = rawSentAt.split('.').first;
         parsedSentAt = DateTime.parse(trimmed);
       }
     } catch (e) {
@@ -32,40 +31,32 @@ class ChatMessage {
       sentAt: parsedSentAt,
     );
   }
-
 }
 
-class ChatDetailScreen extends StatefulWidget {
+class ChatRequestScreen extends StatefulWidget {
   final String userName;
-  final String imageUrl;
-  final String title;
-  final String rentalTimeText;
-  final bool isFaceToFace;
   final int chatRoomId;
-  final String writerStudentNum;       // 글 작성자 학번
+  final String writerStudentNum;
   final String requesterStudentNum;
   final String receiverStudentNum;
-  final int rentalItemId;
+  final int requestId;
+  final String title;
 
-  ChatDetailScreen({
+  ChatRequestScreen({
     required this.userName,
     required this.chatRoomId,
-    required this.imageUrl,
-    required this.title,
-    required this.rentalTimeText,
-    required this.isFaceToFace,
-    required this.writerStudentNum,          // ✅ 추가
+    required this.writerStudentNum,
     required this.requesterStudentNum,
     required this.receiverStudentNum,
-    required this.rentalItemId,
+    required this.requestId,
+    required this.title,
   });
 
-
   @override
-  _ChatDetailScreenState createState() => _ChatDetailScreenState();
+  _ChatRequestScreenState createState() => _ChatRequestScreenState();
 }
 
-class _ChatDetailScreenState extends State<ChatDetailScreen> {
+class _ChatRequestScreenState extends State<ChatRequestScreen> {
   TextEditingController _messageController = TextEditingController();
   List<ChatMessage> _messages = [];
   String? _myStudentNum;
@@ -75,7 +66,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void initState() {
     super.initState();
     _loadStudentNumAndConnect();
-    _loadPreviousMessages(); // 🔥 이거 꼭 추가
+    _loadPreviousMessages();
   }
 
   Future<void> _loadStudentNumAndConnect() async {
@@ -83,7 +74,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final myStudentNum = prefs.getString('studentNum') ?? '';
     _myStudentNum = myStudentNum;
 
-    // 상대방 학번 계산
     _receiverStudentNum = (_myStudentNum == widget.requesterStudentNum)
         ? widget.receiverStudentNum
         : widget.requesterStudentNum;
@@ -93,20 +83,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       myStudentNum: myStudentNum,
       isMounted: () => mounted,
       onMessageReceived: (String body) {
-        if (!mounted) return; // 👈 이거 꼭 필요함!!
+        if (!mounted) return;
         final decoded = jsonDecode(body);
         final message = ChatMessage.fromJson(decoded, myStudentNum);
-
-        // try-catch로 안전하게 감싸기
-        try {
-          if (mounted) {
-            setState(() {
-              _messages.add(message);
-            });
-          }
-        } catch (e) {
-          print("⚠️ setState 에러 발생: $e");
-        }
+        setState(() {
+          _messages.add(message);
+        });
       },
     );
   }
@@ -123,8 +105,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       setState(() {
         _messages = data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
       });
-    } else {
-      print("❌ 메시지 불러오기 실패: ${res.statusCode}");
     }
   }
 
@@ -133,16 +113,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('채팅방 나가기'),
-        content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
+        content: Text('정말 이 채팅방을 나가시겠습니까?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('취소')),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context); // 다이얼로그 닫기
-              await _deleteChatRoom(); // 삭제 요청
+              Navigator.pop(context);
+              await _deleteChatRoom();
             },
             child: Text('확인', style: TextStyle(color: Colors.red)),
           ),
@@ -154,22 +131,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Future<void> _deleteChatRoom() async {
     final url = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
     final res = await http.delete(url);
-
     if (res.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('채팅방이 삭제되었습니다.')),
-      );
-      Navigator.of(context).pop(true); // ✅ true 반환
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('삭제 실패: ${res.statusCode}')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('채팅방이 삭제되었습니다.')));
+      Navigator.of(context).pop(true);
     }
   }
 
   @override
   void dispose() {
-    ChatService.disconnect(); // ✅ 연결 완전히 종료 + 콜백 끊기
+    ChatService.disconnect();
     _messageController.dispose();
     super.dispose();
   }
@@ -181,7 +151,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 🔹 상단바
+            // 상단바
             Container(
               color: Color(0xffF4F1F1),
               child: Column(
@@ -191,96 +161,39 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.pop(context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
-                        },
+                        icon: Icon(Icons.arrow_back_ios_new, color: Color(0xff97C663), size: 30),
+                        onPressed: () => Navigator.pop(context, true),
                       ),
-                      Text(
-                        widget.userName,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text(widget.userName, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded),
-                        color: Colors.redAccent,
-                        iconSize: 30,
-                        padding: EdgeInsets.only(right: 10),
-                        onPressed: _confirmDeleteChatRoom, // 👇 함수로 분리
+                        icon: Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 30),
+                        onPressed: _confirmDeleteChatRoom,
                       ),
                     ],
                   ),
                   SizedBox(height: 10),
-                  Container(height: 1, color: Colors.grey[300]),
+                  Divider(height: 1, color: Colors.grey[300]),
                 ],
               ),
             ),
 
-            // 🔹 상품 정보
+            // 간단한 요청 글 정보
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PostRentalScreen(itemId: widget.rentalItemId),
-                        ),
-                      );
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: widget.imageUrl.isNotEmpty
-                          ? Image.network(
-                        widget.imageUrl,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      )
-                          : Image.asset(
-                        'assets/box.png',
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                  Icon(Icons.description, size: 40, color: Colors.grey),
                   SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        '대여시간: ${widget.rentalTimeText} | ${widget.isFaceToFace ? '대면' : '비대면'}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff97C663),
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text(
-                      '대여 요청',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.title,
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 5),
+                        Text('요청글 ID: ${widget.requestId}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      ],
                     ),
                   ),
                 ],
@@ -289,7 +202,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
             Divider(height: 1, color: Colors.grey[300]),
 
-            // 🔹 채팅 메시지 영역
+            // 채팅 메시지 목록
             Expanded(
               child: ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -297,12 +210,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 itemBuilder: (context, index) {
                   final message = _messages[index];
                   return Align(
-                    alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment:
+                    message.isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       margin: EdgeInsets.symmetric(vertical: 4),
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: message.isMe ? Color(0xff97C663) : Colors.white,
+                        color: message.isMe
+                            ? Color(0xff97C663)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: Text(
@@ -318,7 +235,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               ),
             ),
 
-            // 🔹 입력창
+            // 입력창
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
@@ -333,8 +250,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     child: TextField(
                       controller: _messageController,
                       decoration: InputDecoration(
-                        hintText: '메시지를 입력하세요...',
-                        border: InputBorder.none,
+                          hintText: '메시지를 입력하세요...'
                       ),
                     ),
                   ),
@@ -343,28 +259,22 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
                       final senderStudentNum = prefs.getString('studentNum') ?? '';
-
                       final text = _messageController.text.trim();
                       if (text.isNotEmpty) {
-                        // ✅ 동적으로 receiver 설정
-                        final receiverStudentNum =
-                        (senderStudentNum == widget.writerStudentNum)
+                        final receiver = (senderStudentNum == widget.writerStudentNum)
                             ? widget.requesterStudentNum
                             : widget.writerStudentNum;
-
                         ChatService.sendMessage(
                           widget.chatRoomId,
                           _myStudentNum!,
-                          _receiverStudentNum!, // ✅ receiver는 위에서 계산된 값을 사용
+                          _receiverStudentNum!,
                           text,
                         );
-
                         _messageController.clear();
                         FocusScope.of(context).unfocus();
                       }
                     },
                   ),
-
                 ],
               ),
             ),

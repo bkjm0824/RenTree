@@ -9,7 +9,7 @@ import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
 import '../Notification/notification.dart';
 import '../Search/search.dart';
-import 'chat.dart';
+import 'chat_rental.dart';
 
 class ChatListScreen extends StatefulWidget {
   @override
@@ -301,7 +301,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ChatDetailScreen(
+                                    builder: (context) => ChatRentalScreen(
                                       chatRoomId: room['roomId'],
                                       userName: (_myStudentNum ==
                                               room['writerStudentNum'])
