@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "chat_message")
-public class ChatMessage {
+@Table(name = "rental_chat_message")
+public class RentalChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,23 +21,21 @@ public class ChatMessage {
     // 메시지가 속한 채팅방
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
-    private ChatRoom chatRoom;
+    private RentalChatRoom chatRoom;
 
-    // 발신자: studentNum으로 외래키 연결
+    // 발신자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_student_num", referencedColumnName = "student_num", nullable = false)
     private Student sender;
 
-    // 수신자: studentNum으로 외래키 연결
+    // 수신자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_student_num", referencedColumnName = "student_num", nullable = false)
     private Student receiver;
 
-    // 메시지 내용
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
-    // 보낸 시각
     @Builder.Default
     @Column(nullable = false)
     private LocalDateTime sentAt = LocalDateTime.now();

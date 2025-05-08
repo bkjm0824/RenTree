@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -13,30 +12,32 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "chat_room")
-public class ChatRoom {
+@Table(name = "request_chat_room")
+public class RequestChatRoom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 요청글 정보
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rental_item_id", nullable = false)
-    private RentalItem rentalItem;
+    @JoinColumn(name = "item_request_id", nullable = false)
+    private ItemRequest itemRequest;
 
+    // 채팅 요청자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id", nullable = false)
     private Student requester;
 
+    // 채팅 응답자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responder_id", nullable = false)
     private Student responder;
 
-    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Collection<Object> getParticipants() {
+    public List<Student> getParticipants() {
         return List.of(requester, responder);
     }
 }
