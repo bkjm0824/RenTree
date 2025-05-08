@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../Chat/chat.dart';
+import '../Chat/chat_request.dart';
 import 'package:rentree/screen/Post/post_request_Change.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,11 +28,14 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   bool isLoading = true;
   String? writerProfileImagePath;
   String writerStudentNum = '';
+  String? studentNum;
+  int chatRoomCount = 0;
 
   @override
   void initState() {
     super.initState();
     fetchItemDetail();
+    _loadStudentNum();
   }
 
   String formatTo24Hour(DateTime time) {
@@ -54,6 +57,13 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
       default:
         return 'Bugi_profile.png';
     }
+  }
+
+  Future<void> _loadStudentNum() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      studentNum = prefs.getString('studentNum');
+    });
   }
 
   Future<void> fetchItemDetail() async {
@@ -101,6 +111,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
 
           isLoading = false;
         });
+        await fetchChatRoomCountByWriter();
       } else {
         print('불러오기 실패: ${response.statusCode}');
       }
@@ -189,6 +200,28 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
 
     print('❌ 채팅방 생성 실패: ${createRes.statusCode}');
     return null;
+  }
+
+  Future<void> fetchChatRoomCountByWriter() async {
+    if (writerStudentNum.isEmpty) return;
+
+    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
+        final count = rooms.where((room) => room['rentalItemId'] == widget.itemId).length;
+
+        setState(() {
+          chatRoomCount = count;
+        });
+      } else {
+        print('❌ 채팅방 개수 조회 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ 예외 발생: $e');
+    }
   }
 
 
@@ -347,16 +380,31 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        ElevatedButton(
+                        (studentNum == writerStudentNum)
+                            ? ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xff97C663),
                             foregroundColor: Colors.white,
                             minimumSize: Size(350, 60),
-                          ).copyWith(
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
+                          onPressed: () {
+                            // TODO: ChatListScreen으로 이동하거나 대화중인 채팅 수 표시
+                          },
+                          child: Text(
+                            "대화 중인 채팅 $chatRoomCount",
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        )
+                            : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff97C663),
+                            foregroundColor: Colors.white,
+                            minimumSize: Size(350, 60),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
                             ),
                           ),
                           onPressed: () async {
@@ -368,31 +416,27 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                             if (result != null) {
                               final chatRoomId = result['chatRoomId'];
 
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => ChatDetailScreen(
-                              //       chatRoomId: chatRoomId,
-                              //       userName: nickname,
-                              //       imageUrl: '', // 요청글에는 이미지 없음
-                              //       title: title,
-                              //       rentalTimeText: rentalTimeRangeText,
-                              //       isFaceToFace: isFaceToFace,
-                              //       writerStudentNum: writerStudentNum,
-                              //       requesterStudentNum: studentNum,
-                              //       receiverStudentNum: studentNum ==
-                              //           writerStudentNum
-                              //           ? result['requesterStudentNum']
-                              //           : writerStudentNum,
-                              //     ),
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatRequestScreen(
+                                    chatRoomId: chatRoomId,
+                                    userName: nickname,
+                                    title: title,
+                                    requestId: widget.itemId,
+                                    writerStudentNum: writerStudentNum,
+                                    requesterStudentNum: studentNum,
+                                    receiverStudentNum: studentNum == writerStudentNum
+                                        ? result['requesterStudentNum']
+                                        : writerStudentNum,
+                                  ),
+                                ),
+                              );
                             }
                           },
                           child: Text(
                             "채팅하기",
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],

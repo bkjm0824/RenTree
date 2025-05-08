@@ -3,7 +3,7 @@ import 'package:rentree/screen/Post/post_rental_Change.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../Chat/chat.dart';
+import '../Chat/chat_rental.dart';
 
 class PostRentalScreen extends StatefulWidget {
   final int itemId;
@@ -713,7 +713,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ChatDetailScreen(
+                                        builder: (context) => ChatRentalScreen(
                                           chatRoomId: chatRoomId,
                                           userName: nickname,
                                           imageUrl: imageUrls.isNotEmpty

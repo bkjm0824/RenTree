@@ -25,7 +25,7 @@ class ChatService {
         onConnect: (frame) {
           print('✅ WebSocket 연결 성공');
 
-          final destination = '/topic/chat/${chatRoomId}'; // 👈 변경된 경로
+          final destination = '/user/$myStudentNum/queue/messages'; // 👈 변경된 경로
           print('📡 구독 시작: $destination');
           _unsubscribe = stompClient.subscribe(
             destination: destination,
