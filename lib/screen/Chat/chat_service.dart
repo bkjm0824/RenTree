@@ -25,14 +25,20 @@ class ChatService {
         onConnect: (frame) {
           print('✅ WebSocket 연결 성공');
 
-          final destination = '/user/$myStudentNum/queue/messages'; // 👈 변경된 경로
+          final destination = '/topic/chat/${chatRoomId}'; // 👈 변경된 경로
           print('📡 구독 시작: $destination');
           _unsubscribe = stompClient.subscribe(
             destination: destination,
             callback: (frame) {
-              print('📩 메시지 수신함');
-              if (frame.body != null && isMounted()) {
-                onMessageReceived(frame.body!);
+              print('📩 메시지 수신함!');
+              print('📨 수신된 메시지 내용: ${frame.body}');
+
+              try {
+                if (frame.body != null && isMounted()) {
+                  onMessageReceived(frame.body!);
+                }
+              } catch (e) {
+                print('❌ onMessageReceived 처리 중 오류 발생: $e');
               }
             },
           );

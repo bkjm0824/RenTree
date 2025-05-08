@@ -14,12 +14,25 @@ class ChatMessage {
   ChatMessage({required this.content, required this.isMe, this.sentAt});
 
   factory ChatMessage.fromJson(Map<String, dynamic> json, String myStudentNum) {
+    DateTime? parsedSentAt;
+    try {
+      // 마이크로초 자르기
+      final rawSentAt = json['sentAt'] as String?;
+      if (rawSentAt != null) {
+        final trimmed = rawSentAt.split('.').first; // "2025-05-08T14:25:18"
+        parsedSentAt = DateTime.parse(trimmed);
+      }
+    } catch (e) {
+      print('❌ sentAt 파싱 실패: $e');
+    }
+
     return ChatMessage(
       content: json['message'],
       isMe: json['senderStudentNum'] == myStudentNum,
-      sentAt: json['sentAt'] != null ? DateTime.parse(json['sentAt']) : null,
+      sentAt: parsedSentAt,
     );
   }
+
 }
 
 class ChatDetailScreen extends StatefulWidget {
