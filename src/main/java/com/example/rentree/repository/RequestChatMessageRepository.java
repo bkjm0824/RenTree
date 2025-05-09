@@ -9,4 +9,6 @@ public interface RequestChatMessageRepository extends JpaRepository<RequestChatM
 
     // 채팅방 내 모든 메시지 조회
     List<RequestChatMessage> findByChatRoom_IdOrderBySentAtAsc(Long chatRoomId);
+
+    void deleteByIdAndSender_StudentNum(Long id, String senderStudentNum);
 }
