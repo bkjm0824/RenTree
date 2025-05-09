@@ -32,7 +32,6 @@ class ChatMessage {
       sentAt: parsedSentAt,
     );
   }
-
 }
 
 class ChatRentalScreen extends StatefulWidget {
@@ -42,7 +41,7 @@ class ChatRentalScreen extends StatefulWidget {
   final String rentalTimeText;
   final bool isFaceToFace;
   final int chatRoomId;
-  final String writerStudentNum;       // 글 작성자 학번
+  final String writerStudentNum; // 글 작성자 학번
   final String requesterStudentNum;
   final String receiverStudentNum;
   final int rentalItemId;
@@ -60,22 +59,59 @@ class ChatRentalScreen extends StatefulWidget {
     required this.rentalItemId,
   });
 
-
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
 }
 
 class _ChatDetailScreenState extends State<ChatRentalScreen> {
   TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   List<ChatMessage> _messages = [];
   String? _myStudentNum;
   String? _receiverStudentNum;
+  int _receiverProfileIndex = 1;
 
   @override
   void initState() {
     super.initState();
     _loadStudentNumAndConnect();
     _loadPreviousMessages(); // 🔥 이거 꼭 추가
+    _loadReceiverProfileImageFromItem();
+  }
+
+  Future<void> _loadReceiverProfileImageFromItem() async {
+    final url =
+        Uri.parse('http://10.0.2.2:8080/rental-item/${widget.rentalItemId}');
+    try {
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(res.bodyBytes));
+        final profileImage = data['student']['profileImage'];
+        setState(() {
+          _receiverProfileIndex = profileImage ?? 1;
+        });
+        print('🎯 상대 프로필 이미지 번호: \$_receiverProfileIndex');
+      } else {
+        print('❌ 물품 상세 정보 조회 실패: \${res.statusCode}');
+      }
+    } catch (e) {
+      print('❌ 예외 발생: \$e');
+    }
+  }
+
+  String _profileAssetName(int index) {
+    switch (index) {
+      case 1:
+        return 'Bugi_profile.png';
+      case 2:
+        return 'GgoGgu_profile.png';
+      case 3:
+        return 'Nyangi_profile.png';
+      case 4:
+        return 'Sangzzi_profile.png';
+      default:
+        return 'Bugi_profile.png';
+    }
   }
 
   Future<void> _loadStudentNumAndConnect() async {
@@ -103,6 +139,15 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
             setState(() {
               _messages.add(message);
             });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.animateTo(
+                  _scrollController.position.minScrollExtent,
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              }
+            });
           }
         } catch (e) {
           print("⚠️ setState 에러 발생: $e");
@@ -112,7 +157,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _loadPreviousMessages() async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatmessages/room/${widget.chatRoomId}');
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/chatmessages/room/${widget.chatRoomId}');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -121,7 +167,17 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
       setState(() {
-        _messages = data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+        _messages =
+            data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.minScrollExtent,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
       });
     } else {
       print("❌ 메시지 불러오기 실패: ${res.statusCode}");
@@ -152,7 +208,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final url =
+        Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
@@ -167,6 +224,32 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
     }
   }
 
+  String buildRentalRequestMessage() {
+    //대여요청 누를 시 만들어지는 글
+    final now = DateTime.now();
+    final dateText = "${now.year}년 ${now.month}월 ${now.day}일";
+    final timeRange = widget.rentalTimeText; // 예: "15:00 - 18:00"
+    final faceToFace = widget.isFaceToFace ? "대면" : "비대면";
+
+    return "대여를 요청하였습니다.\n$dateText\n$timeRange\n대여방식 : $faceToFace";
+  }
+
+  String buildRequestAllowMessage(String approverName) {
+    return "$approverName 님이 대여를 승인했어요. 반납시간을 잘 지켜주세요!";
+  }
+
+  String getFormattedTime(DateTime time) {
+    final hour = time.hour;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? '오후' : '오전';
+    final displayHour = hour > 12
+        ? hour - 12
+        : hour == 0
+            ? 12
+            : hour;
+    return '$period $displayHour:$minute';
+  }
+
   @override
   void dispose() {
     ChatService.disconnect(); // ✅ 연결 완전히 종료 + 콜백 끊기
@@ -176,6 +259,17 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, List<ChatMessage>> groupedMessages = {};
+    for (var msg in _messages) {
+      if (msg.sentAt == null) continue;
+      String dateKey =
+          "${msg.sentAt!.year}-${msg.sentAt!.month.toString().padLeft(2, '0')}-${msg.sentAt!.day.toString().padLeft(2, '0')}";
+      if (!groupedMessages.containsKey(dateKey)) {
+        groupedMessages[dateKey] = [];
+      }
+      groupedMessages[dateKey]!.add(msg);
+    }
+
     return Scaffold(
       backgroundColor: Color(0xffF4F1F1),
       body: SafeArea(
@@ -196,15 +290,27 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
+                          Navigator.pop(
+                              context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
                         },
                       ),
-                      Text(
-                        widget.userName,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundImage: AssetImage(
+                                'assets/Profile/${_profileAssetName(_receiverProfileIndex)}'),
+                            backgroundColor: Colors.white,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            widget.userName,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline_rounded),
@@ -231,7 +337,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostRentalScreen(itemId: widget.rentalItemId),
+                          builder: (context) =>
+                              PostRentalScreen(itemId: widget.rentalItemId),
                         ),
                       );
                     },
@@ -239,17 +346,17 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       borderRadius: BorderRadius.circular(8),
                       child: widget.imageUrl.isNotEmpty
                           ? Image.network(
-                        widget.imageUrl,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      )
+                              widget.imageUrl,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            )
                           : Image.asset(
-                        'assets/box.png',
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
+                              'assets/box.png',
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                   SizedBox(width: 16),
@@ -258,7 +365,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                     children: [
                       Text(
                         widget.title,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 5),
                       Text(
@@ -268,21 +376,43 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                     ],
                   ),
                   Spacer(),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff97C663),
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Text(
-                      '대여 요청',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  _myStudentNum == widget.requesterStudentNum
+                      ? ElevatedButton(
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            final senderStudentNum =
+                                prefs.getString('studentNum') ?? '';
+
+                            final messageText = buildRentalRequestMessage();
+
+                            final receiverStudentNum =
+                                (senderStudentNum == widget.writerStudentNum)
+                                    ? widget.requesterStudentNum
+                                    : widget.writerStudentNum;
+
+                            ChatService.sendMessage(
+                              widget.chatRoomId,
+                              senderStudentNum,
+                              receiverStudentNum,
+                              messageText,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff6DB129),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 13),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            '대여 요청',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      : Text("")
                 ],
               ),
             ),
@@ -291,50 +421,254 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
 
             // 🔹 채팅 메시지 영역
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  return Align(
-                    alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 4),
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: message.isMe ? Color(0xff97C663) : Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Text(
-                        message.content,
-                        style: TextStyle(
-                          color: message.isMe ? Colors.white : Colors.black87,
-                          fontSize: 15,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ListView(
+                  controller: _scrollController,
+                  shrinkWrap: true,
+                  reverse: true,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  children: groupedMessages.entries.map((entry) {
+                    final date = entry.key;
+                    final messages = entry.value;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            date,
+                            style: TextStyle(
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                },
+                        ...messages.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final message = entry.value;
+                          final timeText = message.sentAt != null
+                              ? getFormattedTime(message.sentAt!)
+                              : '';
+
+                          final isSameAsPrevious = index > 0 &&
+                              messages[index - 1].isMe == message.isMe;
+
+                          final isSameAsNext = index < messages.length - 1 &&
+                              messages[index + 1].isMe == message.isMe &&
+                              messages[index + 1].sentAt != null &&
+                              message.sentAt != null &&
+                              messages[index + 1]
+                                      .sentAt!
+                                      .difference(message.sentAt!)
+                                      .inMinutes <
+                                  1;
+
+                          final timeWidget = Padding(
+                            padding: const EdgeInsets.only(top: 2, bottom: 6),
+                            child: Text(
+                              timeText,
+                              style: TextStyle(
+                                  color: Color(0xff625F5F), fontSize: 11),
+                            ),
+                          );
+
+                          final bool isRentalRequest =
+                              message.content.startsWith('대여를 요청하였습니다.');
+                          final bool isSystemMessage =
+                              message.content.contains("님이 대여를 승인했어요");
+                          if (isSystemMessage) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xffE7E9C7),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 7),
+                                child: Center(
+                                  child: Text(
+                                    message.content,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff053C05),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          final messageBubble = Container(
+                              margin: EdgeInsets.only(bottom: 5),
+                              padding: isRentalRequest
+                                  ? EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 15)
+                                  : EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isRentalRequest
+                                    ? Color(0xff606060)
+                                    : (message.isMe
+                                        ? Color(0xff6DB129)
+                                        : Color(0xff8F8F8F)),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: IntrinsicWidth(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      message.content,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: isRentalRequest ? 17 : 15,
+                                        fontWeight: isRentalRequest
+                                            ? FontWeight.w500
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                    if (isRentalRequest &&
+                                        _myStudentNum ==
+                                            widget.writerStudentNum)
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: TextButton(
+                                          onPressed: () async {
+                                            final prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                            final senderStudentNum =
+                                                prefs.getString('studentNum') ??
+                                                    '';
+                                            final approverName =
+                                                prefs.getString('nickname') ??
+                                                    '알 수 없음';
+
+                                            final messageText =
+                                                buildRequestAllowMessage(
+                                                    approverName);
+
+                                            final receiverStudentNum =
+                                                (senderStudentNum ==
+                                                        widget.writerStudentNum)
+                                                    ? widget.requesterStudentNum
+                                                    : widget.writerStudentNum;
+
+                                            ChatService.sendMessage(
+                                              widget.chatRoomId,
+                                              senderStudentNum,
+                                              receiverStudentNum,
+                                              messageText,
+                                            );
+                                            print('✅ 승인 버튼 클릭됨!');
+                                          },
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                            minimumSize: Size(30, 0),
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
+                                            foregroundColor: Color(0xff97C663),
+                                          ),
+                                          child: Text(
+                                            '승인',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xffBCF69C),
+                                                fontSize: 18),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ));
+
+                          if (message.isMe) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    if (!isSystemMessage && !isSameAsNext)
+                                      timeWidget,
+                                    SizedBox(width: 5),
+                                    messageBubble,
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (!isSameAsPrevious)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundImage: AssetImage(
+                                            'assets/Profile/${_profileAssetName(_receiverProfileIndex)}'),
+                                        backgroundColor: Colors.white,
+                                      ),
+                                    )
+                                  else
+                                    SizedBox(width: 60),
+                                  Flexible(child: messageBubble),
+                                  if (!isSameAsNext)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 7,
+                                        top: 2,
+                                      ),
+                                      child: timeWidget,
+                                    )
+                                ],
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ],
+                    );
+                  }).toList(),
+                ),
               ),
             ),
 
             // 🔹 입력창
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color(0xffEBEBEB),
                 border: Border(top: BorderSide(color: Colors.grey.shade300)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.add, color: Color(0xff97C663)),
-                  SizedBox(width: 5),
+                  Icon(
+                    Icons.add,
+                    color: Color(0xff97C663),
+                    size: 30,
+                  ),
+                  SizedBox(width: 10),
                   Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        hintText: '메시지를 입력하세요...',
-                        border: InputBorder.none,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: Color(0xffD9D9D9),
+                          borderRadius: BorderRadius.circular(30)),
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          hintText: '메시지를 입력하세요...',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.only(left: 16),
+                        ),
                       ),
                     ),
                   ),
@@ -342,15 +676,16 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                     icon: Icon(Icons.send, color: Color(0xff97C663)),
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
-                      final senderStudentNum = prefs.getString('studentNum') ?? '';
+                      final senderStudentNum =
+                          prefs.getString('studentNum') ?? '';
 
                       final text = _messageController.text.trim();
                       if (text.isNotEmpty) {
                         // ✅ 동적으로 receiver 설정
                         final receiverStudentNum =
-                        (senderStudentNum == widget.writerStudentNum)
-                            ? widget.requesterStudentNum
-                            : widget.writerStudentNum;
+                            (senderStudentNum == widget.writerStudentNum)
+                                ? widget.requesterStudentNum
+                                : widget.writerStudentNum;
 
                         ChatService.sendMessage(
                           widget.chatRoomId,
@@ -364,7 +699,6 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       }
                     },
                   ),
-
                 ],
               ),
             ),
