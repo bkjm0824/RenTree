@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:http/http.dart' as http;
 
 class ChatService {
   static late StompClient stompClient;
@@ -65,21 +66,27 @@ class ChatService {
   static void sendMessage(
       int chatRoomId,
       String senderStudentNum,
-      String receiverStudentNum, // 🔥 추가
+      String receiverStudentNum,
       String message,
-      ) {
-    final msg = {
+      {required String type}) {
+
+    final dto = {
       'chatRoomId': chatRoomId,
       'senderStudentNum': senderStudentNum,
-      'receiverStudentNum': receiverStudentNum, // 🔥 반드시 포함
+      'receiverStudentNum': receiverStudentNum,
       'message': message,
     };
 
-    print('🚀 보낼 메시지: $msg');
+    final endpoint = type == 'rental'
+        ? '/app/chat/rental/send'
+        : '/app/chat/request/send';
 
+    // ✅ WebSocket 전송만 수행 (HTTP 저장 제거)
     stompClient.send(
-      destination: '/app/chat/send',
-      body: jsonEncode(msg),
+      destination: endpoint,
+      body: jsonEncode(dto),
     );
+
+    print('🚀 메시지 WebSocket으로 전송됨: $dto');
   }
 }

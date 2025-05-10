@@ -180,15 +180,10 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
       }
     }
 
-    final createUrl = Uri.parse('http://10.0.2.2:8080/chatrooms');
-    final createRes = await http.post(
-      createUrl,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'rentalItemId': requestItemId,
-        'requesterStudentNum': studentNum,
-      }),
+    final createUrl = Uri.parse(
+      'http://10.0.2.2:8080/chatrooms/request/$requestItemId?requesterStudentNum=$studentNum',
     );
+    final createRes = await http.post(createUrl);
 
     if (createRes.statusCode == 200) {
       final data = jsonDecode(utf8.decode(createRes.bodyBytes));
@@ -288,7 +283,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                       children: [
                                         Text(title,
                                             style: TextStyle(
-                                                fontSize: 24,
+                                                fontSize: 23,
                                                 fontWeight: FontWeight.bold)),
                                         PopupMenuButton<String>(
                                           icon: Icon(Icons.more_vert_rounded),
@@ -429,6 +424,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                     receiverStudentNum: studentNum == writerStudentNum
                                         ? result['requesterStudentNum']
                                         : writerStudentNum,
+                                    rentalTimeText: rentalTimeRangeText,
+                                    isFaceToFace: isFaceToFace,
                                   ),
                                 ),
                               );

@@ -302,25 +302,20 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       final List<dynamic> existingRooms =
           jsonDecode(utf8.decode(existingRes.bodyBytes));
       for (var room in existingRooms) {
-        if (room['rentalItemId'] == rentalItemId) {
+        if (room['type'] == 'rental' && room['rentalItemId'] == rentalItemId) {
           return {
             'chatRoomId': room['roomId'],
-            'responderStudentNum': room['responderStudentNum'], // ✅ 이 값도
+            'responderStudentNum': room['responderStudentNum'],
             'requesterStudentNum': room['requesterStudentNum'],
           };
         }
       }
     }
 
-    final createUrl = Uri.parse('http://10.0.2.2:8080/chatrooms');
-    final createRes = await http.post(
-      createUrl,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'rentalItemId': rentalItemId,
-        'requesterStudentNum': studentNum,
-      }),
+    final createUrl = Uri.parse(
+      'http://10.0.2.2:8080/chatrooms/rental/$rentalItemId?requesterStudentNum=$studentNum',
     );
+    final createRes = await http.post(createUrl);
 
     if (createRes.statusCode == 200) {
       final data = jsonDecode(utf8.decode(createRes.bodyBytes));
@@ -331,6 +326,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     }
 
     print('❌ 채팅방 생성 실패: ${createRes.statusCode}');
+    print('❌ 응답 내용: ${createRes.body}');
     return null;
   }
 

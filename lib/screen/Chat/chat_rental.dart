@@ -32,6 +32,7 @@ class ChatMessage {
       sentAt: parsedSentAt,
     );
   }
+
 }
 
 class ChatRentalScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class ChatRentalScreen extends StatefulWidget {
   final String rentalTimeText;
   final bool isFaceToFace;
   final int chatRoomId;
-  final String writerStudentNum; // 글 작성자 학번
+  final String writerStudentNum;       // 글 작성자 학번
   final String requesterStudentNum;
   final String receiverStudentNum;
   final int rentalItemId;
@@ -58,6 +59,7 @@ class ChatRentalScreen extends StatefulWidget {
     required this.receiverStudentNum,
     required this.rentalItemId,
   });
+
 
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
@@ -81,7 +83,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
 
   Future<void> _loadReceiverProfileImageFromItem() async {
     final url =
-        Uri.parse('http://10.0.2.2:8080/rental-item/${widget.rentalItemId}');
+    Uri.parse('http://10.0.2.2:8080/rental-item/${widget.rentalItemId}');
     try {
       final res = await http.get(url);
       if (res.statusCode == 200) {
@@ -113,6 +115,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
         return 'Bugi_profile.png';
     }
   }
+
 
   Future<void> _loadStudentNumAndConnect() async {
     final prefs = await SharedPreferences.getInstance();
@@ -157,8 +160,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _loadPreviousMessages() async {
-    final url = Uri.parse(
-        'http://10.0.2.2:8080/chatmessages/room/${widget.chatRoomId}');
+    final url = Uri.parse('http://10.0.2.2:8080/chatmessages/rental/${widget.chatRoomId}');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -167,6 +169,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
       setState(() {
+        _messages = data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
         _messages =
             data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -208,8 +211,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
-    final url =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
@@ -245,8 +247,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
     final displayHour = hour > 12
         ? hour - 12
         : hour == 0
-            ? 12
-            : hour;
+        ? 12
+        : hour;
     return '$period $displayHour:$minute';
   }
 
@@ -290,8 +292,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(
-                              context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
+                          Navigator.pop(context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
                         },
                       ),
                       Row(
@@ -337,8 +338,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              PostRentalScreen(itemId: widget.rentalItemId),
+                          builder: (context) => PostRentalScreen(itemId: widget.rentalItemId),
                         ),
                       );
                     },
@@ -346,17 +346,17 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       borderRadius: BorderRadius.circular(8),
                       child: widget.imageUrl.isNotEmpty
                           ? Image.network(
-                              widget.imageUrl,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            )
+                        widget.imageUrl,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      )
                           : Image.asset(
-                              'assets/box.png',
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
+                        'assets/box.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   SizedBox(width: 16),
@@ -365,8 +365,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                     children: [
                       Text(
                         widget.title,
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 5),
                       Text(
@@ -378,40 +377,41 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                   Spacer(),
                   _myStudentNum == widget.requesterStudentNum
                       ? ElevatedButton(
-                          onPressed: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            final senderStudentNum =
-                                prefs.getString('studentNum') ?? '';
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      final senderStudentNum =
+                          prefs.getString('studentNum') ?? '';
 
-                            final messageText = buildRentalRequestMessage();
+                      final messageText = buildRentalRequestMessage();
 
-                            final receiverStudentNum =
-                                (senderStudentNum == widget.writerStudentNum)
-                                    ? widget.requesterStudentNum
-                                    : widget.writerStudentNum;
+                      final receiverStudentNum =
+                      (senderStudentNum == widget.writerStudentNum)
+                          ? widget.requesterStudentNum
+                          : widget.writerStudentNum;
 
-                            ChatService.sendMessage(
-                              widget.chatRoomId,
-                              senderStudentNum,
-                              receiverStudentNum,
-                              messageText,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff6DB129),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 13),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Text(
-                            '대여 요청',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                        )
+                      ChatService.sendMessage(
+                        widget.chatRoomId,
+                        _myStudentNum!,
+                        _receiverStudentNum!,
+                        messageText,
+                        type: 'rental', // 🔥 꼭 전달!
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xff6DB129),
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 13),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      '대여 요청',
+                      style: TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  )
                       : Text("")
                 ],
               ),
@@ -458,9 +458,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                               messages[index + 1].sentAt != null &&
                               message.sentAt != null &&
                               messages[index + 1]
-                                      .sentAt!
-                                      .difference(message.sentAt!)
-                                      .inMinutes <
+                                  .sentAt!
+                                  .difference(message.sentAt!)
+                                  .inMinutes <
                                   1;
 
                           final timeWidget = Padding(
@@ -473,9 +473,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                           );
 
                           final bool isRentalRequest =
-                              message.content.startsWith('대여를 요청하였습니다.');
+                          message.content.startsWith('대여를 요청하였습니다.');
                           final bool isSystemMessage =
-                              message.content.contains("님이 대여를 승인했어요");
+                          message.content.contains("님이 대여를 승인했어요");
                           if (isSystemMessage) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -486,7 +486,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 7),
+                                const EdgeInsets.symmetric(vertical: 7),
                                 child: Center(
                                   child: Text(
                                     message.content,
@@ -504,15 +504,15 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                               margin: EdgeInsets.only(bottom: 5),
                               padding: isRentalRequest
                                   ? EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 15)
+                                  horizontal: 20, vertical: 15)
                                   : EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 10),
+                                  horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
                                 color: isRentalRequest
                                     ? Color(0xff606060)
                                     : (message.isMe
-                                        ? Color(0xff6DB129)
-                                        : Color(0xff8F8F8F)),
+                                    ? Color(0xff6DB129)
+                                    : Color(0xff8F8F8F)),
                                 borderRadius: BorderRadius.circular(18),
                               ),
                               child: IntrinsicWidth(
@@ -537,8 +537,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                         child: TextButton(
                                           onPressed: () async {
                                             final prefs =
-                                                await SharedPreferences
-                                                    .getInstance();
+                                            await SharedPreferences
+                                                .getInstance();
                                             final senderStudentNum =
                                                 prefs.getString('studentNum') ??
                                                     '';
@@ -547,20 +547,21 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                     '알 수 없음';
 
                                             final messageText =
-                                                buildRequestAllowMessage(
-                                                    approverName);
+                                            buildRequestAllowMessage(
+                                                approverName);
 
                                             final receiverStudentNum =
-                                                (senderStudentNum ==
-                                                        widget.writerStudentNum)
-                                                    ? widget.requesterStudentNum
-                                                    : widget.writerStudentNum;
+                                            (senderStudentNum ==
+                                                widget.writerStudentNum)
+                                                ? widget.requesterStudentNum
+                                                : widget.writerStudentNum;
 
                                             ChatService.sendMessage(
                                               widget.chatRoomId,
-                                              senderStudentNum,
-                                              receiverStudentNum,
+                                              _myStudentNum!,
+                                              _receiverStudentNum!,
                                               messageText,
+                                              type: 'rental', // 🔥 꼭 전달!
                                             );
                                             print('✅ 승인 버튼 클릭됨!');
                                           },
@@ -683,15 +684,16 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       if (text.isNotEmpty) {
                         // ✅ 동적으로 receiver 설정
                         final receiverStudentNum =
-                            (senderStudentNum == widget.writerStudentNum)
-                                ? widget.requesterStudentNum
-                                : widget.writerStudentNum;
+                        (senderStudentNum == widget.writerStudentNum)
+                            ? widget.requesterStudentNum
+                            : widget.writerStudentNum;
 
                         ChatService.sendMessage(
                           widget.chatRoomId,
                           _myStudentNum!,
-                          _receiverStudentNum!, // ✅ receiver는 위에서 계산된 값을 사용
+                          _receiverStudentNum!,
                           text,
+                          type: 'rental', // 🔥 꼭 전달!
                         );
 
                         _messageController.clear();
