@@ -77,7 +77,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
 
   Future<void> _loadReceiverProfileImageFromItem() async {
     final url =
-    Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.requestId}');
+        Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.requestId}');
     try {
       final res = await http.get(url);
       if (res.statusCode == 200) {
@@ -136,7 +136,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (_scrollController.hasClients) {
                 _scrollController.animateTo(
-                  _scrollController.position.minScrollExtent,
+                  _scrollController.position.maxScrollExtent,
                   duration: Duration(milliseconds: 300),
                   curve: Curves.easeOut,
                 );
@@ -151,7 +151,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   }
 
   Future<void> _loadPreviousMessages() async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatmessages/request/${widget.chatRoomId}');
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/chatmessages/request/${widget.chatRoomId}');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -160,7 +161,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
       setState(() {
-        _messages = data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+        _messages =
+            data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
       });
     }
   }
@@ -172,7 +174,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
         title: Text('채팅방 나가기'),
         content: Text('정말 이 채팅방을 나가시겠습니까?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('취소')),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: Text('취소')),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
@@ -186,10 +189,12 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final url =
+        Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
     final res = await http.delete(url);
     if (res.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('채팅방이 삭제되었습니다.')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('채팅방이 삭제되었습니다.')));
       Navigator.of(context).pop(true);
     }
   }
@@ -201,8 +206,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
     final displayHour = hour > 12
         ? hour - 12
         : hour == 0
-        ? 12
-        : hour;
+            ? 12
+            : hour;
     return '$period $displayHour:$minute';
   }
 
@@ -249,7 +254,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
+                          Navigator.pop(
+                              context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
                         },
                       ),
                       Row(
@@ -284,34 +290,49 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                 ],
               ),
             ),
-
-            // 간단한 요청 글 정보
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      'assets/requestIcon.png',
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
+                  // ✅ Row는 children 리스트 사용
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PostRequestScreen(itemId: widget.requestId),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/requestIcon.png',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
+                    // ✅ 글자가 넘치지 않게 Column을 Expanded로 감싸기
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.title,
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 5),
                         Text(
                           '대여시간: ${widget.rentalTimeText} | ${widget.isFaceToFace ? '대면' : '비대면'}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -329,7 +350,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                 child: ListView(
                   controller: _scrollController,
                   shrinkWrap: true,
-                  reverse: true,
+                  reverse: false,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   children: groupedMessages.entries.map((entry) {
                     final date = entry.key;
@@ -361,9 +382,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                               messages[index + 1].sentAt != null &&
                               message.sentAt != null &&
                               messages[index + 1]
-                                  .sentAt!
-                                  .difference(message.sentAt!)
-                                  .inMinutes <
+                                      .sentAt!
+                                      .difference(message.sentAt!)
+                                      .inMinutes <
                                   1;
 
                           final timeWidget = Padding(
@@ -376,9 +397,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                           );
 
                           final bool isRentalRequest =
-                          message.content.startsWith('대여를 요청하였습니다.');
+                              message.content.startsWith('대여를 요청하였습니다.');
                           final bool isSystemMessage =
-                          message.content.contains("님이 대여를 승인했어요");
+                              message.content.contains("님이 대여를 승인했어요");
                           if (isSystemMessage) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -389,7 +410,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 padding:
-                                const EdgeInsets.symmetric(vertical: 7),
+                                    const EdgeInsets.symmetric(vertical: 7),
                                 child: Center(
                                   child: Text(
                                     message.content,
@@ -407,15 +428,15 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                               margin: EdgeInsets.only(bottom: 5),
                               padding: isRentalRequest
                                   ? EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 15)
+                                      horizontal: 20, vertical: 15)
                                   : EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 10),
+                                      horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
                                 color: isRentalRequest
                                     ? Color(0xff606060)
                                     : (message.isMe
-                                    ? Color(0xff6DB129)
-                                    : Color(0xff8F8F8F)),
+                                        ? Color(0xff6DB129)
+                                        : Color(0xff8F8F8F)),
                                 borderRadius: BorderRadius.circular(18),
                               ),
                               child: IntrinsicWidth(
@@ -440,8 +461,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                         child: TextButton(
                                           onPressed: () async {
                                             final prefs =
-                                            await SharedPreferences
-                                                .getInstance();
+                                                await SharedPreferences
+                                                    .getInstance();
                                             final senderStudentNum =
                                                 prefs.getString('studentNum') ??
                                                     '';
@@ -450,14 +471,14 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                     '알 수 없음';
 
                                             final messageText =
-                                            buildRequestAllowMessage(
-                                                approverName);
+                                                buildRequestAllowMessage(
+                                                    approverName);
 
                                             final receiverStudentNum =
-                                            (senderStudentNum ==
-                                                widget.writerStudentNum)
-                                                ? widget.requesterStudentNum
-                                                : widget.writerStudentNum;
+                                                (senderStudentNum ==
+                                                        widget.writerStudentNum)
+                                                    ? widget.requesterStudentNum
+                                                    : widget.writerStudentNum;
 
                                             ChatService.sendMessage(
                                               widget.chatRoomId,
@@ -587,9 +608,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                       if (text.isNotEmpty) {
                         // ✅ 동적으로 receiver 설정
                         final receiverStudentNum =
-                        (senderStudentNum == widget.writerStudentNum)
-                            ? widget.requesterStudentNum
-                            : widget.writerStudentNum;
+                            (senderStudentNum == widget.writerStudentNum)
+                                ? widget.requesterStudentNum
+                                : widget.writerStudentNum;
 
                         ChatService.sendMessage(
                           widget.chatRoomId,

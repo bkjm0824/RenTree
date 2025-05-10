@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../Chat/chat_rental.dart';
+import '../Chat/chatlist.dart';
 
 class PostRentalScreen extends StatefulWidget {
   final int itemId;
@@ -152,8 +153,9 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
-        final count =
-            rooms.where((room) => room['rentalItemId'] == widget.itemId).length;
+        final count = rooms
+            .where((room) => room['relatedItemId'] == widget.itemId)
+            .length;
 
         setState(() {
           chatRoomCount = count;
@@ -302,7 +304,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
       final List<dynamic> existingRooms =
           jsonDecode(utf8.decode(existingRes.bodyBytes));
       for (var room in existingRooms) {
-        if (room['type'] == 'rental' && room['rentalItemId'] == rentalItemId) {
+        if (room['type'] == 'rental' && room['relatedItemId'] == rentalItemId) {
           return {
             'chatRoomId': room['roomId'],
             'responderStudentNum': room['responderStudentNum'],
@@ -676,7 +678,12 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  // TODO: ChatListScreen으로 이동 등 추가 가능
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ChatListScreen(),
+                                    ),
+                                  );
                                 },
                                 child: Text(
                                   "대화 중인 채팅 $chatRoomCount",
