@@ -6,6 +6,8 @@ import '../Chat/chat_request.dart';
 import 'package:rentree/screen/Post/post_request_Change.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Chat/chatlist.dart';
+
 class PostRequestScreen extends StatefulWidget {
   final int itemId;
 
@@ -163,14 +165,15 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   Future<Map<String, dynamic>?> getOrCreateChatRoom(
       int requestItemId, String studentNum) async {
     final existingUrl =
-    Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
     final existingRes = await http.get(existingUrl);
 
     if (existingRes.statusCode == 200) {
       final List<dynamic> existingRooms =
-      jsonDecode(utf8.decode(existingRes.bodyBytes));
+          jsonDecode(utf8.decode(existingRes.bodyBytes));
       for (var room in existingRooms) {
-        if (room['rentalItemId'] == requestItemId) {
+        if (room['type'] == 'request' &&
+            room['relatedItemId'] == requestItemId) {
           return {
             'chatRoomId': room['roomId'],
             'responderStudentNum': room['responderStudentNum'],
@@ -200,13 +203,16 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   Future<void> fetchChatRoomCountByWriter() async {
     if (writerStudentNum.isEmpty) return;
 
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+    final url =
+        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
-        final count = rooms.where((room) => room['rentalItemId'] == widget.itemId).length;
+        final count = rooms
+            .where((room) => room['relatedItemId'] == widget.itemId)
+            .length;
 
         setState(() {
           chatRoomCount = count;
@@ -218,7 +224,6 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
       print('❌ 예외 발생: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -285,35 +290,37 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                             style: TextStyle(
                                                 fontSize: 23,
                                                 fontWeight: FontWeight.bold)),
-                                        PopupMenuButton<String>(
-                                          icon: Icon(Icons.more_vert_rounded),
-                                          onSelected: (String value) {
-                                            if (value == 'change') {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      RequestChangeScreen(
-                                                          id: widget.itemId),
-                                                ),
-                                              ).then((_) => fetchItemDetail());
-                                            }
-                                            if (value == 'delete') {
-                                              _confirmDelete();
-                                            }
-                                          },
-                                          itemBuilder: (BuildContext context) =>
-                                              [
-                                            PopupMenuItem<String>(
-                                              value: 'change',
-                                              child: Text('수정'),
-                                            ),
-                                            PopupMenuItem<String>(
-                                              value: 'delete',
-                                              child: Text('삭제'),
-                                            ),
-                                          ],
-                                        )
+                                        if (writerStudentNum == studentNum)
+                                          PopupMenuButton<String>(
+                                            icon: Icon(Icons.more_vert_rounded),
+                                            onSelected: (String value) {
+                                              if (value == 'change') {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        RequestChangeScreen(
+                                                            id: widget.itemId),
+                                                  ),
+                                                ).then(
+                                                    (_) => fetchItemDetail());
+                                              }
+                                              if (value == 'delete') {
+                                                _confirmDelete();
+                                              }
+                                            },
+                                            itemBuilder:
+                                                (BuildContext context) => [
+                                              PopupMenuItem<String>(
+                                                value: 'change',
+                                                child: Text('수정'),
+                                              ),
+                                              PopupMenuItem<String>(
+                                                value: 'delete',
+                                                child: Text('삭제'),
+                                              ),
+                                            ],
+                                          )
                                       ],
                                     ),
                                     SizedBox(height: 10),
@@ -377,65 +384,79 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                       children: [
                         (studentNum == writerStudentNum)
                             ? ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff97C663),
-                            foregroundColor: Colors.white,
-                            minimumSize: Size(350, 60),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                          onPressed: () {
-                            // TODO: ChatListScreen으로 이동하거나 대화중인 채팅 수 표시
-                          },
-                          child: Text(
-                            "대화 중인 채팅 $chatRoomCount",
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                        )
-                            : ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff97C663),
-                            foregroundColor: Colors.white,
-                            minimumSize: Size(350, 60),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                          onPressed: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            final studentNum = prefs.getString('studentNum');
-                            if (studentNum == null) return;
-
-                            final result = await getOrCreateChatRoom(widget.itemId, studentNum);
-                            if (result != null) {
-                              final chatRoomId = result['chatRoomId'];
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatRequestScreen(
-                                    chatRoomId: chatRoomId,
-                                    userName: nickname,
-                                    title: title,
-                                    requestId: widget.itemId,
-                                    writerStudentNum: writerStudentNum,
-                                    requesterStudentNum: studentNum,
-                                    receiverStudentNum: studentNum == writerStudentNum
-                                        ? result['requesterStudentNum']
-                                        : writerStudentNum,
-                                    rentalTimeText: rentalTimeRangeText,
-                                    isFaceToFace: isFaceToFace,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xff97C663),
+                                  foregroundColor: Colors.white,
+                                  minimumSize: Size(350, 60),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
                                   ),
                                 ),
-                              );
-                            }
-                          },
-                          child: Text(
-                            "채팅하기",
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ChatListScreen(), // ChatListScreen은 본인 코드에 맞춰 수정
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  "대화 중인 채팅 $chatRoomCount",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xff97C663),
+                                  foregroundColor: Colors.white,
+                                  minimumSize: Size(350, 60),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  final studentNum =
+                                      prefs.getString('studentNum');
+                                  if (studentNum == null) return;
+
+                                  final result = await getOrCreateChatRoom(
+                                      widget.itemId, studentNum);
+                                  if (result != null) {
+                                    final chatRoomId = result['chatRoomId'];
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatRequestScreen(
+                                          chatRoomId: chatRoomId,
+                                          userName: nickname,
+                                          title: title,
+                                          requestId: widget.itemId,
+                                          writerStudentNum: writerStudentNum,
+                                          requesterStudentNum: studentNum,
+                                          receiverStudentNum: studentNum ==
+                                                  writerStudentNum
+                                              ? result['requesterStudentNum']
+                                              : writerStudentNum,
+                                          rentalTimeText: rentalTimeRangeText,
+                                          isFaceToFace: isFaceToFace,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Text(
+                                  "채팅하기",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                       ],
                     ),
                   )
