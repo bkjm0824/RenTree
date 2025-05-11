@@ -8,7 +8,6 @@ import '../Home/home.dart';
 import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
 import '../Notification/notification.dart';
-import '../Search/search.dart';
 import 'chat_rental.dart';
 import 'chat_request.dart';
 
@@ -188,21 +187,6 @@ class _ChatScreenState extends State<ChatListScreen> {
       }
     }
     return null;
-  }
-
-  String _profileAssetName(dynamic index) {
-    switch (index) {
-      case 1:
-        return 'Bugi_profile.png';
-      case 2:
-        return 'GgoGgu_profile.png';
-      case 3:
-        return 'Nyangi_profile.png';
-      case 4:
-        return 'Sangzzi_profile.png';
-      default:
-        return 'Bugi_profile.png';
-    }
   }
 
   void _onItemTapped(int index) {
