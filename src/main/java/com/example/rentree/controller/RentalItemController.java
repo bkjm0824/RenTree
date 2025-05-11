@@ -1,8 +1,10 @@
 package com.example.rentree.controller;
 
-import com.example.rentree.domain.RentalItem;
+import com.example.rentree.domain.*;
 import com.example.rentree.dto.RentalItemCreateRequest;
 import com.example.rentree.dto.RentalItemUpdateRequest;
+import com.example.rentree.repository.*;
+import com.example.rentree.service.ItemRequestService;
 import com.example.rentree.service.RentalItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +19,16 @@ import java.util.Optional;
 public class RentalItemController {
 
     private final RentalItemService rentalItemService;
+    private final StudentRepository studentRepository;
+    private final RentalChatRoomRepository rentalchatRoomRepository;
+    private final rentalHistoryRepository rentalHistoryRepository;
 
-    public RentalItemController(RentalItemService rentalItemService) {
+
+    public RentalItemController(RentalItemService rentalItemService, StudentRepository studentRepository, RentalChatRoomRepository rentalChatRoomRepository, rentalHistoryRepository rentalHistoryRepository) {
         this.rentalItemService = rentalItemService;
+        this.studentRepository = studentRepository;
+        this.rentalchatRoomRepository = rentalChatRoomRepository;
+        this.rentalHistoryRepository = rentalHistoryRepository;
     }
 
     @PostMapping
@@ -70,8 +79,28 @@ public class RentalItemController {
     // 다시 대여 가능하게 변경
     @PatchMapping("/{id}/return")
     public ResponseEntity<String> markAsAvailable(@PathVariable Long id) {
-        rentalItemService.markAsAvailable(id);
+
+        RentalItem rentalItem = rentalItemService.getRentalItemDetails(id);
+
+        RentalChatRoom rentalChatRoom = rentalchatRoomRepository.findByRentalItemId(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다: " + id));
+
+        Student responder = rentalChatRoom.getResponder(); // 대여 하는 사람
+        Student requester = rentalChatRoom.getRequester(); // 대여 받는 사람
+
+        RentalHistory rentalHistory = RentalHistory.builder()
+                .rentalItem(rentalItem)
+                .responder(responder)
+                .requester(requester)
+                .build();
+
+        rentalHistoryRepository.save(rentalHistory);
+
+        responder.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
+        studentRepository.save(responder); // 대여한 사람의 정보 저장
+
         return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
+
     }
 
     // 특정 카테고리의 대여 가능한 물품 목록 조회

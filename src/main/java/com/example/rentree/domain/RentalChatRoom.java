@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -20,7 +21,7 @@ public class RentalChatRoom {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rental_item_id", nullable = false)
+    @JoinColumn(name = "rental_item_id")
     private RentalItem rentalItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,7 +42,7 @@ public class RentalChatRoom {
     @Column(nullable = false)
     private boolean responderExited = false;
 
-    public List<Student> getParticipants() {
+    public Collection<Object> getParticipants() {
         return List.of(requester, responder);
     }
 }

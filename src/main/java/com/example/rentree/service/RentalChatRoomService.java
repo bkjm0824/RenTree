@@ -50,9 +50,23 @@ public class RentalChatRoomService {
         Student requester = studentRepository.findByStudentNum(requesterStudentNum)
                 .orElseThrow(() -> new IllegalArgumentException("학생 없음"));
 
-        RentalChatRoom chatRoom = rentalChatRoomRepository
-                .findByRequester_IdAndRentalItem_Id((long) requester.getId(), rentalItemId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+        RentalChatRoom chatRoom;
+
+        if (rentalItemId == null) {
+            chatRoom = rentalChatRoomRepository
+                    .findByRequester_Id(requester.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+        } else {
+            // Check if the rental item exists
+            boolean rentalItemExists = rentalItemRepository.existsById(rentalItemId);
+            if (!rentalItemExists) {
+                throw new IllegalArgumentException("해당 ID의 렌탈 아이템이 존재하지 않습니다: " + rentalItemId);
+            }
+
+            chatRoom = rentalChatRoomRepository
+                    .findByRequester_IdAndRentalItem_Id((long)requester.getId(), rentalItemId)
+                    .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+        }
 
         return toDTO(chatRoom);
     }

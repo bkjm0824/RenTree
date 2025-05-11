@@ -47,12 +47,15 @@ public class RequestChatRoomService {
 
     @Transactional(readOnly = true)
     public RequestChatRoomResponseDTO getChatRoom(Long itemRequestId, String requesterStudentNum) {
+
+
         Student requester = studentRepository.findByStudentNum(requesterStudentNum)
                 .orElseThrow(() -> new IllegalArgumentException("학생 없음"));
 
         RequestChatRoom chatRoom = requestChatRoomRepository
                 .findByRequester_IdAndItemRequest_Id((long) requester.getId(), itemRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+
 
         return toDTO(chatRoom);
     }

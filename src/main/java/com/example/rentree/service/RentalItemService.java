@@ -24,8 +24,9 @@ public class RentalItemService {
     private final ItemImageService itemImageService;
     private final ItemImageRepository itemImageRepository;
     private final NotificationService notificationService;
+    private final RentalChatRoomRepository rentalChatRoomRepository;
 
-    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository, LikeRepository likeRepository, ItemImageService itemImageService, ItemImageRepository itemImageRepository, NotificationService notificationService) {
+    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository, LikeRepository likeRepository, ItemImageService itemImageService, ItemImageRepository itemImageRepository, NotificationService notificationService, RentalChatRoomRepository rentalChatRoomRepository) {
         this.rentalItemRepository = rentalItemRepository;
         this.categoryRepository = categoryRepository;
         this.studentRepository = studentRepository;
@@ -33,6 +34,7 @@ public class RentalItemService {
         this.itemImageService = itemImageService;
         this.itemImageRepository = itemImageRepository;
         this.notificationService = notificationService;
+        this.rentalChatRoomRepository = rentalChatRoomRepository;
     }
 
     @Transactional(readOnly = true)
@@ -121,6 +123,8 @@ public class RentalItemService {
     public void deleteRentalItem(Long id) {
         RentalItem rentalItem = rentalItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 물품을 찾을 수 없습니다: " + id));
+
+        rentalChatRoomRepository.updateRentalItemIdToNull(id);
 
         likeRepository.deleteByRentalItem(rentalItem);
 

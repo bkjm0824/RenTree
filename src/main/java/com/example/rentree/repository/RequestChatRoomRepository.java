@@ -2,6 +2,9 @@ package com.example.rentree.repository;
 
 import com.example.rentree.domain.RequestChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,4 +19,12 @@ public interface RequestChatRoomRepository extends JpaRepository<RequestChatRoom
     boolean existsByRequester_IdAndItemRequest_Id(Long requesterId, Long itemRequestId);
 
     Optional<RequestChatRoom> findByRequester_IdAndItemRequest_IdOrResponder_IdAndItemRequest_Id(Long requesterId, Long itemRequestId, Long responderId, Long itemRequestId2);
+
+    @Modifying
+    @Query("UPDATE RequestChatRoom c SET c.itemRequest = NULL WHERE c.itemRequest.id = :itemRequestId")
+    void updateItemRequestIdToNull(@Param("itemRequestId") Long itemRequestId);
+
+
+    @Query("SELECT c FROM RequestChatRoom c WHERE c.itemRequest.id = :itemRequestId")
+    Optional<RequestChatRoom> findByRequestItemId(@Param("itemRequestId") Long itemRequestId);
 }

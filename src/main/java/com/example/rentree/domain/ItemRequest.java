@@ -55,6 +55,9 @@ public class ItemRequest {
     @Column(nullable = false)
     private Integer viewCount = 0;
 
+    @Column(nullable = false)
+    private Boolean isAvailable = true; // 요청 가능 여부
+
     public void incrementViewCount() {
         this.viewCount++;
     }
@@ -69,4 +72,6 @@ public class ItemRequest {
         this.rentalStartTime = rentalStartTime;
         this.rentalEndTime = rentalEndTime;
     }
+
+    public void markAsRequested() {this.isAvailable = false; } // 요청 처리 완료 시 호출되는 메서드
 }

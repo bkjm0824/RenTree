@@ -1,9 +1,12 @@
 package com.example.rentree.controller;
 
+import com.example.rentree.domain.*;
 import com.example.rentree.dto.ItemRequestDTO;
-import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.dto.ItemRequestResponseDTO;
+import com.example.rentree.repository.RequestChatRoomRepository;
+import com.example.rentree.repository.StudentRepository;
 import com.example.rentree.service.ItemRequestService;
+import com.example.rentree.repository.rentalHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,11 @@ import java.util.stream.Collectors;
 public class ItemRequestController {
 
     private final ItemRequestService itemRequestService;
+    private final StudentRepository studentRepository;
+    private final RequestChatRoomRepository requestChatRoomRepository;
+    private final rentalHistoryRepository rentalHistoryRepository;
+    private final com.example.rentree.repository.requestHistoryRepository requestHistoryRepository;
+
 
     // 전체 게시글 가져오기
     @GetMapping("/all")
@@ -104,12 +112,47 @@ public class ItemRequestController {
         }
 
         try {
-            ItemRequestDTO dto = itemRequestService.getItemRequestDetail(id);
+            ItemRequest dto = itemRequestService.getItemRequestDetail(id);
             return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    // 대여 완료 처리
+    @PatchMapping("/{id}/rent")
+    public ResponseEntity<String> markAsRequested(@PathVariable Long id) {
+        itemRequestService.markAsRequested(id);
+        return ResponseEntity.ok("물품 대여 완료 처리됨");
+    }
+
+    // 다시 대여 가능하게 변경
+    @PatchMapping("/{id}/return")
+    public ResponseEntity<String> markAsAvailable(@PathVariable Long id) {
+
+        ItemRequest itemRequest = itemRequestService.getItemRequestDetail(id);
+
+        RequestChatRoom requestChatRoom = requestChatRoomRepository.findByRequestItemId(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다: " + id));
+
+        Student responder = requestChatRoom.getResponder(); // 대여 받는 사람
+        Student requester = requestChatRoom.getRequester(); // 대여 하는 사람
+
+        RequestHistory requestHistory = RequestHistory.builder()
+                .itemRequest(itemRequest)
+                .responder(responder)
+                .requester(requester)
+                .build();
+
+        requestHistoryRepository.save(requestHistory);
+
+        requester.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
+        studentRepository.save(requester); // 대여한 사람의 정보 저장
+
+        return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
+
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteItemRequest(@PathVariable Long id) {

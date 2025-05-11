@@ -1,11 +1,13 @@
 package com.example.rentree.service;
 
 import com.example.rentree.domain.RentalItem;
+import com.example.rentree.domain.RequestChatRoom;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.dto.ItemRequestResponseDTO;
 import com.example.rentree.repository.ItemRequestRepository;
+import com.example.rentree.repository.RequestChatRoomRepository;
 import com.example.rentree.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -26,7 +28,10 @@ public class ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository; // ItemRequestRepository 객체 주입
     private final StudentRepository studentRepository;
+
     private final NotificationService notificationService;
+
+    private final RequestChatRoomRepository requestChatRoomRepository;
 
     // 전체 게시글 가져오기 (createdAt이 최신순인 순서로 정렬)
     @Transactional(readOnly = true)
@@ -56,13 +61,13 @@ public class ItemRequestService {
     }
 
     @Transactional
-    public ItemRequestDTO getItemRequestDetail(Long id) {
+    public ItemRequest getItemRequestDetail(Long id) {
         ItemRequest itemRequest = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(" : " + id));
         itemRequest.incrementViewCount(); // 조회수 증가
         itemRequestRepository.save(itemRequest); // 수정된 객체 저장
 
-        return ItemRequestDTO.fromEntity(itemRequest);
+        return itemRequest;
     }
 
 
@@ -86,9 +91,21 @@ public class ItemRequestService {
     }
 
     @Transactional
+    public void markAsRequested(Long id) {
+        ItemRequest item = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 물품이 존재하지 않습니다."));
+        item.markAsRequested();
+    }
+
+    @Transactional
     // 게시글 삭제
     public void deleteItemRequest(Long Id) {
-        itemRequestRepository.findById(Id).ifPresent(itemRequestRepository::delete); // 게시글 ID로 게시글 찾아 삭제
+        ItemRequest itemRequest = itemRequestRepository.findById(Id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 게시글을 찾을 수 없습니다: " + Id));
+
+        requestChatRoomRepository.updateItemRequestIdToNull(Id);
+
+        itemRequestRepository.delete(itemRequest);
     }
 
     @Transactional(readOnly = true)
