@@ -4,7 +4,9 @@ import com.example.rentree.domain.Student;
 import com.example.rentree.dto.NotificationDto;
 import com.example.rentree.service.NotificationService;
 import com.example.rentree.repository.StudentRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,9 +39,22 @@ public class NotificationController {
         notificationService.markAsRead(id);
     }
 
-    // studentNum을 기반으로 학생 정보를 조회
+    // 키워드 기반 자동 알림 생성
+    @PostMapping("/auto")
+    public void createAutoNotification(@RequestBody AutoNotificationRequest request) {
+        notificationService.createNotificationsForMatchingKeywords(request.getMessage());
+    }
+
+    // studentNum으로 Student 조회
     private Student getStudentByStudentNum(String studentNum) {
         return studentRepository.findByStudentNum(studentNum)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+    }
+
+    // DTO 클래스
+    @Getter
+    @Setter
+    public static class AutoNotificationRequest {
+        private String message;
     }
 }

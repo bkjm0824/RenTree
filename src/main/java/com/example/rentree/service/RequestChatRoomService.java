@@ -89,10 +89,17 @@ public class RequestChatRoomService {
                 .roomId(chatRoom.getId())
                 .itemRequestId(chatRoom.getItemRequest().getId())
                 .itemRequestTitle(chatRoom.getItemRequest().getTitle())
+
                 .requesterStudentNum(chatRoom.getRequester().getStudentNum())
                 .requesterNickname(chatRoom.getRequester().getNickname())
+                .requesterProfileImage(chatRoom.getRequester().getProfileImage()) // ✅ 추가
+
                 .responderStudentNum(chatRoom.getResponder().getStudentNum())
                 .responderNickname(chatRoom.getResponder().getNickname())
+                .responderProfileImage(chatRoom.getResponder().getProfileImage()) // ✅ 추가
+
+                .requesterExited(chatRoom.isRequesterExited())
+                .responderExited(chatRoom.isResponderExited())
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }

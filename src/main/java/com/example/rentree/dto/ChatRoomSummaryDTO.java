@@ -23,5 +23,8 @@ public class ChatRoomSummaryDTO {
     private String writerStudentNum;
     private String writerNickname;
 
+    private Integer requesterProfileImage;
+    private Integer responderProfileImage;
+
     private LocalDateTime createdAt;
 }

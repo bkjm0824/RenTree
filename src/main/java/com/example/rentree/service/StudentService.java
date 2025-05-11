@@ -73,6 +73,13 @@ public class StudentService {
         studentRepository.save(student);
     }
 
+    // 프로필 이미지 조회
+    public Integer getProfileImage(String studentNum) {
+        Student student = studentRepository.findByStudentNum(studentNum)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with studentNum: " + studentNum));
+        return student.getProfileImage();
+    }
+
     public void updateProfileImage(String studentNum, Integer profileImage) {
         if (profileImage < 1 || profileImage > 4) {
             throw new IllegalArgumentException("Invalid profile image value: " + profileImage);

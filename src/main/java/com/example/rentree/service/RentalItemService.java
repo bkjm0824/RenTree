@@ -23,14 +23,16 @@ public class RentalItemService {
     private final LikeRepository likeRepository;
     private final ItemImageService itemImageService;
     private final ItemImageRepository itemImageRepository;
+    private final NotificationService notificationService;
 
-    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository, LikeRepository likeRepository, ItemImageService itemImageService, ItemImageRepository itemImageRepository) {
+    public RentalItemService(RentalItemRepository rentalItemRepository, CategoryRepository categoryRepository, StudentRepository studentRepository, LikeRepository likeRepository, ItemImageService itemImageService, ItemImageRepository itemImageRepository, NotificationService notificationService) {
         this.rentalItemRepository = rentalItemRepository;
         this.categoryRepository = categoryRepository;
         this.studentRepository = studentRepository;
         this.likeRepository = likeRepository;
         this.itemImageService = itemImageService;
         this.itemImageRepository = itemImageRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -63,8 +65,14 @@ public class RentalItemService {
                 request.getRentalEndTime()
         );
 
-        return rentalItemRepository.save(item); // 저장한 객체 반환!
+        RentalItem saved = rentalItemRepository.save(item);
+
+        // 자동 알림 생성
+        notificationService.createNotificationsForMatchingKeywords(request.getTitle() + " " + request.getDescription());
+
+        return saved;
     }
+
 
     @Transactional(readOnly = true)
     public List<RentalItem> searchRentalItemsByTitle(String keyword) {

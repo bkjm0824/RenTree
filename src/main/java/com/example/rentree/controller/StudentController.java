@@ -55,6 +55,16 @@ public class StudentController {
         }
     }
 
+    @GetMapping("/students/profile-image")
+    public ResponseEntity<?> getProfileImage(@RequestParam String studentNum) {
+        try {
+            Integer profileImage = studentService.getProfileImage(studentNum);
+            return ResponseEntity.ok(profileImage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/students/profile-image")
     public ResponseEntity<?> updateProfileImage(
             @RequestParam String studentNum,

@@ -15,9 +15,11 @@ public class RequestChatRoomResponseDTO {
 
     private String requesterStudentNum;
     private String requesterNickname;
+    private Integer requesterProfileImage;
 
     private String responderStudentNum;
     private String responderNickname;
+    private Integer responderProfileImage;
 
     private boolean requesterExited;
     private boolean responderExited;

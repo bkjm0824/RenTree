@@ -26,6 +26,7 @@ public class ItemRequestService {
 
     private final ItemRequestRepository itemRequestRepository; // ItemRequestRepository 객체 주입
     private final StudentRepository studentRepository;
+    private final NotificationService notificationService;
 
     // 전체 게시글 가져오기 (createdAt이 최신순인 순서로 정렬)
     @Transactional(readOnly = true)
@@ -36,11 +37,9 @@ public class ItemRequestService {
     // 게시글 등록
     @Transactional
     public void saveItemRequest(String studentNum, ItemRequestDTO itemRequestDTO) {
-        // 학번으로 학생 엔티티 조회
         Student student = studentRepository.findByStudentNum(studentNum)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생을 찾을 수 없습니다: " + studentNum));
 
-        // ItemRequest 엔티티 생성 (DTO에서 받은 정보는 DB에 직접 저장이 불가해 DTO를 엔티티로 변환)
         ItemRequest itemRequest = new ItemRequest(
                 student,
                 itemRequestDTO.getTitle(),
@@ -51,6 +50,9 @@ public class ItemRequestService {
                 itemRequestDTO.getRentalEndTime()
         );
         itemRequestRepository.save(itemRequest);
+
+        // 자동 알림 생성
+        notificationService.createNotificationsForMatchingKeywords(itemRequestDTO.getTitle() + " " + itemRequestDTO.getDescription());
     }
 
     @Transactional

@@ -56,6 +56,9 @@ public class ChatRoomQueryService {
                 .writerStudentNum(chatRoom.getRentalItem().getStudent().getStudentNum())
                 .writerNickname(chatRoom.getRentalItem().getStudent().getNickname())
 
+                .requesterProfileImage(chatRoom.getRequester().getProfileImage()) // ✅ 추가
+                .responderProfileImage(chatRoom.getResponder().getProfileImage())
+
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }
@@ -73,6 +76,9 @@ public class ChatRoomQueryService {
 
                 .writerStudentNum(chatRoom.getItemRequest().getStudent().getStudentNum())
                 .writerNickname(chatRoom.getItemRequest().getStudent().getNickname())
+
+                .requesterProfileImage(chatRoom.getRequester().getProfileImage()) // 🔥 추가
+                .responderProfileImage(chatRoom.getResponder().getProfileImage())
 
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
