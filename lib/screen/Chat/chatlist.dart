@@ -94,12 +94,14 @@ class _ChatScreenState extends State<ChatListScreen> {
           room['imageUrl'] = 'assets/requestIcon.png';
           // ✅ 요청글 제목 가져오기
           final itemId = room['relatedItemId'];
+
           final itemRes = await http.get(Uri.parse('http://10.0.2.2:8080/ItemRequest/$itemId'));
           if (itemRes.statusCode == 200) {
             final itemData = jsonDecode(utf8.decode(itemRes.bodyBytes));
             room['itemRequestTitle'] = itemData['title'] ?? '제목 없음';
             room['writerNickname'] = itemData['nickname'] ?? '작성자';
             room['writerStudentNum'] = itemData['studentNum'] ?? '';
+
             // ✅ 여기 추가: 대여 시간 포맷팅
             final start = itemData['rentalStartTime'];
             final end = itemData['rentalEndTime'];
@@ -164,6 +166,20 @@ class _ChatScreenState extends State<ChatListScreen> {
     return null;
   }
 
+  String _profileAssetName(dynamic index) {
+    switch (index) {
+      case 1:
+        return 'Bugi_profile.png';
+      case 2:
+        return 'GgoGgu_profile.png';
+      case 3:
+        return 'Nyangi_profile.png';
+      case 4:
+        return 'Sangzzi_profile.png';
+      default:
+        return 'Bugi_profile.png';
+    }
+  }
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -231,13 +247,9 @@ class _ChatScreenState extends State<ChatListScreen> {
   List<dynamic> get _filteredChatRooms {
     switch (selectedFilter) {
       case 1: // 대여글
-        return _chatRooms
-            .where((room) => room['rentalItemId'] != null)
-            .toList();
+        return _chatRooms.where((room) => room['type'] == 'rental').toList();
       case 2: // 요청글
-        return _chatRooms
-            .where((room) => room['rentalItemId'] == null)
-            .toList();
+        return _chatRooms.where((room) => room['type'] == 'request').toList();
       default:
         return _chatRooms;
     }
@@ -336,6 +348,8 @@ class _ChatScreenState extends State<ChatListScreen> {
                             print('✅ requesterNickname: ${room['requesterNickname']}');
                             print('✅ writerStudentNum: ${room['writerStudentNum']}');
                             print('✅ 내 학번: $_myStudentNum');
+                            print('requesterProfileImage: ${room['requesterProfileImage']}');
+                            print('responderProfileImage: ${room['responderProfileImage']}');
                             final opponentNickname = (_myStudentNum == room['writerStudentNum'])
                                 ? room['requesterNickname']
                                 : room['writerNickname'];
@@ -361,6 +375,9 @@ class _ChatScreenState extends State<ChatListScreen> {
                                           receiverStudentNum: (_myStudentNum == room['writerStudentNum'])
                                               ? room['requesterStudentNum']
                                               : room['writerStudentNum'],
+                                          receiverProfileIndex: (_myStudentNum == room['writerStudentNum'])
+                                              ? (room['requesterProfileImage'] ?? 1)
+                                              : (room['responderProfileImage'] ?? 1),
                                         ),
                                       ),
                                     );
@@ -382,6 +399,9 @@ class _ChatScreenState extends State<ChatListScreen> {
                                               : room['writerStudentNum'],
                                           rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
                                           isFaceToFace: room['isFaceToFace'] ?? true,
+                                          receiverProfileIndex: (_myStudentNum == room['writerStudentNum'])
+                                              ? (room['requesterProfileImage'] ?? 1)
+                                              : (room['responderProfileImage'] ?? 1),
                                         ),
                                       ),
                                     );

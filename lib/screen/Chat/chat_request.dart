@@ -43,6 +43,7 @@ class ChatRequestScreen extends StatefulWidget {
   final String title;
   final String rentalTimeText;
   final bool isFaceToFace;
+  final int receiverProfileIndex;
 
   ChatRequestScreen({
     required this.userName,
@@ -54,6 +55,7 @@ class ChatRequestScreen extends StatefulWidget {
     required this.title,
     required this.rentalTimeText,
     required this.isFaceToFace,
+    required this.receiverProfileIndex,
   });
 
   @override
@@ -71,6 +73,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   @override
   void initState() {
     super.initState();
+    _receiverProfileIndex = widget.receiverProfileIndex;
     _loadStudentNumAndConnect();
     _loadPreviousMessages();
   }
@@ -82,16 +85,16 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
       final res = await http.get(url);
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
-        final profileImage = data['student']['profileImage'];
+        final profileImage = data['profileImage'];
         setState(() {
           _receiverProfileIndex = profileImage ?? 1;
         });
-        print('🎯 상대 프로필 이미지 번호: \$_receiverProfileIndex');
+        print('🎯 상대 프로필 이미지 번호: $_receiverProfileIndex');
       } else {
-        print('❌ 물품 상세 정보 조회 실패: \${res.statusCode}');
+        print('❌ 물품 상세 정보 조회 실패: ${res.statusCode}');
       }
     } catch (e) {
-      print('❌ 예외 발생: \$e');
+      print('❌ 예외 발생: $e');
     }
   }
 
@@ -164,6 +167,17 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
         _messages =
             data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
