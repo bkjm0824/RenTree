@@ -78,26 +78,6 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
     _loadPreviousMessages();
   }
 
-  Future<void> _loadReceiverProfileImageFromItem() async {
-    final url =
-        Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.requestId}');
-    try {
-      final res = await http.get(url);
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
-        final profileImage = data['profileImage'];
-        setState(() {
-          _receiverProfileIndex = profileImage ?? 1;
-        });
-        print('🎯 상대 프로필 이미지 번호: $_receiverProfileIndex');
-      } else {
-        print('❌ 물품 상세 정보 조회 실패: ${res.statusCode}');
-      }
-    } catch (e) {
-      print('❌ 예외 발생: $e');
-    }
-  }
-
   String _profileAssetName(int index) {
     switch (index) {
       case 1:
