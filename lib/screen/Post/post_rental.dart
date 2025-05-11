@@ -128,6 +128,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   int currentImageIndex = 0;
   String writerStudentNum = '';
   int chatRoomCount = 0;
+  int receiverProfileIndex = 1;
 
   @override
   void initState() {
@@ -195,7 +196,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
           category = data['category']['name'] ?? '기타';
           final profileIndex = data['student']['profileImage'] ?? 1;
           writerProfileImagePath =
-              'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+          'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+          receiverProfileIndex = profileIndex;
           writerStudentNum = data['student']['studentNum'] ?? '';
           print('🧑‍🎓 writerStudentNum: $writerStudentNum');
           if (category == '양도(무료 나눔)' ||
@@ -732,6 +734,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                                   writerStudentNum
                                               ? result['requesterStudentNum']
                                               : writerStudentNum,
+                                          receiverProfileIndex: receiverProfileIndex,
                                         ),
                                       ),
                                     );

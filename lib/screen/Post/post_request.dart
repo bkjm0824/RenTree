@@ -32,6 +32,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   String writerStudentNum = '';
   String? studentNum;
   int chatRoomCount = 0;
+  int writerProfileIndex = 1;
 
   @override
   void initState() {
@@ -92,8 +93,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           writerStudentNum = data['studentNum'] ?? '';
 
           final profileIndex = data['profileImage'] ?? 1;
-          writerProfileImagePath =
-              'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+          writerProfileIndex = profileIndex; // 👈 저장
+          writerProfileImagePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
 
           rentalTimeRangeText =
               '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
@@ -428,7 +429,13 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                       widget.itemId, studentNum);
                                   if (result != null) {
                                     final chatRoomId = result['chatRoomId'];
+                                    final receiverStudentNum = studentNum == writerStudentNum
+                                        ? result['requesterStudentNum']
+                                        : writerStudentNum;
 
+                                    final receiverProfileIndex = studentNum == writerStudentNum
+                                        ? result['requesterProfileImage'] ?? 1
+                                        : writerProfileIndex;
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -445,6 +452,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                               : writerStudentNum,
                                           rentalTimeText: rentalTimeRangeText,
                                           isFaceToFace: isFaceToFace,
+                                          receiverProfileIndex: receiverProfileIndex,
                                         ),
                                       ),
                                     );

@@ -32,7 +32,6 @@ class ChatMessage {
       sentAt: parsedSentAt,
     );
   }
-
 }
 
 class ChatRentalScreen extends StatefulWidget {
@@ -42,10 +41,11 @@ class ChatRentalScreen extends StatefulWidget {
   final String rentalTimeText;
   final bool isFaceToFace;
   final int chatRoomId;
-  final String writerStudentNum;       // 글 작성자 학번
+  final String writerStudentNum; // 글 작성자 학번
   final String requesterStudentNum;
   final String receiverStudentNum;
   final int rentalItemId;
+  final int receiverProfileIndex;
 
   ChatRentalScreen({
     required this.userName,
@@ -58,8 +58,8 @@ class ChatRentalScreen extends StatefulWidget {
     required this.requesterStudentNum,
     required this.receiverStudentNum,
     required this.rentalItemId,
+    required this.receiverProfileIndex,
   });
-
 
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
@@ -73,12 +73,13 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   String? _receiverStudentNum;
   int _receiverProfileIndex = 1;
 
+
   @override
   void initState() {
     super.initState();
+    _receiverProfileIndex = widget.receiverProfileIndex;
     _loadStudentNumAndConnect();
     _loadPreviousMessages(); // 🔥 이거 꼭 추가
-    _loadReceiverProfileImageFromItem();
   }
 
   Future<void> _loadReceiverProfileImageFromItem() async {
@@ -116,7 +117,6 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
     }
   }
 
-
   Future<void> _loadStudentNumAndConnect() async {
     final prefs = await SharedPreferences.getInstance();
     final myStudentNum = prefs.getString('studentNum') ?? '';
@@ -142,15 +142,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
             setState(() {
               _messages.add(message);
             });
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_scrollController.hasClients) {
-                _scrollController.animateTo(
-                  _scrollController.position.minScrollExtent,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              }
-            });
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _scrollToBottom());
           }
         } catch (e) {
           print("⚠️ setState 에러 발생: $e");
@@ -160,7 +153,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _loadPreviousMessages() async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatmessages/rental/${widget.chatRoomId}');
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/chatmessages/rental/${widget.chatRoomId}');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -169,21 +163,22 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
       setState(() {
-        _messages = data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
         _messages =
             data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.minScrollExtent,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
-        });
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       });
     } else {
       print("❌ 메시지 불러오기 실패: ${res.statusCode}");
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -211,7 +206,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final url =
+    Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
@@ -292,7 +288,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
+                          Navigator.pop(
+                              context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
                         },
                       ),
                       Row(
@@ -338,7 +335,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostRentalScreen(itemId: widget.rentalItemId),
+                          builder: (context) =>
+                              PostRentalScreen(itemId: widget.rentalItemId),
                         ),
                       );
                     },
@@ -365,7 +363,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                     children: [
                       Text(
                         widget.title,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 5),
                       Text(
@@ -388,6 +387,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       (senderStudentNum == widget.writerStudentNum)
                           ? widget.requesterStudentNum
                           : widget.writerStudentNum;
+
+                      WidgetsBinding.instance
+                          .addPostFrameCallback((_) => _scrollToBottom());
 
                       ChatService.sendMessage(
                         widget.chatRoomId,
@@ -426,7 +428,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                 child: ListView(
                   controller: _scrollController,
                   shrinkWrap: true,
-                  reverse: true,
+                  reverse: false,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   children: groupedMessages.entries.map((entry) {
                     final date = entry.key;
