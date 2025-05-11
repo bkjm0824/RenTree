@@ -14,4 +14,6 @@ public interface RequestChatRoomRepository extends JpaRepository<RequestChatRoom
     List<RequestChatRoom> findByRequester_StudentNumOrResponder_StudentNum(String requester, String responder);
 
     boolean existsByRequester_IdAndItemRequest_Id(Long requesterId, Long itemRequestId);
+
+    Optional<RequestChatRoom> findByRequester_IdAndItemRequest_IdOrResponder_IdAndItemRequest_Id(Long requesterId, Long itemRequestId, Long responderId, Long itemRequestId2);
 }

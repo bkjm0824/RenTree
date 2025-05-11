@@ -19,23 +19,27 @@ public class RequestChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 요청글 정보
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_request_id", nullable = false)
     private ItemRequest itemRequest;
 
-    // 채팅 요청자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id", nullable = false)
     private Student requester;
 
-    // 채팅 응답자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responder_id", nullable = false)
     private Student responder;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // 추가된 퇴장 여부 필드
+    @Column(nullable = false)
+    private boolean requesterExited = false;
+
+    @Column(nullable = false)
+    private boolean responderExited = false;
 
     public List<Student> getParticipants() {
         return List.of(requester, responder);

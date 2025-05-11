@@ -20,5 +20,8 @@ public class ChatRoomSummaryDTO {
     private String requesterNickname;
     private String responderNickname;
 
+    private String writerStudentNum;
+    private String writerNickname;
+
     private LocalDateTime createdAt;
 }

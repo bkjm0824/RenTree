@@ -19,5 +19,8 @@ public class RentalChatRoomResponseDTO {
     private String responderStudentNum;
     private String responderNickname;
 
+    private boolean requesterExited;
+    private boolean responderExited;
+
     private LocalDateTime createdAt;
 }

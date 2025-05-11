@@ -37,7 +37,7 @@ public class RentalChatRoomService {
         RentalChatRoom chatRoom = RentalChatRoom.builder()
                 .rentalItem(item)
                 .requester(requester)
-                .responder(item.getStudent()) // 또는 getOwner()
+                .responder(item.getStudent())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -66,8 +66,22 @@ public class RentalChatRoomService {
                 .findByRequester_IdAndRentalItem_Id((long) requester.getId(), rentalItemId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
 
-        rentalChatRoomRepository.delete(chatRoom);
-        return new RentalChatRoomDeleteResponseDTO(chatRoom.getId(), "렌탈 채팅방 삭제됨");
+        boolean isRequester = chatRoom.getRequester().getId() == requester.getId();
+
+        if (isRequester) {
+            chatRoom.setRequesterExited(true);
+        } else if (chatRoom.getResponder().getId() == requester.getId()) {
+            chatRoom.setResponderExited(true);
+        } else {
+            throw new IllegalStateException("채팅방 참여자가 아님");
+        }
+
+        if (chatRoom.isRequesterExited() && chatRoom.isResponderExited()) {
+            rentalChatRoomRepository.delete(chatRoom);
+            return new RentalChatRoomDeleteResponseDTO(chatRoom.getId(), "채팅방 완전히 삭제됨");
+        }
+
+        return new RentalChatRoomDeleteResponseDTO(chatRoom.getId(), "한 명만 나갔습니다. 상대도 나가야 삭제됩니다.");
     }
 
     private RentalChatRoomResponseDTO toDTO(RentalChatRoom chatRoom) {
@@ -83,4 +97,3 @@ public class RentalChatRoomService {
                 .build();
     }
 }
-

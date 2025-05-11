@@ -52,6 +52,10 @@ public class ChatRoomQueryService {
                 .responderStudentNum(chatRoom.getResponder().getStudentNum())
                 .requesterNickname(chatRoom.getRequester().getNickname())
                 .responderNickname(chatRoom.getResponder().getNickname())
+
+                .writerStudentNum(chatRoom.getRentalItem().getStudent().getStudentNum())
+                .writerNickname(chatRoom.getRentalItem().getStudent().getNickname())
+
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }
@@ -66,6 +70,10 @@ public class ChatRoomQueryService {
                 .responderStudentNum(chatRoom.getResponder().getStudentNum())
                 .requesterNickname(chatRoom.getRequester().getNickname())
                 .responderNickname(chatRoom.getResponder().getNickname())
+
+                .writerStudentNum(chatRoom.getItemRequest().getStudent().getStudentNum())
+                .writerNickname(chatRoom.getItemRequest().getStudent().getNickname())
+
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }

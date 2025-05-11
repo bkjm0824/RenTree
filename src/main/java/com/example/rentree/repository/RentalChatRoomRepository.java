@@ -14,4 +14,7 @@ public interface RentalChatRoomRepository extends JpaRepository<RentalChatRoom, 
     List<RentalChatRoom> findByRequester_StudentNumOrResponder_StudentNum(String requester, String responder);
 
     boolean existsByRequester_IdAndRentalItem_Id(Long requesterId, Long rentalItemId);
+
+    Optional<RentalChatRoom> findByRequester_IdAndRentalItem_IdOrResponder_IdAndRentalItem_Id(Long requesterId, Long rentalItemId, Long responderId, Long rentalItemId2);
+
 }

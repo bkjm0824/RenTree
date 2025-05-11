@@ -66,8 +66,22 @@ public class RequestChatRoomService {
                 .findByRequester_IdAndItemRequest_Id((long) requester.getId(), itemRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
 
-        requestChatRoomRepository.delete(chatRoom);
-        return new RequestChatRoomDeleteResponseDTO(chatRoom.getId(), "요청글 채팅방 삭제됨");
+        boolean isRequester = chatRoom.getRequester().getId() == requester.getId();
+
+        if (isRequester) {
+            chatRoom.setRequesterExited(true);
+        } else if (chatRoom.getResponder().getId() == requester.getId()) {
+            chatRoom.setResponderExited(true);
+        } else {
+            throw new IllegalStateException("채팅방 참여자가 아님");
+        }
+
+        if (chatRoom.isRequesterExited() && chatRoom.isResponderExited()) {
+            requestChatRoomRepository.delete(chatRoom);
+            return new RequestChatRoomDeleteResponseDTO(chatRoom.getId(), "채팅방 완전히 삭제됨");
+        }
+
+        return new RequestChatRoomDeleteResponseDTO(chatRoom.getId(), "한 명만 나갔습니다. 상대도 나가야 삭제됩니다.");
     }
 
     private RequestChatRoomResponseDTO toDTO(RequestChatRoom chatRoom) {
