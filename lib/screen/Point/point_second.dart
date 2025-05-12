@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/Point/point_first.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Chat/chatlist.dart';
 import '../Home/addpost_give.dart';
@@ -13,6 +15,7 @@ class PointedScreen extends StatefulWidget {
 
 class _PointedScreenState extends State<PointedScreen> {
   int _selectedIndex = 2;
+  int _myPoint = 0;
   final List<Map<String, String>> rankingList = [
     {"rank": "1", "name": "상상북스딱스", "points": "29"},
     {"rank": "2", "name": "호식이", "points": "27"},
@@ -64,6 +67,56 @@ class _PointedScreenState extends State<PointedScreen> {
           _selectedIndex = index;
         });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMyPoint(); // ✅ 이거 반드시 필요!
+  }
+
+  Future<void> _loadMyPoint() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rentalCount = prefs.getInt('rentalCount') ?? 0;
+    final point = rentalCount * 20;
+
+    print('📦 불러온 rentalCount: $rentalCount');
+
+    if (point == 0) {
+      Future.delayed(Duration.zero, () {
+        showGeneralDialog(
+          context: context,
+          barrierLabel: "PointPopup",
+          barrierDismissible: true,
+          barrierColor: Colors.black.withOpacity(0.3),
+          transitionDuration: Duration(milliseconds: 600), // ⭐ 애니메이션 속도
+          pageBuilder: (_, __, ___) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: FractionallySizedBox(
+                child: PointScreen(), // ✅ 유지된 레이아웃
+              ),
+            );
+          },
+          transitionBuilder: (_, animation, __, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(0, 1), // 아래에서 시작
+                end: Offset(0, 0), // 제자리 도착
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut, // 부드러운 효과
+              )),
+              child: child,
+            );
+          },
+        );
+      });
+    }
+
+    setState(() {
+      _myPoint = point;
+    });
   }
 
   @override
@@ -150,7 +203,7 @@ class _PointedScreenState extends State<PointedScreen> {
                                         ),
                                       ),
                                       TextSpan(
-                                        text: '280',
+                                        text: '$_myPoint',
                                         style: TextStyle(
                                           color: Color(0xFF41B642),
                                           fontSize: 30,

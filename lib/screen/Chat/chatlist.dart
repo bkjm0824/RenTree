@@ -8,6 +8,7 @@ import '../Home/home.dart';
 import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
 import '../Notification/notification.dart';
+import '../Point/point_second.dart';
 import 'chat_rental.dart';
 import 'chat_request.dart';
 
@@ -209,7 +210,7 @@ class _ChatScreenState extends State<ChatListScreen> {
         // 포인트
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PointScreen()),
+          MaterialPageRoute(builder: (context) => PointedScreen()),
         );
         break;
       case 3:
@@ -551,6 +552,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                                     fontSize: 15,
                                                     color: Colors.grey),
                                                 overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
                                               ),
                                             ],
                                           ),
