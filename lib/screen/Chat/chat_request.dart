@@ -62,6 +62,14 @@ class ChatRequestScreen extends StatefulWidget {
   _ChatRequestScreenState createState() => _ChatRequestScreenState();
 }
 
+enum RentalState {
+  idle,
+  requested,
+  approved,
+  returned,
+  completed
+}
+
 class _ChatRequestScreenState extends State<ChatRequestScreen> {
   TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -69,6 +77,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   String? _myStudentNum;
   String? _receiverStudentNum;
   int _receiverProfileIndex = 1;
+  Set<String> _completedReturnMessageTimes = {};
+  RentalState _currentState = RentalState.idle;
 
   @override
   void initState() {
@@ -76,6 +86,12 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
     _receiverProfileIndex = widget.receiverProfileIndex;
     _loadStudentNumAndConnect();
     _loadPreviousMessages();
+  }
+
+  void _updateRentalState() {
+    setState(() {
+      _currentState = _calculateRentalState();
+    });
   }
 
   String _profileAssetName(int index) {
@@ -116,6 +132,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
             setState(() {
               _messages.add(message);
             });
+            _updateRentalState();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (_scrollController.hasClients) {
                 _scrollController.animateTo(
@@ -147,6 +164,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
         _messages =
             data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
       });
+      _updateRentalState();
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     }
   }
@@ -207,6 +225,111 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
 
   String buildRequestAllowMessage(String approverName) {
     return "$approverName 님이 대여를 승인했어요. 반납시간을 잘 지켜주세요!";
+  }
+
+  RentalState _calculateRentalState() {
+    bool requested = false;
+    bool approved = false;
+    bool returned = false;
+    bool completed = false;
+
+    for (var msg in _messages) {
+      if (msg.content.startsWith('대여를 요청하였습니다.')) requested = true;
+      if (msg.content.contains('대여를 승인했어요')) approved = true;
+      if (msg.content.contains('반납을 요청하였습니다.')) returned = true;
+      if (msg.content.contains('반납이 완료되었습니다.')) completed = true;
+    }
+
+    if (completed) return RentalState.completed;
+    if (returned) return RentalState.returned;
+    if (approved) return RentalState.approved;
+    if (requested) return RentalState.requested;
+    return RentalState.idle;
+  }
+
+  String buildRentalRequestMessage() {
+    final now = DateTime.now();
+    final dateText = "${now.year}년 ${now.month}월 ${now.day}일";
+    final timeRange = widget.rentalTimeText;
+    final faceToFace = widget.isFaceToFace ? "대면" : "비대면";
+    return "대여를 요청하였습니다.\n$dateText\n$timeRange\n대여방식 : $faceToFace";
+  }
+
+  bool isReturnRequestCompleted(ChatMessage requestMessage) {
+    final requestTime = requestMessage.sentAt;
+    if (requestTime == null) return false;
+
+    // 반납 완료 메시지가 반납 요청 이후에 있는지 확인
+    return _messages.any((msg) =>
+    msg.content.contains('반납이 완료되었습니다.') &&
+        msg.sentAt != null &&
+        msg.sentAt!.isAfter(requestTime));
+  }
+
+  bool hasReturnCompleteMessage() {
+    return _messages.any((msg) => msg.content.contains('반납이 완료되었습니다.'));
+  }
+  bool hasApprovalMessage() {
+    return _messages.any((msg) => msg.content.contains('대여를 승인했어요'));
+  }
+
+  Widget buildBottomButton(RentalState state) {
+    if (_myStudentNum != widget.writerStudentNum) return SizedBox.shrink();
+
+    if (state == RentalState.idle) {
+      return ElevatedButton(
+        onPressed: () {
+          final messageText = buildRentalRequestMessage();
+          ChatService.sendMessage(
+            widget.chatRoomId,
+            _myStudentNum!,
+            _receiverStudentNum!,
+            messageText,
+            type: 'request',
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xff6DB129),
+          foregroundColor: Colors.white,
+        ),
+        child: Text('대여 요청'),
+      );
+    } else if (state == RentalState.approved) {
+      return ElevatedButton(
+        onPressed: () {
+          ChatService.sendMessage(
+            widget.chatRoomId,
+            _myStudentNum!,
+            _receiverStudentNum!,
+            "반납을 요청하였습니다.",
+            type: 'request',
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+        ),
+        child: Text('반납하기'),
+      );
+    } else if (state == RentalState.returned || state == RentalState.completed) {
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey,
+          foregroundColor: Colors.white,
+        ),
+        child: Text('반납하기'),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey,
+          foregroundColor: Colors.white,
+        ),
+        child: Text('대여 요청'),
+      );
+    }
   }
 
   @override
@@ -331,6 +454,79 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                       ],
                     ),
                   ),
+
+                  Builder(
+                    builder: (context) {
+                      Widget bottomActionButton = SizedBox.shrink();
+
+                      if (_myStudentNum == widget.writerStudentNum) {
+                        if (_currentState == RentalState.idle) {
+                          bottomActionButton = ElevatedButton(
+                            onPressed: () {
+                              final messageText = buildRentalRequestMessage();
+                              ChatService.sendMessage(
+                                widget.chatRoomId,
+                                _myStudentNum!,
+                                _receiverStudentNum!,
+                                messageText,
+                                type: 'request',
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xff6DB129),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            child: Text('대여 요청', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          );
+                        } else if (_currentState == RentalState.approved) {
+                          bottomActionButton = ElevatedButton(
+                            onPressed: () {
+                              ChatService.sendMessage(
+                                widget.chatRoomId,
+                                _myStudentNum!,
+                                _receiverStudentNum!,
+                                "반납을 요청하였습니다.",
+                                type: 'request',
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            child: Text('반납하기', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          );
+                        } else if (_currentState == RentalState.returned || _currentState == RentalState.completed) {
+                          bottomActionButton = ElevatedButton(
+                            onPressed: null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            child: Text('반납하기', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          );
+                        } else {
+                          bottomActionButton = ElevatedButton(
+                            onPressed: null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            child: Text('대여 요청', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          );
+                        }
+                      }
+
+                      return bottomActionButton;
+                    },
+                  ),
                 ],
               ),
             ),
@@ -392,8 +588,11 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
 
                           final bool isRentalRequest =
                               message.content.startsWith('대여를 요청하였습니다.');
+                          final bool isReturnRequest =
+                              message.content.startsWith('반납을 요청하였습니다.');
                           final bool isSystemMessage =
-                              message.content.contains("님이 대여를 승인했어요");
+                              message.content.contains("님이 대여를 승인했어요") ||
+                                  message.content.contains("반납이 완료되었습니다.");
                           if (isSystemMessage) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -420,17 +619,13 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                           }
                           final messageBubble = Container(
                               margin: EdgeInsets.only(bottom: 5),
-                              padding: isRentalRequest
-                                  ? EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 15)
-                                  : EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 10),
+                              padding: (isRentalRequest || isReturnRequest)
+                                  ? EdgeInsets.symmetric(horizontal: 20, vertical: 15)
+                                  : EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
-                                color: isRentalRequest
+                                color: (isRentalRequest || isReturnRequest)
                                     ? Color(0xff606060)
-                                    : (message.isMe
-                                        ? Color(0xff6DB129)
-                                        : Color(0xff8F8F8F)),
+                                    : (message.isMe ? Color(0xff6DB129) : Color(0xff8F8F8F)),
                                 borderRadius: BorderRadius.circular(18),
                               ),
                               child: IntrinsicWidth(
@@ -441,64 +636,92 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                       message.content,
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: isRentalRequest ? 17 : 15,
-                                        fontWeight: isRentalRequest
-                                            ? FontWeight.w500
-                                            : FontWeight.normal,
+                                        fontSize: (isRentalRequest || isReturnRequest) ? 17 : 15,
+                                        fontWeight: (isRentalRequest || isReturnRequest) ? FontWeight.w500 : FontWeight.normal,
                                       ),
                                     ),
-                                    if (isRentalRequest &&
-                                        _myStudentNum ==
-                                            widget.writerStudentNum)
+                                    if ((isRentalRequest || isReturnRequest) && _myStudentNum == widget.requesterStudentNum)
                                       Align(
                                         alignment: Alignment.bottomRight,
-                                        child: TextButton(
-                                          onPressed: () async {
-                                            final prefs =
-                                                await SharedPreferences
-                                                    .getInstance();
-                                            final senderStudentNum =
-                                                prefs.getString('studentNum') ??
-                                                    '';
-                                            final approverName =
-                                                prefs.getString('nickname') ??
-                                                    '알 수 없음';
+                                        child: Padding(
+                                          padding: EdgeInsets.only(left: 15),
+                                          child: Builder(
+                                            builder: (context) {
+                                              final isApproved = hasApprovalMessage();
+                                              final isReturned = hasReturnCompleteMessage();
 
-                                            final messageText =
-                                                buildRequestAllowMessage(
-                                                    approverName);
+                                              if (isRentalRequest) {
+                                                return isApproved
+                                                    ? Text(
+                                                  '승인 완료',
+                                                  style: TextStyle(
+                                                    color: Colors.grey, // ✅ 바꿔줘
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                  ),
+                                                )
+                                                    : TextButton(
+                                                  onPressed: () async {
+                                                    final prefs = await SharedPreferences.getInstance();
+                                                    final nickname = prefs.getString('nickname') ?? '작성자';
+                                                    final messageText = buildRequestAllowMessage(nickname);
 
-                                            final receiverStudentNum =
-                                                (senderStudentNum ==
-                                                        widget.writerStudentNum)
-                                                    ? widget.requesterStudentNum
-                                                    : widget.writerStudentNum;
+                                                    ChatService.sendMessage(
+                                                      widget.chatRoomId,
+                                                      _myStudentNum!,
+                                                      _receiverStudentNum!,
+                                                      messageText,
+                                                      type: 'request',
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    '승인',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Color(0xffBCF69C),
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
 
-                                            ChatService.sendMessage(
-                                              widget.chatRoomId,
-                                              _myStudentNum!,
-                                              _receiverStudentNum!,
-                                              messageText,
-                                              type: 'rental', // 🔥 꼭 전달!
-                                            );
-                                            print('✅ 승인 버튼 클릭됨!');
-                                          },
-                                          style: TextButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: Size(30, 0),
-                                            tapTargetSize: MaterialTapTargetSize
-                                                .shrinkWrap,
-                                            foregroundColor: Color(0xff97C663),
-                                          ),
-                                          child: Text(
-                                            '승인',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xffBCF69C),
-                                                fontSize: 18),
+                                              if (isReturnRequest) {
+                                                return isReturnRequestCompleted(message)
+                                                    ? Text(
+                                                  '반납 완료',
+                                                  style: TextStyle(
+                                                    color: Colors.grey, // ✅ 이 부분도 바꿔줘
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                  ),
+                                                )
+                                                    : TextButton(
+                                                  onPressed: () {
+                                                    ChatService.sendMessage(
+                                                      widget.chatRoomId,
+                                                      _myStudentNum!,
+                                                      _receiverStudentNum!,
+                                                      "반납이 완료되었습니다.",
+                                                      type: 'request',
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    '승인',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Color(0xffBCF69C),
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+
+                                              return SizedBox.shrink();
+                                            },
                                           ),
                                         ),
                                       ),
+
                                   ],
                                 ),
                               ));
@@ -557,6 +780,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                     );
                   }).toList(),
                 ),
+
               ),
             ),
 
