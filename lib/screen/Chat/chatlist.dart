@@ -103,8 +103,8 @@ class _ChatScreenState extends State<ChatListScreen> {
           if (itemRes.statusCode == 200) {
             final itemData = jsonDecode(utf8.decode(itemRes.bodyBytes));
             room['itemRequestTitle'] = itemData['title'] ?? '제목 없음';
-            room['writerNickname'] = itemData['nickname'] ?? '작성자';
-            room['writerStudentNum'] = itemData['studentNum'] ?? '';
+            room['writerNickname'] = itemData['student']['nickname'] ?? '작성자';
+            room['writerStudentNum'] = itemData['student']['studentNum'] ?? '';
 
             // ✅ 여기 추가: 대여 시간 포맷팅
             final start = itemData['rentalStartTime'];

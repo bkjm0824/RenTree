@@ -85,14 +85,14 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
         setState(() {
           title = data['title'] ?? '제목 없음';
           description = data['description'] ?? '내용 없음';
-          nickname = data['nickname'] ?? '익명';
+          nickname = data['student']?['nickname'] ?? '익명';
           isFaceToFace = data['isFaceToFace'] ?? true;
           rentalStartTime = DateTime.parse(data['rentalStartTime']);
           rentalEndTime = DateTime.parse(data['rentalEndTime']);
           createdAt = DateTime.parse(data['createdAt']);
-          writerStudentNum = data['studentNum'] ?? '';
+          writerStudentNum = data['student']?['studentNum'] ?? '';
 
-          final profileIndex = data['profileImage'] ?? 1;
+          final profileIndex = data['student']?['profileImage'] ?? 1;
           writerProfileIndex = profileIndex; // 👈 저장
           writerProfileImagePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
 
