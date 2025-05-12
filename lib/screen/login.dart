@@ -54,6 +54,11 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         print('❌ 서버 응답에 profileImage가 없음!');
       }
+      final rentalCount = data['rentalCount'];
+      if (rentalCount != null) {
+        await prefs.setInt('rentalCount', rentalCount);
+        print('📦 저장된 rentalCount: $rentalCount');
+      }
 
       if (studentId != null) {
         await prefs.setInt('studentId', studentId);

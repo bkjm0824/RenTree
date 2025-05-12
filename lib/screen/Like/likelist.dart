@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../Point/point_second.dart';
 import '../Post/post_rental.dart';
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
@@ -10,7 +11,6 @@ import '../MyPage/mypage.dart';
 import '../Notification/notification.dart';
 import '../Post/post_request.dart';
 import '../Search/search.dart';
-import '../Point/point_first.dart';
 
 class LikeScreen extends StatefulWidget {
   @override
@@ -121,7 +121,7 @@ class _LikeScreenState extends State<LikeScreen> {
         break;
       case 2:
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => PointScreen()));
+            context, MaterialPageRoute(builder: (context) => PointedScreen()));
         break;
       case 3:
         Navigator.pushReplacement(

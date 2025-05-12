@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:rentree/screen/Point/point_first.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
@@ -82,7 +81,7 @@ class _MypageScreenState extends State<MypageScreen> {
         // 포인트
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PointScreen()),
+          MaterialPageRoute(builder: (context) => PointedScreen()),
         );
         break;
       case 3:
@@ -151,7 +150,9 @@ class _MypageScreenState extends State<MypageScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => SearchScreen()), // SearchScreen으로 이동
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SearchScreen()), // SearchScreen으로 이동
                           );
                         },
                       ),
@@ -265,7 +266,8 @@ class _MypageScreenState extends State<MypageScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 20),
+            icon:
+                Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 20),
             onPressed: () {
               Navigator.push(
                 context,
@@ -277,7 +279,6 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
     );
   }
-
 
 // 🔹 현재 대여 진행 상태
   Widget CurrentRentalBox(BuildContext context) {
@@ -330,9 +331,9 @@ class _MypageScreenState extends State<MypageScreen> {
     );
   }
 
-
 // 🔹 대여 물품 아이템
-  Widget _buildRentalItem(BuildContext context, int itemId, String imagePath, String title, String timeLeft, String description) {
+  Widget _buildRentalItem(BuildContext context, int itemId, String imagePath,
+      String title, String timeLeft, String description) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -369,7 +370,8 @@ class _MypageScreenState extends State<MypageScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                   SizedBox(height: 4),
                   Text(timeLeft,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600])),
@@ -381,8 +383,6 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
     );
   }
-
-
 
 // 🔹 메뉴 박스
   Widget MenuBox() {
@@ -444,7 +444,8 @@ class _MypageScreenState extends State<MypageScreen> {
   }
 
   // 🔹 메뉴 항목을 생성하는 함수
-  Widget _buildMenuItem(String title, {bool isLast = false, VoidCallback? onTap}) {
+  Widget _buildMenuItem(String title,
+      {bool isLast = false, VoidCallback? onTap}) {
     return Column(
       children: [
         ListTile(
@@ -452,14 +453,12 @@ class _MypageScreenState extends State<MypageScreen> {
             title,
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          trailing: Icon(Icons.arrow_forward_ios,
-              size: 16, color: Colors.black54),
+          trailing:
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54),
           onTap: onTap,
         ),
-        if (!isLast)
-          Divider(height: 1, color: Colors.grey[400]),
+        if (!isLast) Divider(height: 1, color: Colors.grey[400]),
       ],
     );
   }
-
 }

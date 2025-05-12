@@ -129,6 +129,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   String writerStudentNum = '';
   int chatRoomCount = 0;
   int receiverProfileIndex = 1;
+  int viewCount = 0;
 
   @override
   void initState() {
@@ -196,9 +197,10 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
           category = data['category']['name'] ?? '기타';
           final profileIndex = data['student']['profileImage'] ?? 1;
           writerProfileImagePath =
-          'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+              'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
           receiverProfileIndex = profileIndex;
           writerStudentNum = data['student']['studentNum'] ?? '';
+          viewCount = data['viewCount'] ?? 0;
           print('🧑‍🎓 writerStudentNum: $writerStudentNum');
           if (category == '양도(무료 나눔)' ||
               data['rentalStartTime'] == null ||
@@ -609,11 +611,28 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    '관심 $likeCount',
-                                    style: TextStyle(
-                                        fontSize: 14, color: Color(0xff747474)),
-                                    overflow: TextOverflow.ellipsis,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '관심 $likeCount',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xff747474)),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(' | ',
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Color(0xff747474),
+                                              fontWeight: FontWeight.bold)),
+                                      Text(
+                                        '조회 $viewCount',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xff747474)),
+                                        overflow: TextOverflow.ellipsis,
+                                      )
+                                    ],
                                   ),
                                 ),
                                 Expanded(
@@ -734,7 +753,8 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                                   writerStudentNum
                                               ? result['requesterStudentNum']
                                               : writerStudentNum,
-                                          receiverProfileIndex: receiverProfileIndex,
+                                          receiverProfileIndex:
+                                              receiverProfileIndex,
                                         ),
                                       ),
                                     );

@@ -33,7 +33,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   String? studentNum;
   int chatRoomCount = 0;
   int writerProfileIndex = 1;
-
+  int viewCount = 0;
   @override
   void initState() {
     super.initState();
@@ -91,10 +91,11 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           rentalEndTime = DateTime.parse(data['rentalEndTime']);
           createdAt = DateTime.parse(data['createdAt']);
           writerStudentNum = data['student']?['studentNum'] ?? '';
-
+          viewCount = data['viewCount'] ?? 0;
           final profileIndex = data['student']?['profileImage'] ?? 1;
           writerProfileIndex = profileIndex; // 👈 저장
-          writerProfileImagePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+          writerProfileImagePath =
+              'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
 
           rentalTimeRangeText =
               '${formatTo24Hour(rentalStartTime!)} ~ ${formatTo24Hour(rentalEndTime!)}';
@@ -374,6 +375,18 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                               ),
                             ),
                           ),
+                          SizedBox(height: 7),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                '조회 $viewCount ',
+                                style: TextStyle(
+                                    fontSize: 15, color: Color(0xff747474)),
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -429,11 +442,13 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                       widget.itemId, studentNum);
                                   if (result != null) {
                                     final chatRoomId = result['chatRoomId'];
-                                    final receiverStudentNum = studentNum == writerStudentNum
-                                        ? result['requesterStudentNum']
-                                        : writerStudentNum;
+                                    final receiverStudentNum =
+                                        studentNum == writerStudentNum
+                                            ? result['requesterStudentNum']
+                                            : writerStudentNum;
 
-                                    final receiverProfileIndex = studentNum == writerStudentNum
+                                    final receiverProfileIndex = studentNum ==
+                                            writerStudentNum
                                         ? result['requesterProfileImage'] ?? 1
                                         : writerProfileIndex;
                                     Navigator.push(
@@ -452,7 +467,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                               : writerStudentNum,
                                           rentalTimeText: rentalTimeRangeText,
                                           isFaceToFace: isFaceToFace,
-                                          receiverProfileIndex: receiverProfileIndex,
+                                          receiverProfileIndex:
+                                              receiverProfileIndex,
                                         ),
                                       ),
                                     );

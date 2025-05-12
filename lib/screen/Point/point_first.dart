@@ -74,6 +74,7 @@ class _PointScreenState extends State<PointScreen> {
               Padding(
                 padding: const EdgeInsets.all(25.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(
                       child: SingleChildScrollView(
@@ -166,8 +167,8 @@ class _PointScreenState extends State<PointScreen> {
                 left: 0, // 왼쪽 끝 정렬
                 child: IconButton(
                   icon: Icon(
-                    Icons.arrow_back_ios_rounded,
-                    size: 35,
+                    Icons.close,
+                    size: 40,
                   ),
                   onPressed: () {
                     Navigator.pop(context);
