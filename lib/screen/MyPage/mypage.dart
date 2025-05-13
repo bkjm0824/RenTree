@@ -13,8 +13,7 @@ import '../guide.dart';
 import '../Post/post_rental.dart';
 import 'mypage_profile.dart';
 import 'mypage_mypost.dart';
-import 'mypage_history1.dart';
-import 'mypage_history2.dart';
+import 'mypage_history.dart';
 import 'mypage_customersupport.dart';
 import 'mypage_userguide.dart';
 
@@ -408,16 +407,10 @@ class _MypageScreenState extends State<MypageScreen> {
               MaterialPageRoute(builder: (context) => MyPageMypost()),
             );
           }),
-          _buildMenuItem('대여받은 내역', onTap: () {
+          _buildMenuItem('대여 내역', onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MyPageHistory1()),
-            );
-          }),
-          _buildMenuItem('대여해준 내역', onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MyPageHistory2()),
+              MaterialPageRoute(builder: (context) => MyPageHistory()),
             );
           }),
           _buildMenuItem('나의 상추', onTap: () {
