@@ -519,7 +519,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                                   Text(
                                                     title ?? '제목 없음',
                                                     style: TextStyle(
-                                                      fontSize: 15,
+                                                      fontSize: 13,
                                                       color: Color(0xff7c7c7c),
                                                     ),
                                                     overflow:
@@ -529,7 +529,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                                       style: TextStyle(
                                                           color:
                                                               Color(0xff7c7c7c),
-                                                          fontSize: 17)),
+                                                          fontSize: 13)),
                                                   Text(
                                                     formatTimeDifference(
                                                       DateTime.tryParse(room[
@@ -540,7 +540,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                                     ),
                                                     style: TextStyle(
                                                       color: Color(0xff7c7c7c),
-                                                      fontSize: 15,
+                                                      fontSize: 13,
                                                     ),
                                                   ),
                                                 ],

@@ -711,9 +711,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                                 buildRequestAllowMessage(
                                                                     nickname);
 
-                                                            // ✅ 1. 서버에 반납 완료 요청
                                                             final url = Uri.parse(
-                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/rent');
+                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/rent/${widget.chatRoomId}'
+                                                            );
                                                             final res =
                                                                 await http
                                                                     .patch(url);
@@ -770,9 +770,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                         )
                                                       : TextButton(
                                                           onPressed: () async {
-                                                            // ✅ 1. 서버에 반납 완료 요청
                                                             final url = Uri.parse(
-                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/return');
+                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/return/${widget.chatRoomId}'
+                                                            );
                                                             final res =
                                                                 await http
                                                                     .patch(url);
