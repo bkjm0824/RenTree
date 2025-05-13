@@ -4,9 +4,10 @@ import com.example.rentree.domain.*;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.dto.ItemRequestResponseDTO;
 import com.example.rentree.repository.RequestChatRoomRepository;
+import com.example.rentree.repository.RequestHistoryRepository;
 import com.example.rentree.repository.StudentRepository;
 import com.example.rentree.service.ItemRequestService;
-import com.example.rentree.repository.rentalHistoryRepository;
+import com.example.rentree.repository.RentalHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,8 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
     private final StudentRepository studentRepository;
     private final RequestChatRoomRepository requestChatRoomRepository;
-    private final rentalHistoryRepository rentalHistoryRepository;
-    private final com.example.rentree.repository.requestHistoryRepository requestHistoryRepository;
+    private final RentalHistoryRepository rentalHistoryRepository;
+    private final RequestHistoryRepository requestHistoryRepository;
 
 
     // 전체 게시글 가져오기

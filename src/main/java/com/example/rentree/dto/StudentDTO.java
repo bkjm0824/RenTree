@@ -22,4 +22,16 @@ public class StudentDTO {
         studentDTO.setRentalCount(student.getRentalCount()); // Student 객체의 rentalCount 값을 DTO에 설정
         return studentDTO; // StudentDTO 객체 반환
     }
+
+    // DTO → Student 엔티티 변환
+    public Student toEntity() {
+        return Student.builder()
+                .id(this.id)
+                .studentNum(this.studentNum)
+                .password(this.password)
+                .nickname(this.nickname)
+                .profileImage(this.profileImage)
+                .rentalCount(this.rentalCount)
+                .build();
+    }
 }

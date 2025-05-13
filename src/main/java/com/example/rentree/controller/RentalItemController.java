@@ -4,15 +4,11 @@ import com.example.rentree.domain.*;
 import com.example.rentree.dto.RentalItemCreateRequest;
 import com.example.rentree.dto.RentalItemUpdateRequest;
 import com.example.rentree.repository.*;
-import com.example.rentree.service.ItemRequestService;
 import com.example.rentree.service.RentalItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/rental-item")
@@ -21,10 +17,10 @@ public class RentalItemController {
     private final RentalItemService rentalItemService;
     private final StudentRepository studentRepository;
     private final RentalChatRoomRepository rentalchatRoomRepository;
-    private final rentalHistoryRepository rentalHistoryRepository;
+    private final RentalHistoryRepository rentalHistoryRepository;
 
 
-    public RentalItemController(RentalItemService rentalItemService, StudentRepository studentRepository, RentalChatRoomRepository rentalChatRoomRepository, rentalHistoryRepository rentalHistoryRepository) {
+    public RentalItemController(RentalItemService rentalItemService, StudentRepository studentRepository, RentalChatRoomRepository rentalChatRoomRepository, RentalHistoryRepository rentalHistoryRepository) {
         this.rentalItemService = rentalItemService;
         this.studentRepository = studentRepository;
         this.rentalchatRoomRepository = rentalChatRoomRepository;
