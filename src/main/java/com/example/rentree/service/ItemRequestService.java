@@ -98,6 +98,13 @@ public class ItemRequestService {
     }
 
     @Transactional
+    public void markAsAvailable(Long id) {
+        ItemRequest item = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 물품이 존재하지 않습니다."));
+        item.markAsAvailable();
+    }
+
+    @Transactional
     // 게시글 삭제
     public void deleteItemRequest(Long Id) {
         ItemRequest itemRequest = itemRequestRepository.findById(Id)

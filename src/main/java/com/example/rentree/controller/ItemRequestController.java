@@ -158,7 +158,7 @@ public class ItemRequestController {
         requester.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
         studentRepository.save(requester); // 대여한 사람의 정보 저장
 
-        itemRequestService.markAsRequested(itemId);
+        itemRequestService.markAsAvailable(itemId);
 
         return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
     }

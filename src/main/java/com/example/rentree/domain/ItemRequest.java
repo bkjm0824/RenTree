@@ -74,4 +74,8 @@ public class ItemRequest {
     }
 
     public void markAsRequested() {this.isAvailable = false; } // 요청 처리 완료 시 호출되는 메서드
+
+    public void markAsAvailable() {
+        this.isAvailable = true;
+    }
 }
