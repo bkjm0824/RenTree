@@ -85,7 +85,6 @@ public class RentalItemController {
     }
 
     // 다시 대여 가능하게 변경
-// 다시 대여 가능하게 변경
     @PatchMapping("/{itemId}/return/{chatRoomId}")
     public ResponseEntity<String> markAsAvailable(
             @PathVariable Long itemId,
@@ -109,6 +108,8 @@ public class RentalItemController {
 
         responder.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
         studentRepository.save(responder); // 대여한 사람의 정보 저장
+
+        rentalItemService.markAsAvailable(itemId);
 
         return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
     }
