@@ -70,20 +70,31 @@ public class RentalItemController {
     }
 
     // 대여 완료 처리
-    @PatchMapping("/{id}/rent")
-    public ResponseEntity<String> markAsRented(@PathVariable Long id) {
-        rentalItemService.markAsRented(id);
+    @PatchMapping("/{itemId}/rent/{chatRoomId}")
+    public ResponseEntity<String> markAsRented(
+            @PathVariable Long itemId,
+            @PathVariable Long chatRoomId) {
+
+        // 글 ID와 채팅방 ID로 특정 채팅방 조회
+        RentalChatRoom rentalChatRoom = rentalchatRoomRepository.findByRentalItemIdAndId(itemId, chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다. 글 ID: " + itemId + ", 채팅방 ID: " + chatRoomId));
+
+        rentalItemService.markAsRented(itemId); // 물품 상태를 '대여 중'으로 변경
+
         return ResponseEntity.ok("물품 대여 완료 처리됨");
     }
 
     // 다시 대여 가능하게 변경
-    @PatchMapping("/{id}/return")
-    public ResponseEntity<String> markAsAvailable(@PathVariable Long id) {
+// 다시 대여 가능하게 변경
+    @PatchMapping("/{itemId}/return/{chatRoomId}")
+    public ResponseEntity<String> markAsAvailable(
+            @PathVariable Long itemId,
+            @PathVariable Long chatRoomId) {
 
-        RentalItem rentalItem = rentalItemService.getRentalItemDetails(id);
+        RentalItem rentalItem = rentalItemService.getRentalItemDetails(itemId);
 
-        RentalChatRoom rentalChatRoom = rentalchatRoomRepository.findByRentalItemId(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다: " + id));
+        RentalChatRoom rentalChatRoom = rentalchatRoomRepository.findByRentalItemIdAndId(itemId, chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다. 글 ID: " + itemId + ", 채팅방 ID: " + chatRoomId));
 
         Student responder = rentalChatRoom.getResponder(); // 대여 하는 사람
         Student requester = rentalChatRoom.getRequester(); // 대여 받는 사람
@@ -100,7 +111,6 @@ public class RentalItemController {
         studentRepository.save(responder); // 대여한 사람의 정보 저장
 
         return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
-
     }
 
     // 특정 카테고리의 대여 가능한 물품 목록 조회

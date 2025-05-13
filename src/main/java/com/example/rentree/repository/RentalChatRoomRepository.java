@@ -29,4 +29,6 @@ public interface RentalChatRoomRepository extends JpaRepository<RentalChatRoom, 
     Optional<RentalChatRoom> findByRentalItemId(@Param("rentalItemId") Long rentalItemId);
 
     Optional<RentalChatRoom> findByRequester_Id(long id);
+
+    Optional<RentalChatRoom> findByRentalItemIdAndId(Long itemId, Long chatRoomId);
 }

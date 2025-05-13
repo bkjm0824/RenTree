@@ -120,20 +120,29 @@ public class ItemRequestController {
     }
 
     // 대여 완료 처리
-    @PatchMapping("/{id}/rent")
-    public ResponseEntity<String> markAsRequested(@PathVariable Long id) {
-        itemRequestService.markAsRequested(id);
+    @PatchMapping("/{itemId}/rent/{chatRoomId}")
+    public ResponseEntity<String> markAsRequested(
+            @PathVariable Long itemId,
+            @PathVariable Long chatRoomId) {
+
+        RequestChatRoom requestChatRoom = requestChatRoomRepository.findByItemRequestIdAndId(itemId, chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다. 글 ID: " + itemId + ", 채팅방 ID: " + chatRoomId));
+
+        itemRequestService.markAsRequested(itemId);
+
         return ResponseEntity.ok("물품 대여 완료 처리됨");
     }
 
     // 다시 대여 가능하게 변경
-    @PatchMapping("/{id}/return")
-    public ResponseEntity<String> markAsAvailable(@PathVariable Long id) {
+    @PatchMapping("/{itemId}/return/{chatRoomId}")
+    public ResponseEntity<String> markAsAvailable(
+            @PathVariable Long itemId,
+            @PathVariable Long chatRoomId) {
 
-        ItemRequest itemRequest = itemRequestService.getItemRequestDetail(id);
+        ItemRequest itemRequest = itemRequestService.getItemRequestDetail(itemId);
 
-        RequestChatRoom requestChatRoom = requestChatRoomRepository.findByRequestItemId(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다: " + id));
+        RequestChatRoom requestChatRoom = requestChatRoomRepository.findByItemRequestIdAndId(itemId, chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다. 글 ID: " + itemId + ", 채팅방 ID: " + chatRoomId));
 
         Student responder = requestChatRoom.getResponder(); // 대여 받는 사람
         Student requester = requestChatRoom.getRequester(); // 대여 하는 사람
@@ -150,7 +159,6 @@ public class ItemRequestController {
         studentRepository.save(requester); // 대여한 사람의 정보 저장
 
         return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
-
     }
 
 
