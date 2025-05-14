@@ -1,12 +1,15 @@
 // 마이페이지 화면
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:rentree/screen/Point/point_first.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
 import '../Notification/notification.dart';
+import '../Post/post_request.dart';
 import '../Search/search.dart';
 import '../Point/point_second.dart';
 import '../guide.dart';
@@ -28,11 +31,114 @@ class _MypageScreenState extends State<MypageScreen> {
   String? _studentNum;
   int? _profileImageIndex = 1;
   bool _isLoading = true;
+  Map<String, dynamic>? _latestReceived;
+  Map<String, dynamic>? _latestGiven;
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
+    _loadLatestHistories();
+  }
+
+  Future<void> _loadLatestHistories() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final res1 = await http.get(Uri.parse(
+        'http://10.0.2.2:8080/api/history/rentals/my?studentNum=$studentNum'));
+    final res2 = await http.get(Uri.parse(
+        'http://10.0.2.2:8080/api/history/requests/got?studentNum=$studentNum'));
+    final res3 = await http.get(Uri.parse(
+        'http://10.0.2.2:8080/api/history/rentals/given?studentNum=$studentNum'));
+    final res4 = await http.get(Uri.parse(
+        'http://10.0.2.2:8080/api/history/requests/my?studentNum=$studentNum'));
+
+    final rentalMy = jsonDecode(utf8.decode(res1.bodyBytes));
+    final requestGot = jsonDecode(utf8.decode(res2.bodyBytes));
+    final rentalGiven = jsonDecode(utf8.decode(res3.bodyBytes));
+    final requestMy = jsonDecode(utf8.decode(res4.bodyBytes));
+
+    List<Map<String, dynamic>> received = [];
+    List<Map<String, dynamic>> given = [];
+
+    for (var item in rentalMy) {
+      final rentalItem = item['rentalItem'];
+      received.add({
+        'source': 'rental',
+        'id': rentalItem['id'],
+        'title': rentalItem['title'],
+        'description': rentalItem['description'],
+        'imageUrl': await _fetchImageUrl(rentalItem['id']),
+        'startTime': rentalItem['rentalStartTime'],
+        'endTime': rentalItem['rentalEndTime'],
+        'createdAt': rentalItem['createdAt'],
+      });
+    }
+
+    for (var item in requestGot) {
+      final responder = item['responder'];
+      if (responder['studentNum'] == studentNum) {
+        final requestItem = item['requestItem'];
+        received.add({
+          'source': 'request',
+          'id': requestItem['id'],
+          'title': requestItem['title'],
+          'description': requestItem['description'],
+          'imageUrl': null,
+          'startTime': requestItem['rentalStartTime'],
+          'endTime': requestItem['rentalEndTime'],
+          'createdAt': requestItem['createdAt'],
+        });
+      }
+    }
+
+    for (var item in rentalGiven) {
+      final rentalItem = item['rentalItem'];
+      given.add({
+        'source': 'rental',
+        'id': rentalItem['id'],
+        'title': rentalItem['title'],
+        'description': rentalItem['description'],
+        'imageUrl': await _fetchImageUrl(rentalItem['id']),
+        'startTime': rentalItem['rentalStartTime'],
+        'endTime': rentalItem['rentalEndTime'],
+        'createdAt': rentalItem['createdAt'],
+      });
+    }
+
+    for (var item in requestMy) {
+      final requestItem = item['requestItem'];
+      given.add({
+        'source': 'request',
+        'id': requestItem['id'],
+        'title': requestItem['title'],
+        'description': requestItem['description'],
+        'imageUrl': null,
+        'startTime': requestItem['rentalStartTime'],
+        'endTime': requestItem['rentalEndTime'],
+        'createdAt': requestItem['createdAt'],
+      });
+    }
+
+    received.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+    given.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+
+    setState(() {
+      _latestReceived = received.isNotEmpty ? received.first : null;
+      _latestGiven = given.isNotEmpty ? given.first : null;
+    });
+  }
+
+  Future<String?> _fetchImageUrl(int rentalItemId) async {
+    final res = await http
+        .get(Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
+    if (res.statusCode == 200) {
+      final List<dynamic> images = jsonDecode(utf8.decode(res.bodyBytes));
+      if (images.isNotEmpty) return images[0]['imageUrl'];
+    }
+    return null;
   }
 
   String _mapIndexToProfileFile(int index) {
@@ -47,6 +153,26 @@ class _MypageScreenState extends State<MypageScreen> {
         return 'Sangzzi_profile.png';
       default:
         return 'Bugi_profile.png';
+    }
+  }
+
+  String formatDateTime(String dateTimeStr) {
+    final dt = DateTime.parse(dateTimeStr);
+    return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  String formatTimeAgo(String dateTimeStr) {
+    try {
+      final createdAt = DateTime.parse(dateTimeStr);
+      final now = DateTime.now();
+      final diff = now.difference(createdAt);
+
+      if (diff.inMinutes < 1) return '방금 전';
+      if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+      if (diff.inHours < 24) return '${diff.inHours}시간 전';
+      return '${diff.inDays}일 전';
+    } catch (e) {
+      return '';
     }
   }
 
@@ -279,7 +405,6 @@ class _MypageScreenState extends State<MypageScreen> {
     );
   }
 
-// 🔹 현재 대여 진행 상태
   Widget CurrentRentalBox(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 32, vertical: 5),
@@ -288,11 +413,7 @@ class _MypageScreenState extends State<MypageScreen> {
         color: Color(0xFFEBEBEB),
         borderRadius: BorderRadius.circular(35),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-            spreadRadius: 2,
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 2),
         ],
       ),
       child: Column(
@@ -303,29 +424,168 @@ class _MypageScreenState extends State<MypageScreen> {
             Text('내가 대여 받은 물품', style: TextStyle(fontSize: 16))
           ]),
           SizedBox(height: 8),
-          _buildRentalItem(
-            context,
-            1,
-            'assets/box.png',
-            '상품 1',
-            '3시간 10분 남음',
-            '상품 1에 대한 설명입니다.',
-          ),
-          SizedBox(height: 8),
+          _latestReceived != null
+              ? _buildRentalItemFromData(_latestReceived!)
+              : Container(
+                  height: 100,
+                  margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF4F1F1),
+                    borderRadius: BorderRadius.circular(35),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 5,
+                          spreadRadius: 2),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '대여해준 물품이 없어요',
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
+                      )
+                    ],
+                  ),
+                ),
+          SizedBox(height: 16),
           Row(children: [
             SizedBox(width: 5),
             Text('내가 대여 해준 물품', style: TextStyle(fontSize: 16))
           ]),
           SizedBox(height: 8),
-          _buildRentalItem(
-            context,
-            2,
-            'assets/box.png',
-            '상품 2',
-            '5시간 20분 남음',
-            '상품 2에 대한 설명입니다.',
-          ),
+          _latestGiven != null
+              ? _buildRentalItemFromData(_latestGiven!)
+              : Container(
+                  height: 100,
+                  margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF4F1F1),
+                    borderRadius: BorderRadius.circular(35),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 5,
+                          spreadRadius: 2),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '대여해준 물품이 없어요',
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
+                      )
+                    ],
+                  ),
+                ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRentalItemFromData(Map<String, dynamic> item) {
+    final imageUrl = item['imageUrl'];
+    final title = item['title'] ?? '';
+    final description = item['description'] ?? '';
+    final start = item['startTime'];
+    final end = item['endTime'];
+    final type = item['source']; // ← 'type'이 아니라 'source'
+    final itemId = item['id'];
+    final isAvailable = item['isAvailable']; // ← 이 필드가 API에 포함되어 있어야 함
+
+    String timeStatusText = '';
+    try {
+      if (end != null) {
+        final endTime = DateTime.parse(end);
+        final now = DateTime.now().add(Duration(hours: 9));
+        final diff = now.difference(endTime);
+
+        if (diff.isNegative) {
+          // 아직 대여 중
+          final left = endTime.difference(now);
+          if (left.inHours > 0) {
+            timeStatusText = '${left.inHours}시간 ${left.inMinutes % 60}분 남음';
+          } else {
+            timeStatusText = '${left.inMinutes}분 남음';
+          }
+        } else {
+          // 대여 종료됨 → 경과 시간 표시
+          if (diff.inDays > 0) {
+            timeStatusText = '${diff.inDays}일 지남';
+          } else if (diff.inHours > 0) {
+            timeStatusText = '${diff.inHours}시간 ${diff.inMinutes % 60}분 지남';
+          } else {
+            timeStatusText = '${diff.inMinutes}분 지남';
+          }
+        }
+      } else {
+        timeStatusText = '대여 시간 없음';
+      }
+    } catch (e) {
+      timeStatusText = '시간 파싱 오류';
+    }
+
+    return GestureDetector(
+      onTap: () {
+        if (type == 'rental') {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PostRentalScreen(itemId: item['id']),
+              ));
+        } else {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PostRequestScreen(itemId: item['id']),
+              ));
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Color(0xFFF4F1F1),
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 2),
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundImage: imageUrl != null
+                  ? NetworkImage(imageUrl)
+                  : AssetImage('assets/requestIcon.png') as ImageProvider,
+              backgroundColor: Colors.white,
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text(timeStatusText,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
