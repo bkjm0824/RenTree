@@ -65,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('studentNum', studentNum);
         await prefs.setString('nickname', nickname);
         await prefs.setInt('profileImage', data['profileImage']);
+        await prefs.setString('accountPassword', password);
 
         print('✅ 저장된 studentId: $studentId');
         print('✅ 저장된 nickname: $nickname');
