@@ -84,4 +84,15 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    // 포인트 차감 api (patch)
+    @PatchMapping("/students/rental-point")
+    public ResponseEntity<?> deductRentalPoint(@RequestParam String studentNum, @RequestParam int rentalPoint) {
+        try {
+            studentService.deductRentalPoint(studentNum, rentalPoint); // 포인트 차감
+            return ResponseEntity.ok("포인트 차감 완료");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

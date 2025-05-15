@@ -100,4 +100,17 @@ public class StudentService {
 
         studentRepository.save(student);
     }
+
+    public void deductRentalPoint(String studentNum, int rentalPoint) {
+        Student student = studentRepository.findByStudentNum(studentNum)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with studentNum: " + studentNum));
+
+        int currentRentalPoint = student.getRentalPoint();
+        if (currentRentalPoint < rentalPoint) {
+            throw new IllegalArgumentException("Insufficient rental points");
+        }
+
+        student.setRentalPoint(currentRentalPoint - rentalPoint);
+        studentRepository.save(student);
+    }
 }
