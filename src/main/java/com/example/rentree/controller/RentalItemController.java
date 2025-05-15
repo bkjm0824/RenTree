@@ -116,4 +116,18 @@ public class RentalItemController {
     public ResponseEntity<List<RentalItem>> getAvailableItemsByCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(rentalItemService.getAvailableItemsByCategory(categoryId));
     }
+
+    // 비대면 거래 시 사용할 비밀번호 생성
+    @PatchMapping("/{id}/generate-password")
+    public ResponseEntity<String> generatePassword(@PathVariable Long id, @RequestParam String password) {
+        String generatedPassword = rentalItemService.generatePassword(id, password);
+        return ResponseEntity.ok(generatedPassword);
+    }
+
+    // 비대면 거래 시 사용할 비밀번호 조회
+    @GetMapping("/{id}/password")
+    public ResponseEntity<String> getPassword(@PathVariable Long id) {
+        String password = rentalItemService.getPassword(id);
+        return ResponseEntity.ok(password);
+    }
 }

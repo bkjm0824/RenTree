@@ -58,12 +58,16 @@ public class ItemRequest {
     @Column(nullable = false)
     private Boolean isAvailable = true; // 요청 가능 여부
 
+    // 비밀번호
+    @Column(name = "password")
+    private String password;
+
     public void incrementViewCount() {
         this.viewCount++;
     }
 
     public ItemRequest(Student student, String title, String description, Boolean isFaceToFace,
-                       Timestamp createdAt, LocalDateTime rentalStartTime, LocalDateTime rentalEndTime) {
+                       Timestamp createdAt, LocalDateTime rentalStartTime, LocalDateTime rentalEndTime, String password) {
         this.student = student;
         this.title = title;
         this.description = description;
@@ -71,6 +75,7 @@ public class ItemRequest {
         this.createdAt = createdAt;
         this.rentalStartTime = rentalStartTime;
         this.rentalEndTime = rentalEndTime;
+        this.password = password;
     }
 
     public void markAsRequested() {this.isAvailable = false; } // 요청 처리 완료 시 호출되는 메서드

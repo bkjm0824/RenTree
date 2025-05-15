@@ -23,6 +23,7 @@ public class RentalItemDTO {
     private String categoryName;
     private Boolean isAvailable;
     private Integer profileImage;
+    private String password;
 
     public static RentalItemDTO fromEntity(RentalItem item) {
         RentalItemDTO dto = new RentalItemDTO();
@@ -42,6 +43,7 @@ public class RentalItemDTO {
             dto.setCategoryName(item.getCategory().getName());
         }
         dto.setIsAvailable(item.getIsAvailable());
+        dto.setPassword(item.getPassword());
         return dto;
     }
 }

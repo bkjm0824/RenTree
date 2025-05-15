@@ -38,6 +38,8 @@ public class ItemRequestDTO {
 
     private Integer profileImage;
 
+    private String password;
+
 
     /*
     ItemRequest 객체를 ItemRequestDTO 객체로 변환하는 메서드
@@ -59,6 +61,7 @@ public class ItemRequestDTO {
         dto.setCreatedAt(itemRequest.getCreatedAt());
         dto.setViewCount(itemRequest.getViewCount());
         dto.setProfileImage(itemRequest.getStudent().getProfileImage());
+        dto.setPassword(itemRequest.getPassword());
         return dto;
     }
 

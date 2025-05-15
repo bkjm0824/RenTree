@@ -17,7 +17,9 @@ public class RentalItemCreateRequest {
     private Long categoryId;
     private LocalDateTime rentalStartTime;
     private LocalDateTime rentalEndTime;
+    private String password;
 
 
     public RentalItemCreateRequest() {}
+
 }

@@ -176,4 +176,19 @@ public class ItemRequestController {
         itemRequestService.deleteItemRequest(id);
         return ResponseEntity.ok("ItemRequest deleted");
     }
+
+    // 비대면 거래 시 사용할 비밀번호 생성
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<String> generatePassword(@PathVariable Long id, @RequestParam String password) {
+        String generatedPassword = itemRequestService.generatePassword(id, password);
+        return ResponseEntity.ok(generatedPassword);
+    }
+
+    // 비대면 거래 시 사용할 비밀번호 조회
+    @GetMapping("/{id}/password")
+    public ResponseEntity<String> getPassword(@PathVariable Long id) {
+        String password = itemRequestService.getPassword(id);
+        return ResponseEntity.ok(password);
+    }
 }
+

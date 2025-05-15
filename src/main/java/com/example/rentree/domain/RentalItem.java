@@ -46,6 +46,10 @@ public class RentalItem {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    // 비밀번호
+    @Column(name = "password")
+    private String password;
+
     @Column(nullable = false)
     private Boolean isAvailable = true;
 
@@ -53,7 +57,7 @@ public class RentalItem {
 
     public RentalItem(Student student, String title, String description, Boolean isFaceToFace,
                       Timestamp createdAt, Category category,
-                      LocalDateTime rentalStartTime, LocalDateTime rentalEndTime) {
+                      LocalDateTime rentalStartTime, LocalDateTime rentalEndTime, String password) {
         this.student = student;
         this.title = title;
         this.description = description;
@@ -62,6 +66,7 @@ public class RentalItem {
         this.category = category;
         this.rentalStartTime = rentalStartTime;
         this.rentalEndTime = rentalEndTime;
+        this.password = password;
     }
 
     public void incrementViewCount() {

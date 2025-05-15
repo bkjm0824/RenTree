@@ -36,6 +36,8 @@ public class ItemRequestResponseDTO {
 
     private Integer profileImage;
 
+    private String password;
+
     //private Integer viewCount = 0; // 조회수
 
     /*
@@ -57,6 +59,7 @@ public class ItemRequestResponseDTO {
         dto.setIsFaceToFace(itemRequest.getIsFaceToFace());
         dto.setCreatedAt(itemRequest.getCreatedAt());
         dto.setProfileImage(itemRequest.getStudent().getProfileImage());
+        dto.setPassword(itemRequest.getPassword());
         return dto;
     }
 

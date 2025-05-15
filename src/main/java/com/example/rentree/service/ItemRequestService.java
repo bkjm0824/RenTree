@@ -52,7 +52,8 @@ public class ItemRequestService {
                 itemRequestDTO.getIsFaceToFace(),
                 itemRequestDTO.getCreatedAt(),
                 itemRequestDTO.getRentalStartTime(),
-                itemRequestDTO.getRentalEndTime()
+                itemRequestDTO.getRentalEndTime(),
+                itemRequestDTO.getPassword()
         );
         itemRequestRepository.save(itemRequest);
 
@@ -119,5 +120,23 @@ public class ItemRequestService {
     // 게시글 ID로 게시글 가져오기
     public Optional<ItemRequest> findById(Long id) {
         return itemRequestRepository.findById(id);
+    }
+
+    public String generatePassword(Long id, String password) {
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found"));
+
+        itemRequest.setPassword(password);
+
+        itemRequestRepository.save(itemRequest);
+
+        return password; // 비밀번호 반환
+    }
+
+    public String getPassword(Long id) {
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found"));
+
+        return itemRequest.getPassword(); // 비밀번호 반환
     }
 }

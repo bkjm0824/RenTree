@@ -64,7 +64,8 @@ public class RentalItemService {
                 request.getCreatedAt(),
                 category,
                 request.getRentalStartTime(),
-                request.getRentalEndTime()
+                request.getRentalEndTime(),
+                request.getPassword()
         );
 
         RentalItem saved = rentalItemRepository.save(item);
@@ -160,4 +161,22 @@ public class RentalItemService {
         return rentalItemRepository.findByCategory_IdAndIsAvailableTrue(categoryId);
     }
 
+    @Transactional
+    public String generatePassword(Long id, String password) {
+        RentalItem rentalItem = rentalItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found"));
+
+        rentalItem.setPassword(password);
+
+        rentalItemRepository.save(rentalItem);
+
+        return password; // 비밀번호 반환
+    }
+
+    public String getPassword(Long id) {
+        RentalItem rentalItem = rentalItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found"));
+
+        return rentalItem.getPassword();
+    }
 }
