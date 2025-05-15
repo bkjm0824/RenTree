@@ -34,8 +34,12 @@ public class Student {
     private Integer profileImage; // 프로필 이미지 난수
 
     // 대여 횟수
-    @Column(name = "rental_count", nullable = false)
+    @Column(name = "rental_count", nullable = false, columnDefinition = "int default 0")
     private int rentalCount = 0; // 대여 횟수 초기값 0
+
+    // 대여 포인트
+    @Column(name = "rental_point", nullable = false, columnDefinition = "int default 0")
+    private int rentalPoint = 0;
 
     public void incrementRentalCount() {
         this.rentalCount++; // 대여 횟수 증가
