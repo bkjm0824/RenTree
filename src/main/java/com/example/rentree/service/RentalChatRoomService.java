@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -72,19 +73,19 @@ public class RentalChatRoomService {
     }
 
     @Transactional
-    public RentalChatRoomDeleteResponseDTO deleteChatRoom(Long rentalItemId, String requesterStudentNum) {
-        Student requester = studentRepository.findByStudentNum(requesterStudentNum)
+    public RentalChatRoomDeleteResponseDTO deleteChatRoom(Long chatRoomId, String studentNum) {
+        Student student = studentRepository.findByStudentNum(studentNum)
                 .orElseThrow(() -> new IllegalArgumentException("학생 없음"));
 
-        RentalChatRoom chatRoom = rentalChatRoomRepository
-                .findByRequester_IdAndRentalItem_Id((long) requester.getId(), rentalItemId)
+        RentalChatRoom chatRoom = rentalChatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
 
-        boolean isRequester = chatRoom.getRequester().getId() == requester.getId();
+        boolean isRequester = Objects.equals(chatRoom.getRequester().getStudentNum(), studentNum);
+        boolean isResponder = Objects.equals(chatRoom.getResponder().getStudentNum(), studentNum);
 
         if (isRequester) {
             chatRoom.setRequesterExited(true);
-        } else if (chatRoom.getResponder().getId() == requester.getId()) {
+        } else if (isResponder) {
             chatRoom.setResponderExited(true);
         } else {
             throw new IllegalStateException("채팅방 참여자가 아님");
@@ -97,6 +98,9 @@ public class RentalChatRoomService {
 
         return new RentalChatRoomDeleteResponseDTO(chatRoom.getId(), "한 명만 나갔습니다. 상대도 나가야 삭제됩니다.");
     }
+
+
+
 
     private RentalChatRoomResponseDTO toDTO(RentalChatRoom chatRoom) {
         return RentalChatRoomResponseDTO.builder()

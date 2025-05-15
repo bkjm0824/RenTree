@@ -16,9 +16,10 @@ public interface RentalChatRoomRepository extends JpaRepository<RentalChatRoom, 
 
     List<RentalChatRoom> findByRequester_StudentNumOrResponder_StudentNum(String requester, String responder);
 
+    Optional<RentalChatRoom> findByResponder_IdAndRentalItem_Id(Long responderId, Long rentalItemId);
+
     boolean existsByRequester_IdAndRentalItem_Id(Long requesterId, Long rentalItemId);
 
-    Optional<RentalChatRoom> findByRequester_IdAndRentalItem_IdOrResponder_IdAndRentalItem_Id(Long requesterId, Long rentalItemId, Long responderId, Long rentalItemId2);
 
     @Modifying
     @Query("UPDATE RentalChatRoom c SET c.rentalItem = NULL WHERE c.rentalItem.id = :rentalItemId")
@@ -31,4 +32,11 @@ public interface RentalChatRoomRepository extends JpaRepository<RentalChatRoom, 
     Optional<RentalChatRoom> findByRequester_Id(long id);
 
     Optional<RentalChatRoom> findByRentalItemIdAndId(Long itemId, Long chatRoomId);
+
+    @Query("SELECT c FROM RentalChatRoom c " +
+            "WHERE (c.requester.studentNum = :studentNum OR c.responder.studentNum = :studentNum) " +
+            "AND c.rentalItem.id = :rentalItemId")
+    Optional<RentalChatRoom> findByParticipantStudentNumAndRentalItem(@Param("studentNum") String studentNum,
+                                                                      @Param("rentalItemId") Long rentalItemId);
+
 }

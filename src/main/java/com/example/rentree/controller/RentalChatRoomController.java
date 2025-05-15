@@ -26,9 +26,10 @@ public class RentalChatRoomController {
         return ResponseEntity.ok(rentalChatRoomService.getChatRoom(rentalItemId, requesterStudentNum));
     }
 
-    @DeleteMapping("/{rentalItemId}")
-    public ResponseEntity<RentalChatRoomDeleteResponseDTO> delete(@PathVariable Long rentalItemId,
-                                                                  @RequestParam String requesterStudentNum) {
-        return ResponseEntity.ok(rentalChatRoomService.deleteChatRoom(rentalItemId, requesterStudentNum));
+    // chatRoomId 기반으로 삭제
+    @DeleteMapping("/id/{chatRoomId}")
+    public ResponseEntity<RentalChatRoomDeleteResponseDTO> delete(@PathVariable Long chatRoomId,
+                                                                  @RequestParam String studentNum) {
+        return ResponseEntity.ok(rentalChatRoomService.deleteChatRoom(chatRoomId, studentNum));
     }
 }

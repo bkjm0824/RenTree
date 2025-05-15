@@ -26,9 +26,9 @@ public class RequestChatRoomController {
         return ResponseEntity.ok(requestChatRoomService.getChatRoom(itemRequestId, requesterStudentNum));
     }
 
-    @DeleteMapping("/{itemRequestId}")
-    public ResponseEntity<RequestChatRoomDeleteResponseDTO> delete(@PathVariable Long itemRequestId,
-                                                                   @RequestParam String requesterStudentNum) {
-        return ResponseEntity.ok(requestChatRoomService.deleteChatRoom(itemRequestId, requesterStudentNum));
+    @DeleteMapping("/id/{chatRoomId}")
+    public ResponseEntity<RequestChatRoomDeleteResponseDTO> delete(@PathVariable Long chatRoomId,
+                                                                   @RequestParam String studentNum) {
+        return ResponseEntity.ok(requestChatRoomService.deleteChatRoom(chatRoomId, studentNum));
     }
 }

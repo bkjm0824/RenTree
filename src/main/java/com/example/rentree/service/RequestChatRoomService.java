@@ -61,19 +61,20 @@ public class RequestChatRoomService {
     }
 
     @Transactional
-    public RequestChatRoomDeleteResponseDTO deleteChatRoom(Long itemRequestId, String requesterStudentNum) {
-        Student requester = studentRepository.findByStudentNum(requesterStudentNum)
+    public RequestChatRoomDeleteResponseDTO deleteChatRoom(Long chatRoomId, String studentNum) {
+        Student student = studentRepository.findByStudentNum(studentNum)
                 .orElseThrow(() -> new IllegalArgumentException("학생 없음"));
 
-        RequestChatRoom chatRoom = requestChatRoomRepository
-                .findByRequester_IdAndItemRequest_Id((long) requester.getId(), itemRequestId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+        // 채팅방 존재 + 참여자 여부 확인
+        RequestChatRoom chatRoom = requestChatRoomRepository.findByIdAndParticipant(chatRoomId, studentNum)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 없거나 참여자가 아님"));
 
-        boolean isRequester = chatRoom.getRequester().getId() == requester.getId();
+        boolean isRequester = chatRoom.getRequester().getStudentNum().equals(studentNum);
+        boolean isResponder = chatRoom.getResponder().getStudentNum().equals(studentNum);
 
         if (isRequester) {
             chatRoom.setRequesterExited(true);
-        } else if (chatRoom.getResponder().getId() == requester.getId()) {
+        } else if (isResponder) {
             chatRoom.setResponderExited(true);
         } else {
             throw new IllegalStateException("채팅방 참여자가 아님");
@@ -86,6 +87,7 @@ public class RequestChatRoomService {
 
         return new RequestChatRoomDeleteResponseDTO(chatRoom.getId(), "한 명만 나갔습니다. 상대도 나가야 삭제됩니다.");
     }
+
 
     private RequestChatRoomResponseDTO toDTO(RequestChatRoom chatRoom) {
         return RequestChatRoomResponseDTO.builder()

@@ -14,19 +14,34 @@ public interface RequestChatRoomRepository extends JpaRepository<RequestChatRoom
     // 특정 요청자와 요청글 기준으로 채팅방 존재 여부 확인
     Optional<RequestChatRoom> findByRequester_IdAndItemRequest_Id(Long requesterId, Long itemRequestId);
 
+    // 학생 번호로 관련된 모든 채팅방 가져오기
     List<RequestChatRoom> findByRequester_StudentNumOrResponder_StudentNum(String requester, String responder);
 
+    // 채팅방 존재 여부
     boolean existsByRequester_IdAndItemRequest_Id(Long requesterId, Long itemRequestId);
 
-    Optional<RequestChatRoom> findByRequester_IdAndItemRequest_IdOrResponder_IdAndItemRequest_Id(Long requesterId, Long itemRequestId, Long responderId, Long itemRequestId2);
+    // 아이템 요청 ID와 참여자 ID로 채팅방 찾기
+    @Query("SELECT c FROM RequestChatRoom c " +
+            "WHERE (c.requester.studentNum = :studentNum OR c.responder.studentNum = :studentNum) " +
+            "AND c.itemRequest.id = :itemRequestId")
+    Optional<RequestChatRoom> findByParticipantStudentNumAndItemRequestId(@Param("studentNum") String studentNum,
+                                                                          @Param("itemRequestId") Long itemRequestId);
 
+    // 요청 아이템 null 처리 (예: 삭제 시)
     @Modifying
     @Query("UPDATE RequestChatRoom c SET c.itemRequest = NULL WHERE c.itemRequest.id = :itemRequestId")
     void updateItemRequestIdToNull(@Param("itemRequestId") Long itemRequestId);
 
-
+    // 요청 아이템 기준 채팅방 조회
     @Query("SELECT c FROM RequestChatRoom c WHERE c.itemRequest.id = :itemRequestId")
     Optional<RequestChatRoom> findByRequestItemId(@Param("itemRequestId") Long itemRequestId);
 
+    // 요청 아이템 ID와 채팅방 ID로 조회
     Optional<RequestChatRoom> findByItemRequestIdAndId(Long itemId, Long chatRoomId);
+
+    // ID와 학생 번호로 채팅방 존재 확인
+    @Query("SELECT c FROM RequestChatRoom c " +
+            "WHERE c.id = :chatRoomId AND (c.requester.studentNum = :studentNum OR c.responder.studentNum = :studentNum)")
+    Optional<RequestChatRoom> findByIdAndParticipant(@Param("chatRoomId") Long chatRoomId,
+                                                     @Param("studentNum") String studentNum);
 }
