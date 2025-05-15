@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController // RESTful 서비스임을 명시
 @RequestMapping("/Rentree") // 이 컨트롤러의 모든 엔드포인트는 /Rentree로 시작
@@ -31,6 +32,12 @@ public class StudentController {
         } else { // 로그인 실패 시
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials"); // 로그인 실패 응답 (401 Unauthorized)
         }
+    }
+
+    @GetMapping("/students")
+    public ResponseEntity<List<StudentDTO>> getAllStudents() {
+        List<StudentDTO> students = studentService.getAllStudents();
+        return ResponseEntity.ok(students);
     }
 
     @GetMapping("/{studentNum}") // '/Rentree/{studentNum}' GET 요청 처리 (경로 변수 사용)

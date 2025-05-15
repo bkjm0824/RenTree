@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service // 서비스 클래스임을 명시
 @RequiredArgsConstructor // final 필드를 파라미터로 받는 생성자 생성
@@ -51,6 +53,13 @@ public class StudentService {
         }
         // 해싱된 비밀번호 반환
         return hexString.toString();
+    }
+
+    public List<StudentDTO> getAllStudents() {
+        List<Student> students = studentRepository.findAll();
+        return students.stream()
+                .map(StudentDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     // StudentService.java
