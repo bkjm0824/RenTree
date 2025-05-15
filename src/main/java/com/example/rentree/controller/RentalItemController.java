@@ -103,6 +103,7 @@ public class RentalItemController {
         rentalHistoryRepository.save(rentalHistory);
 
         responder.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
+        responder.incrementRentalPoint();
         studentRepository.save(responder); // 대여한 사람의 정보 저장
 
         rentalItemService.markAsAvailable(itemId);

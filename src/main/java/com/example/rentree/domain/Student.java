@@ -45,4 +45,9 @@ public class Student {
         this.rentalCount++; // 대여 횟수 증가
     }
 
+    // 대여 횟수가 1증가하면 포인트는 10증가
+    public void incrementRentalPoint() {
+        this.rentalPoint += 10; // 대여 포인트 증가
+    }
+
 }

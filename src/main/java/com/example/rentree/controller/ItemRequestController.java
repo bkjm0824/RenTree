@@ -157,6 +157,7 @@ public class ItemRequestController {
         requestHistoryRepository.save(requestHistory);
 
         requester.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
+        requester.incrementRentalPoint(); // 대여한 사람의 요청 횟수 증가
         studentRepository.save(requester); // 대여한 사람의 정보 저장
 
         itemRequestService.markAsAvailable(itemId);
