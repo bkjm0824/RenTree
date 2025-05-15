@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,32 +34,31 @@ public class ChatRoomQueryService {
                 .map(this::toRequestSummary)
                 .toList();
 
-        return List.copyOf(rentalRooms).stream()
-                .collect(Collectors.toCollection(() -> {
-                    List<ChatRoomSummaryDTO> all = new java.util.ArrayList<>();
-                    all.addAll(rentalRooms);
-                    all.addAll(requestRooms);
-                    return all;
-                }));
+        // 가변 리스트를 사용하여 중복 제거
+        List<ChatRoomSummaryDTO> allRooms = new ArrayList<>();
+        allRooms.addAll(rentalRooms);
+        allRooms.addAll(requestRooms);
+
+        // distinct()를 사용하여 중복 제거
+        return allRooms.stream()
+                .distinct()
+                .toList();
     }
 
     private ChatRoomSummaryDTO toRentalSummary(RentalChatRoom chatRoom) {
         return ChatRoomSummaryDTO.builder()
                 .roomId(chatRoom.getId())
                 .type("rental")
-                .relatedItemId(chatRoom.getRentalItem().getId())
-                .relatedItemTitle(chatRoom.getRentalItem().getTitle())
+                .relatedItemId(chatRoom.getRentalItem() != null ? chatRoom.getRentalItem().getId() : null)
+                .relatedItemTitle(chatRoom.getRentalItem() != null ? chatRoom.getRentalItem().getTitle() : null)
                 .requesterStudentNum(chatRoom.getRequester().getStudentNum())
                 .responderStudentNum(chatRoom.getResponder().getStudentNum())
                 .requesterNickname(chatRoom.getRequester().getNickname())
                 .responderNickname(chatRoom.getResponder().getNickname())
-
-                .writerStudentNum(chatRoom.getRentalItem().getStudent().getStudentNum())
-                .writerNickname(chatRoom.getRentalItem().getStudent().getNickname())
-
-                .requesterProfileImage(chatRoom.getRequester().getProfileImage()) // ✅ 추가
+                .writerStudentNum(chatRoom.getRentalItem() != null ? chatRoom.getRentalItem().getStudent().getStudentNum() : null)
+                .writerNickname(chatRoom.getRentalItem() != null ? chatRoom.getRentalItem().getStudent().getNickname() : null)
+                .requesterProfileImage(chatRoom.getRequester().getProfileImage())
                 .responderProfileImage(chatRoom.getResponder().getProfileImage())
-
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
     }
@@ -67,21 +67,17 @@ public class ChatRoomQueryService {
         return ChatRoomSummaryDTO.builder()
                 .roomId(chatRoom.getId())
                 .type("request")
-                .relatedItemId(chatRoom.getItemRequest().getId())
-                .relatedItemTitle(chatRoom.getItemRequest().getTitle())
+                .relatedItemId(chatRoom.getItemRequest() != null ? chatRoom.getItemRequest().getId() : null)
+                .relatedItemTitle(chatRoom.getItemRequest() != null ? chatRoom.getItemRequest().getTitle() : null)
                 .requesterStudentNum(chatRoom.getRequester().getStudentNum())
                 .responderStudentNum(chatRoom.getResponder().getStudentNum())
                 .requesterNickname(chatRoom.getRequester().getNickname())
                 .responderNickname(chatRoom.getResponder().getNickname())
-
-                .writerStudentNum(chatRoom.getItemRequest().getStudent().getStudentNum())
-                .writerNickname(chatRoom.getItemRequest().getStudent().getNickname())
-
-                .requesterProfileImage(chatRoom.getRequester().getProfileImage()) // 🔥 추가
+                .writerStudentNum(chatRoom.getItemRequest() != null ? chatRoom.getItemRequest().getStudent().getStudentNum() : null)
+                .writerNickname(chatRoom.getItemRequest() != null ? chatRoom.getItemRequest().getStudent().getNickname() : null)
+                .requesterProfileImage(chatRoom.getRequester().getProfileImage())
                 .responderProfileImage(chatRoom.getResponder().getProfileImage())
-
                 .createdAt(chatRoom.getCreatedAt())
                 .build();
-    }
-}
+    }}
 
