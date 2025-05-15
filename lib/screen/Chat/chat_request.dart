@@ -195,8 +195,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
-    final url =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/chatrooms/request/${widget.requestId}?${_receiverStudentNum}');
     final res = await http.delete(url);
     if (res.statusCode == 200) {
       ScaffoldMessenger.of(context)
@@ -696,38 +696,52 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                         ),
                                                       )
                                                     : TextButton(
-                                                  onPressed: () async {
-                                                    final prefs = await SharedPreferences.getInstance();
-                                                    final nickname = prefs.getString('nickname') ?? '작성자';
-                                                    final messageText = buildRequestAllowMessage(nickname);
+                                                        onPressed: () async {
+                                                          final prefs =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+                                                          final nickname =
+                                                              prefs.getString(
+                                                                      'nickname') ??
+                                                                  '작성자';
+                                                          final messageText =
+                                                              buildRequestAllowMessage(
+                                                                  nickname);
 
-                                                    // ✅ 1. 서버에 승인 API 호출
-                                                    final url = Uri.parse(
-                                                        'http://10.0.2.2:8080/ItemRequest/${widget.requestId}/rent/${widget.chatRoomId}'
-                                                    );
-                                                    final res = await http.patch(url);
+                                                          // ✅ 1. 서버에 승인 API 호출
+                                                          final url = Uri.parse(
+                                                              'http://10.0.2.2:8080/ItemRequest/${widget.requestId}/rent/${widget.chatRoomId}');
+                                                          final res = await http
+                                                              .patch(url);
 
-                                                    if (res.statusCode == 200) {
-                                                      print('✅ 승인 처리 완료됨');
-                                                    } else {
-                                                      print('❌ 승인 처리 실패: ${res.statusCode}');
-                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                        SnackBar(content: Text('승인 처리 실패: ${res.statusCode}')),
-                                                      );
-                                                      return;
-                                                    }
+                                                          if (res.statusCode ==
+                                                              200) {
+                                                            print(
+                                                                '✅ 승인 처리 완료됨');
+                                                          } else {
+                                                            print(
+                                                                '❌ 승인 처리 실패: ${res.statusCode}');
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                              SnackBar(
+                                                                  content: Text(
+                                                                      '승인 처리 실패: ${res.statusCode}')),
+                                                            );
+                                                            return;
+                                                          }
 
-                                                    // ✅ 2. 채팅 메시지 전송
-                                                    ChatService.sendMessage(
-                                                      widget.chatRoomId,
-                                                      _myStudentNum!,
-                                                      _receiverStudentNum!,
-                                                      messageText,
-                                                      type: 'request',
-                                                    );
-                                                  },
-
-                                                  child: Text(
+                                                          // ✅ 2. 채팅 메시지 전송
+                                                          ChatService
+                                                              .sendMessage(
+                                                            widget.chatRoomId,
+                                                            _myStudentNum!,
+                                                            _receiverStudentNum!,
+                                                            messageText,
+                                                            type: 'request',
+                                                          );
+                                                        },
+                                                        child: Text(
                                                           '승인',
                                                           style: TextStyle(
                                                             fontWeight:
@@ -759,9 +773,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                               widget.requestId);
                                                           // ✅ 1. 서버에 반납 완료 요청
                                                           final url = Uri.parse(
-                                                              'http://10.0.2.2:8080/ItemRequest/${widget.requestId}/return/${widget.chatRoomId}'
-                                                          );
-                                                          final res = await http.patch(url);
+                                                              'http://10.0.2.2:8080/ItemRequest/${widget.requestId}/return/${widget.chatRoomId}');
+                                                          final res = await http
+                                                              .patch(url);
 
                                                           if (res.statusCode ==
                                                               200) {

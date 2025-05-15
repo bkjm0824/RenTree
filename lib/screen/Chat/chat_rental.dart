@@ -1,5 +1,7 @@
 // 물품 대여 채팅 화면
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/Chat/passwordPopup.dart';
+import 'package:rentree/screen/Chat/setPasswordPopup.dart';
 import 'chat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -609,6 +611,12 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                               message.content.contains("님이 대여를 승인했어요") ||
                                   message.content.startsWith("반납이 완료되었습니다.");
                           if (isSystemMessage) {
+                            final isApprovalMessage =
+                                message.content.contains("님이 대여를 승인했어요");
+                            final showPasswordButton = isApprovalMessage &&
+                                !widget.isFaceToFace &&
+                                _myStudentNum == widget.requesterStudentNum;
+
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: Container(
@@ -617,21 +625,48 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                   color: const Color(0xffE7E9C7),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 7),
-                                child: Center(
-                                  child: Text(
-                                    message.content,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff053C05),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 7, horizontal: 12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        message.content,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff053C05),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    if (showPasswordButton)
+                                      TextButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            builder: (context) => passwordPopup(
+                                                rentalItemId:
+                                                    widget.rentalItemId),
+                                          );
+                                        },
+                                        child: Text(
+                                          '비밀번호 확인',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             );
                           }
+
                           final messageBubble = Container(
                               margin: EdgeInsets.only(bottom: 5),
                               padding: (isRentalRequest || isReturnRequest)
@@ -700,6 +735,16 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                         )
                                                       : TextButton(
                                                           onPressed: () async {
+                                                            showDialog(
+                                                              context: context,
+                                                              barrierDismissible:
+                                                                  true,
+                                                              builder: (context) =>
+                                                                  setPasswordPopup(
+                                                                      rentalItemId:
+                                                                          widget
+                                                                              .rentalItemId),
+                                                            );
                                                             final prefs =
                                                                 await SharedPreferences
                                                                     .getInstance();
@@ -712,8 +757,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                                     nickname);
 
                                                             final url = Uri.parse(
-                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/rent/${widget.chatRoomId}'
-                                                            );
+                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/rent/${widget.chatRoomId}');
                                                             final res =
                                                                 await http
                                                                     .patch(url);
@@ -771,8 +815,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                       : TextButton(
                                                           onPressed: () async {
                                                             final url = Uri.parse(
-                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/return/${widget.chatRoomId}'
-                                                            );
+                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/return/${widget.chatRoomId}');
                                                             final res =
                                                                 await http
                                                                     .patch(url);
