@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rentree/screen/Point/point_first.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 import '../Chat/chatlist.dart';
+import 'dart:convert';
 import '../Home/addpost_give.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
@@ -16,14 +17,47 @@ class PointedScreen extends StatefulWidget {
 class _PointedScreenState extends State<PointedScreen> {
   int _selectedIndex = 2;
   int _myPoint = 0;
-  final List<Map<String, String>> rankingList = [
-    {"rank": "1", "name": "상상북스딱스", "points": "29"},
-    {"rank": "2", "name": "호식이", "points": "27"},
-    {"rank": "3", "name": "나옹이", "points": "24"},
-    {"rank": "4", "name": "상추쌈", "points": "20"},
-    {"rank": "5", "name": "다람쥐", "points": "18"},
-    // 더 많은 데이터 추가 가능
-  ];
+  List<Map<String, String>> rankingList = [];
+
+  Future<void> _loadRankingList() async {
+    final url = Uri.parse('http://10.0.2.2:8080/Rentree/students');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+
+        // 렌탈카운트 내림차순 정렬
+        data.sort((a, b) => (b['rentalCount'] ?? 0).compareTo(a['rentalCount'] ?? 0));
+
+        // 전체 학생을 rankingList에 매핑
+        setState(() {
+          rankingList = List.generate(data.length, (index) {
+            final item = data[index];
+            return {
+              "rank": (index + 1).toString(),
+              "name": item["nickname"] ?? "익명",
+              "count": item["rentalCount"].toString(),
+            };
+          });
+        });
+      } else {
+        print("❌ 서버 오류: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("❌ 랭킹 불러오기 실패: $e");
+    }
+  }
+
+  Future<void> _deductPoint(String studentNum, int cost) async {
+    final url = Uri.parse('http://10.0.2.2:8080/Rentree/students/rental-point?studentNum=$studentNum&rentalPoint=$cost');
+    final response = await http.patch(url);
+
+    if (response.statusCode == 200) {
+      print('✅ 포인트 차감 성공');
+    } else {
+      print('❌ 포인트 차감 실패: ${response.body}');
+    }
+  }
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -73,51 +107,30 @@ class _PointedScreenState extends State<PointedScreen> {
   void initState() {
     super.initState();
     _loadMyPoint(); // ✅ 이거 반드시 필요!
+    _loadRankingList();
   }
 
   Future<void> _loadMyPoint() async {
     final prefs = await SharedPreferences.getInstance();
-    final rentalCount = prefs.getInt('rentalCount') ?? 0;
-    final point = rentalCount * 20;
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
 
-    print('📦 불러온 rentalCount: $rentalCount');
+    final url = Uri.parse('http://10.0.2.2:8080/Rentree/students');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      final prefs = await SharedPreferences.getInstance();
+      final studentNum = prefs.getString('studentNum');
 
-    if (point == 0) {
-      Future.delayed(Duration.zero, () {
-        showGeneralDialog(
-          context: context,
-          barrierLabel: "PointPopup",
-          barrierDismissible: true,
-          barrierColor: Colors.black.withOpacity(0.3),
-          transitionDuration: Duration(milliseconds: 600), // ⭐ 애니메이션 속도
-          pageBuilder: (_, __, ___) {
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: FractionallySizedBox(
-                child: PointScreen(), // ✅ 유지된 레이아웃
-              ),
-            );
-          },
-          transitionBuilder: (_, animation, __, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(0, 1), // 아래에서 시작
-                end: Offset(0, 0), // 제자리 도착
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut, // 부드러운 효과
-              )),
-              child: child,
-            );
-          },
-        );
-      });
+      final me = data.firstWhere((e) => e['studentNum'] == studentNum, orElse: () => null);
+      if (me != null) {
+        setState(() {
+          _myPoint = me['rentalPoint'] ?? 0;
+        });
+      }
     }
-
-    setState(() {
-      _myPoint = point;
-    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +207,7 @@ class _PointedScreenState extends State<PointedScreen> {
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: '현재 보유 상추 : ',
+                                        text: '내 상추 : ',
                                         style: TextStyle(
                                           fontSize: 26,
                                           fontFamily: 'Inter',
@@ -206,15 +219,6 @@ class _PointedScreenState extends State<PointedScreen> {
                                         text: '$_myPoint',
                                         style: TextStyle(
                                           color: Color(0xFF41B642),
-                                          fontSize: 30,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.38,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: '/500',
-                                        style: TextStyle(
                                           fontSize: 30,
                                           fontFamily: 'Inter',
                                           fontWeight: FontWeight.w700,
@@ -236,7 +240,7 @@ class _PointedScreenState extends State<PointedScreen> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 14,
+                                    fontSize: 20,
                                     fontFamily: 'Inter',
                                     fontWeight: FontWeight.w700,
                                     height: 1.57,
@@ -262,68 +266,27 @@ class _PointedScreenState extends State<PointedScreen> {
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  // 2등 (왼쪽) - 중간 높이
-                                  Positioned(
-                                    top: 41, // 높이 조정
-                                    left: 62,
-                                    child: Icon(Icons.account_circle,
-                                        size: 38, color: Colors.grey),
-                                  ),
-
-                                  // 1등 (가운데) - 가장 높은 위치
-                                  Positioned(
-                                    top: 28, // 가장 높게 배치
-                                    child: Icon(Icons.account_circle,
-                                        size: 38, color: Colors.amber),
-                                  ),
-
-                                  // 3등 (오른쪽) - 중간 높이
-                                  Positioned(
-                                    top: 46, // 높이 조정
-                                    right: 62,
-                                    child: Icon(Icons.account_circle,
-                                        size: 38, color: Colors.grey),
-                                  ),
-
-                                  // podium 이미지가 일부 아이콘을 가리도록 배치
-                                  Positioned(
-                                    bottom: 330,
-                                    child: Image.asset(
-                                      'assets/podium.png',
-                                      width: 214,
-                                      height: 44,
-                                    ),
-                                  ),
-
-                                  Center(
-                                    // 컨테이너를 가운데 정렬
-                                    child: Container(
-                                      width: 180, // 컨테이너 가로 크기 제한
-                                      height: 200, // 크기 조정 가능
+                                  // podium 위 아이콘들
+                                  Positioned(top: 41, left: 62, child: Icon(Icons.account_circle, size: 38, color: Colors.grey)),
+                                  Positioned(top: 28, child: Icon(Icons.account_circle, size: 38, color: Colors.amber)),
+                                  Positioned(top: 46, right: 62, child: Icon(Icons.account_circle, size: 38, color: Colors.grey)),
+                                  Positioned(bottom: 330, child: Image.asset('assets/podium.png', width: 214, height: 44)),
+                                  // 🟩 podium 밑 랭킹 출력
+                                  Positioned.fill(
+                                    top: 110,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 30),
                                       child: ListView.builder(
                                         itemCount: rankingList.length,
                                         itemBuilder: (context, index) {
+                                          final item = rankingList[index];
                                           return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 5.0),
+                                            padding: const EdgeInsets.symmetric(vertical: 4),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment
-                                                  .spaceBetween, // 왼쪽과 오른쪽 정렬
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text(
-                                                  '${rankingList[index]["rank"]}등 ${rankingList[index]["name"]}',
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '${rankingList[index]["points"]}회',
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
+                                                Text('${item["rank"]}등 ${item["name"]}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
+                                                Text('${item["count"]}회', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
                                               ],
                                             ),
                                           );
@@ -334,6 +297,19 @@ class _PointedScreenState extends State<PointedScreen> {
                                 ],
                               ),
                             ),
+
+                            SizedBox(height: 50),
+
+                            Text(
+                              '🎁 포인트 교환소',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            _buildExchangeItem('비교과 포인트 5점', '100 상추', 'assets/clover.png'),
+                            _buildExchangeItem('더베이크 아메리카노(I)', '100 상추', 'assets/americano.png'),
                           ],
                         ),
                       ),
@@ -394,4 +370,91 @@ class _PointedScreenState extends State<PointedScreen> {
       ),
     );
   }
+  Widget _buildExchangeItem(String name, String cost, String imagePath) {
+    return GestureDetector(
+      onTap: () {
+        _showExchangeDialog(name, 100); // 100상추 차감 예시
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            Image.asset(imagePath, width: 60, height: 60),
+            SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                name,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            Text(
+              cost,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF41B642),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  void _showExchangeDialog(String itemName, int cost) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('포인트 교환'),
+          content: Text('$itemName을(를) $cost 상추로 교환하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // 취소
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // 닫기
+                _exchangeItem(cost);     // 차감 로직 호출
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  _exchangeItem(int cost) async {
+    if (_myPoint >= cost) {
+      final prefs = await SharedPreferences.getInstance();
+      final studentNum = prefs.getString('studentNum') ?? '';
+
+      await _deductPoint(studentNum, cost); // 서버 반영
+
+      setState(() {
+        _myPoint -= cost;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('교환이 완료되었습니다!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('상추가 부족합니다.')),
+      );
+    }
+  }
+
 }

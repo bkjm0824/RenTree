@@ -421,7 +421,7 @@ class _MypageScreenState extends State<MypageScreen> {
         children: [
           Row(children: [
             SizedBox(width: 5),
-            Text('내가 대여 받은 물품', style: TextStyle(fontSize: 16))
+            Text('최근 대여 받은 물품', style: TextStyle(fontSize: 16))
           ]),
           SizedBox(height: 8),
           _latestReceived != null
@@ -456,7 +456,7 @@ class _MypageScreenState extends State<MypageScreen> {
           SizedBox(height: 16),
           Row(children: [
             SizedBox(width: 5),
-            Text('내가 대여 해준 물품', style: TextStyle(fontSize: 16))
+            Text('최근 대여 해준 물품', style: TextStyle(fontSize: 16))
           ]),
           SizedBox(height: 8),
           _latestGiven != null
