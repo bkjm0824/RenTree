@@ -180,6 +180,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
             'chatRoomId': room['roomId'],
             'responderStudentNum': room['responderStudentNum'],
             'requesterStudentNum': room['requesterStudentNum'],
+            'isFaceToFace': room['isFaceToFace']
           };
         }
       }
@@ -432,6 +433,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                   ),
                                 ),
                                 onPressed: () async {
+                                  print('💥 전달되는 isFaceToFace: $isFaceToFace');
                                   final prefs =
                                       await SharedPreferences.getInstance();
                                   final studentNum =
