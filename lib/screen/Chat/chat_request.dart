@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'chat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rentree/screen/Chat/passwordPopup.dart';
+import 'package:rentree/screen/Chat/setPasswordPopup.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Post/post_request.dart';
@@ -80,6 +82,10 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
     _receiverProfileIndex = widget.receiverProfileIndex;
     _loadStudentNumAndConnect();
     _loadPreviousMessages();
+    print('🧭 받은 isFaceToFace: ${widget.isFaceToFace}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('🔁 화면 초기화 후 isFaceToFace 상태: ${widget.isFaceToFace}');
+    });
   }
 
   void _updateRentalState() {
@@ -606,7 +612,14 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                           final bool isSystemMessage =
                               message.content.contains("님이 대여를 승인했어요") ||
                                   message.content.contains("반납이 완료되었습니다.");
+
                           if (isSystemMessage) {
+                            final isApprovalMessage =
+                                message.content.contains("님이 대여를 승인했어요");
+                            final showPasswordButton = isApprovalMessage &&
+                                !widget.isFaceToFace &&
+                                _myStudentNum == widget.writerStudentNum;
+
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: Container(
@@ -615,17 +628,44 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                   color: const Color(0xffE7E9C7),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 7),
-                                child: Center(
-                                  child: Text(
-                                    message.content,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff053C05),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 7, horizontal: 12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        message.content,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff053C05),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    if (showPasswordButton)
+                                      TextButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            builder: (context) => passwordPopup(
+                                              rentalItemId: widget.requestId,
+                                              type: 'request', // 또는 'rental'
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          '비밀번호 확인',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             );
@@ -697,6 +737,20 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                       )
                                                     : TextButton(
                                                         onPressed: () async {
+                                                          if (!widget
+                                                              .isFaceToFace) {
+                                                            await showDialog(
+                                                              context: context,
+                                                              barrierDismissible:
+                                                                  true,
+                                                              builder: (context) =>
+                                                                  setPasswordPopup(
+                                                                postId: widget
+                                                                    .requestId,
+                                                                type: 'request',
+                                                              ),
+                                                            );
+                                                          }
                                                           final prefs =
                                                               await SharedPreferences
                                                                   .getInstance();
@@ -748,7 +802,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                                 FontWeight.bold,
                                                             color: Color(
                                                                 0xffBCF69C),
-                                                            fontSize: 18,
+                                                            fontSize: 20,
                                                           ),
                                                         ),
                                                       );

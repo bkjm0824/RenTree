@@ -506,7 +506,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                               backgroundColor: Color(0xff97C663),
                               foregroundColor: Colors.white,
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 13),
+                                  horizontal: 11, vertical: 13),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
                             ),
@@ -648,8 +648,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                             context: context,
                                             barrierDismissible: true,
                                             builder: (context) => passwordPopup(
-                                                rentalItemId:
-                                                    widget.rentalItemId),
+                                              rentalItemId: widget.rentalItemId,
+                                              type: 'rental',
+                                            ),
                                           );
                                         },
                                         child: Text(
@@ -741,9 +742,10 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                                   true,
                                                               builder: (context) =>
                                                                   setPasswordPopup(
-                                                                      rentalItemId:
-                                                                          widget
-                                                                              .rentalItemId),
+                                                                postId: widget
+                                                                    .rentalItemId,
+                                                                type: 'rental',
+                                                              ),
                                                             );
                                                             final prefs =
                                                                 await SharedPreferences

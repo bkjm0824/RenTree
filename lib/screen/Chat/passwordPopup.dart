@@ -5,8 +5,13 @@ import 'package:http/http.dart' as http;
 
 class passwordPopup extends StatefulWidget {
   final int rentalItemId;
+  final String type; // 'rental' 또는 'request'
 
-  const passwordPopup({Key? key, required this.rentalItemId}) : super(key: key);
+  const passwordPopup({
+    Key? key,
+    required this.rentalItemId,
+    required this.type,
+  }) : super(key: key);
 
   @override
   State<passwordPopup> createState() => _passwordPopupState();
@@ -28,12 +33,13 @@ class _passwordPopupState extends State<passwordPopup> {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('accountPassword'); // ✅ 로그인 시 저장된 비번
+    final saved = prefs.getString('accountPassword');
 
     if (input == saved) {
-      // ✅ 계정 비번 일치 → 서버에서 사물함 비밀번호 조회
+      final endpoint = widget.type == 'request' ? 'ItemRequest' : 'rental-item';
+
       final res = await http.get(Uri.parse(
-          'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/password'));
+          'http://10.0.2.2:8080/$endpoint/${widget.rentalItemId}/password'));
 
       if (res.statusCode == 200) {
         final password = utf8.decode(res.bodyBytes).trim();
@@ -41,7 +47,7 @@ class _passwordPopupState extends State<passwordPopup> {
         setState(() {
           _errorText = null;
           _isVerified = true;
-          _lockerPassword = password; // ✅ 서버에서 받은 사물함 비번 저장
+          _lockerPassword = password;
         });
       } else {
         print('❌ 비밀번호 조회 실패: ${res.statusCode}');

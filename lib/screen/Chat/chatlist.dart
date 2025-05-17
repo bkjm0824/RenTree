@@ -106,6 +106,7 @@ class _ChatScreenState extends State<ChatListScreen> {
             room['itemRequestTitle'] = itemData['title'] ?? '제목 없음';
             room['writerNickname'] = itemData['student']['nickname'] ?? '작성자';
             room['writerStudentNum'] = itemData['student']['studentNum'] ?? '';
+            room['isFaceToFace'] = itemData['isFaceToFace'];
 
             // ✅ 여기 추가: 대여 시간 포맷팅
             final start = itemData['rentalStartTime'];

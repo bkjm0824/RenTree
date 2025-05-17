@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'chat_service.dart';
 
 class setPasswordPopup extends StatefulWidget {
-  final int rentalItemId;
+  final int postId; // 글 ID (rentalItemId 또는 requestId)
+  final String type; // 'rental' 또는 'request'
 
   const setPasswordPopup({
     Key? key,
-    required this.rentalItemId,
+    required this.postId,
+    required this.type,
   }) : super(key: key);
 
   @override
@@ -29,15 +28,18 @@ class _setPasswordPopupState extends State<setPasswordPopup> {
       return;
     }
 
-    // PATCH 요청만 수행
-    final patchUrl = Uri.parse(
-        'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/generate-password?password=$password');
+    final String endpoint =
+        widget.type == 'request' ? 'ItemRequest' : 'rental-item';
 
-    final res = await http.patch(patchUrl);
+    final String url = widget.type == 'request'
+        ? 'http://10.0.2.2:8080/ItemRequest/${widget.postId}/password?password=$password'
+        : 'http://10.0.2.2:8080/rental-item/${widget.postId}/generate-password?password=$password';
+
+    final res = await http.patch(Uri.parse(url));
 
     if (res.statusCode == 200) {
       print('✅ 비밀번호 설정 성공');
-      Navigator.pop(context); // 팝업 닫기
+      Navigator.pop(context);
     } else {
       print('❌ 비밀번호 설정 실패: ${res.statusCode}');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +61,7 @@ class _setPasswordPopupState extends State<setPasswordPopup> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '대여 승인용 비밀번호 설정',
+              '비밀번호 설정',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
