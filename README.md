@@ -45,7 +45,7 @@ RenTree/
 ## 💻 설치 방법
 1. 저장소 복제
 ```bash
-git clone [레포지토리 URL]
+git clone https://github.com/bkjm0824/RenTree.git
 cd [프로젝트명]
 ```
 
