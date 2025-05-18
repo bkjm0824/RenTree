@@ -201,13 +201,24 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
+    final prefs = await SharedPreferences.getInstance();
+    final myStudentNum = prefs.getString('studentNum') ?? '';
+
     final url = Uri.parse(
-        'http://10.0.2.2:8080/chatrooms/request/${widget.requestId}?${_receiverStudentNum}');
+      'http://10.0.2.2:8080/chatrooms/request/id/${widget.chatRoomId}?studentNum=$myStudentNum',
+    );
+
     final res = await http.delete(url);
+
     if (res.statusCode == 200) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('채팅방이 삭제되었습니다.')));
-      Navigator.of(context).pop(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('채팅방이 삭제되었습니다.')),
+      );
+      Navigator.of(context).pop(true); // ✅ true로 결과 반환
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('삭제 실패: ${res.statusCode}')),
+      );
     }
   }
 
