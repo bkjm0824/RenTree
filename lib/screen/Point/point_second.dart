@@ -417,19 +417,30 @@ class _PointedScreenState extends State<PointedScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('포인트 교환'),
+          backgroundColor: Color(0xffF4F1F1),
+          title: Text('포인트 교환', style: TextStyle(fontWeight: FontWeight.bold),),
           content: Text('$itemName을(를) $cost 상추로 교환하시겠습니까?'),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // 취소
-              child: Text('취소'),
-            ),
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff97C663),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
               onPressed: () {
                 Navigator.pop(context); // 닫기
                 _exchangeItem(cost);     // 차감 로직 호출
               },
               child: Text('확인'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: Text('취소'),
             ),
           ],
         );

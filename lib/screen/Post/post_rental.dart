@@ -139,6 +139,138 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     fetchLikeCount();
   }
 
+  void showChatRoomPopup(List<Map<String, dynamic>> chatRooms) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xffF4F1F1),
+          title: Text("대화 중인 채팅",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: chatRooms.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text("대화 중인 채팅방이 없습니다."),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: chatRooms.length,
+                      itemBuilder: (context, index) {
+                        final room = chatRooms[index];
+                        final nickname = room['requesterNickname'] ?? '알 수 없음';
+                        final message = room['lastMessage'] ?? '';
+                        final date = room['lastMessageDate'] ?? '';
+                        final profileIndex = room['requesterProfileImage'] ?? 1;
+                        final profilePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+                        final isWriterRequester = writerStudentNum == room['requesterStudentNum'];
+                        final receiverProfileIndex = isWriterRequester
+                            ? room['responderProfileImage']
+                            : room['requesterProfileImage'];
+                        return Card(
+                          color: Color(0xffE7E9C8),
+                          margin: EdgeInsets.symmetric(vertical: 6),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: AssetImage(
+                                'assets/Profile/${_mapIndexToProfileFile(room['requesterProfileImage'] ?? 1)}',
+                              ),
+                              radius: 24,
+                            ),
+                            title: Text(
+                              room['requesterNickname'] ?? '알 수 없음',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  room['lastMessage'] ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  room['lastMessageDate'] != null
+                                      ? formatTimeDifference(DateTime.tryParse(room['lastMessageDate']) ?? DateTime.now())
+                                      : '',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              final isWriterRequester = writerStudentNum == room['requesterStudentNum'];
+                              final receiverProfileIndex = isWriterRequester
+                                  ? room['responderProfileImage']
+                                  : room['requesterProfileImage'];
+
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatRentalScreen(
+                                    chatRoomId: room['roomId'],
+                                    userName: isWriterRequester
+                                        ? room['responderNickname']
+                                        : room['requesterNickname'],
+                                    imageUrl: imageUrls.isNotEmpty ? imageUrls[0] : '',
+                                    title: title,
+                                    rentalItemId: widget.itemId,
+                                    rentalTimeText: rentalTimeRangeText,
+                                    isFaceToFace: isFaceToFace,
+                                    writerStudentNum: writerStudentNum,
+                                    requesterStudentNum: room['requesterStudentNum'],
+                                    receiverStudentNum: isWriterRequester
+                                        ? room['responderStudentNum']
+                                        : room['requesterStudentNum'],
+                                    receiverProfileIndex: receiverProfileIndex,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                },
+              ),
+            ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff97C663),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text("닫기", style: TextStyle(fontSize: 16)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String formatTimeDifference(DateTime messageTime) {
+    final now = DateTime.now().add(Duration(hours: 9)); // KST 보정
+    final diff = now.difference(messageTime);
+
+    if (diff.inMinutes < 1) return '방금 전';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+    if (diff.inHours < 24) return '${diff.inHours}시간 전';
+    if (diff.inDays < 30) return '${diff.inDays}일 전';
+    final months = diff.inDays ~/ 30;
+    if (months < 12) return '${months}달 전';
+    return '${messageTime.year}.${messageTime.month.toString().padLeft(2, '0')}.${messageTime.day.toString().padLeft(2, '0')}';
+  }
+
   String formatTo24Hour(DateTime time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
@@ -530,6 +662,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                           // 변경된 코드
                                           if (writerStudentNum == studentNum)
                                             PopupMenuButton<String>(
+                                              color: Color(0xffF4F1F1),
                                               icon:
                                                   Icon(Icons.more_vert_rounded),
                                               onSelected: (String value) {
@@ -698,14 +831,38 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ChatListScreen(),
-                                    ),
-                                  );
-                                },
+                          onPressed: () async {
+                            final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+                            final response = await http.get(url);
+                            if (response.statusCode == 200) {
+                              final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
+                              final filtered = rooms
+                                  .where((room) => room['type'] == 'rental' && room['relatedItemId'] == widget.itemId)
+                                  .toList()
+                                  .cast<Map<String, dynamic>>();
+
+                              // ✅ 마지막 메시지 추가 fetch
+                              for (var room in filtered) {
+                                final type = room['type'];
+                                final roomId = room['roomId'];
+                                final res = await http.get(Uri.parse('http://10.0.2.2:8080/chatmessages/$type/$roomId'));
+                                if (res.statusCode == 200) {
+                                  final List<dynamic> messages = jsonDecode(utf8.decode(res.bodyBytes));
+                                  if (messages.isNotEmpty) {
+                                    final lastMessage = messages.last;
+                                    final rawSentAt = lastMessage['sentAt'];
+                                    final trimmed = rawSentAt?.split('.')?.first ?? '';
+                                    room['lastMessage'] = lastMessage['message'];
+                                    room['lastMessageDate'] = trimmed;
+                                  }
+                                }
+                              }
+
+                              showChatRoomPopup(filtered);
+                            } else {
+                              print('❌ 채팅방 목록 조회 실패: ${response.statusCode}');
+                            }
+                          },
                                 child: Text(
                                   "대화 중인 채팅 $chatRoomCount",
                                   style: TextStyle(
