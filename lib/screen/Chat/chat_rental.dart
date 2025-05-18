@@ -195,8 +195,13 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   }
 
   Future<void> _deleteChatRoom() async {
-    final url =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/${widget.chatRoomId}');
+    final prefs = await SharedPreferences.getInstance();
+    final myStudentNum = prefs.getString('studentNum') ?? '';
+
+    final url = Uri.parse(
+      'http://10.0.2.2:8080/chatrooms/rental/id/${widget.chatRoomId}?studentNum=$myStudentNum',
+    );
+
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
