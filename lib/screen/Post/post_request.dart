@@ -420,6 +420,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                                 fontWeight: FontWeight.bold)),
                                         if (writerStudentNum == studentNum)
                                           PopupMenuButton<String>(
+                                            color: Color(0xffF4F1F1),
                                             icon: Icon(Icons.more_vert_rounded),
                                             onSelected: (String value) {
                                               if (value == 'change') {

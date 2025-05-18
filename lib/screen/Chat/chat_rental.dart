@@ -184,19 +184,30 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('채팅방 나가기'),
+        backgroundColor: Color(0xffF4F1F1),
+        title: Text('채팅방 나가기', style: TextStyle(fontWeight: FontWeight.bold),),
         content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('취소'),
-          ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xff97C663),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
             onPressed: () async {
               Navigator.pop(context); // 다이얼로그 닫기
               await _deleteChatRoom(); // 삭제 요청
             },
-            child: Text('확인', style: TextStyle(color: Colors.red)),
+            child: Text("확인"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: Text('취소'),
           ),
         ],
       ),

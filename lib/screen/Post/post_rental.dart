@@ -662,6 +662,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                           // 변경된 코드
                                           if (writerStudentNum == studentNum)
                                             PopupMenuButton<String>(
+                                              color: Color(0xffF4F1F1),
                                               icon:
                                                   Icon(Icons.more_vert_rounded),
                                               onSelected: (String value) {
