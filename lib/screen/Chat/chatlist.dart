@@ -46,6 +46,26 @@ class _ChatScreenState extends State<ChatListScreen> {
           jsonDecode(utf8.decode(res.bodyBytes)); // ✅ 여기에 data 선언!
 
       for (var room in data) {
+        print('📦 채팅방 ID: ${room['roomId']}');
+        print('🧍 내 학번: $_myStudentNum');
+        print('🧍 requesterStudentNum: ${room['requesterStudentNum']}');
+        print('🧍 responderStudentNum: ${room['responderStudentNum']}');
+        print('🚪 requesterExited: ${room['requesterExited']}');
+        print('🚪 responderExited: ${room['responderExited']}');
+        // ❗️숨기기 필터링 추가
+        final requesterExited = room['requesterExited'] ?? false;
+        final responderExited = room['responderExited'] ?? false;
+
+        final isRequester = room['requesterStudentNum'] == _myStudentNum;
+        final isResponder = room['responderStudentNum'] == _myStudentNum;
+
+        print('📌 isRequester: $isRequester, isResponder: $isResponder');
+
+        if ((isRequester && requesterExited) || (isResponder && responderExited)) {
+          print('🚫 내가 나간 채팅방이므로 숨김: roomId=${room['roomId']}');
+          continue; // 이 채팅방은 리스트에 추가하지 않음
+        }
+
         final String uniqueKey = '${room['roomId']}_${room['type']}';
         if (uniqueRooms.containsKey(uniqueKey)) continue;
         uniqueRooms[uniqueKey] = room;
@@ -409,11 +429,15 @@ class _ChatScreenState extends State<ChatListScreen> {
                                       ),
                                     ),
                                   ).then((result) {
-                                    if (result != null && result is DateTime) {
+                                    if (result is Map && result.containsKey('lastMessageTime')) {
                                       setState(() {
                                         room['lastMessageTime'] =
-                                            result.toIso8601String();
+                                            (result['lastMessageTime'] as DateTime).toIso8601String();
+                                        room['lastMessage'] = result['lastMessage'] ?? '';
                                       });
+                                    } else if (result == true) {
+                                      // 삭제 등으로 변경된 경우 전체 새로고침
+                                      _fetchChatRooms();
                                     }
                                   });
                                 } else {
@@ -452,11 +476,13 @@ class _ChatScreenState extends State<ChatListScreen> {
                                       ),
                                     ),
                                   ).then((result) {
-                                    if (result != null && result is DateTime) {
+                                    if (result != null && result is Map && result.containsKey('lastMessageTime')) {
                                       setState(() {
-                                        room['lastMessageTime'] =
-                                            result.toIso8601String();
+                                        room['lastMessageTime'] = (result['lastMessageTime'] as DateTime).toIso8601String();
+                                        room['lastMessage'] = result['lastMessage'] ?? '';
                                       });
+                                    } else if (result == true) {
+                                      _fetchChatRooms();
                                     }
                                   });
                                 }

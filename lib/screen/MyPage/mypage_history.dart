@@ -281,13 +281,29 @@ class _MyPageHistoryState extends State<MyPageHistory> {
         : '양도(무료나눔)';
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (item['type'] == 'rental') {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => PostRentalScreen(itemId: item['id'])));
+          final changed = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PostRentalScreen(itemId: item['id']),
+            ),
+          );
+
+          if (changed == true) {
+            // 좋아요 변경됨 → 다시 불러오기
+            _loadHistories(); // 👈 찜 수 반영 위해 다시 불러옴
+          }
         } else {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => PostRequestScreen(itemId: item['id'])));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PostRequestScreen(itemId: item['id']),
+            ),
+          );
         }
       },
+
       child: Column(
         children: [
           Padding(

@@ -91,7 +91,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       if (imageRes.statusCode == 200) {
         final imageList = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (imageList.isNotEmpty) {
-          item['imageUrl'] = 'http://10.0.2.2:8080${imageList[0]['imageUrl']}';
+          final rawUrl = imageList[0]['imageUrl'];
+          item['imageUrl'] = rawUrl.toString().startsWith('http')
+              ? rawUrl
+              : 'http://10.0.2.2:8080$rawUrl';
         }
       }
     }

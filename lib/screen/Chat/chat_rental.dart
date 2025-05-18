@@ -82,6 +82,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   String? _myStudentNum;
   String? _receiverStudentNum;
   int _receiverProfileIndex = 1;
+  DateTime? _lastMessageTime;
+
 
   @override
   void initState() {
@@ -151,9 +153,16 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
       final studentNum = prefs.getString('studentNum') ?? '';
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
+      final messages =
+      data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+
+      // ✅ 마지막 메시지 시간 저장
+      if (messages.isNotEmpty) {
+        _lastMessageTime = messages.last.sentAt;
+      }
+
       setState(() {
-        _messages =
-            data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+        _messages = messages;
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       });
     } else {
@@ -315,8 +324,10 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(
-                              context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
+                          Navigator.pop(context, {
+                            'lastMessageTime': _lastMessageTime,
+                            'lastMessage': _messages.isNotEmpty ? _messages.last.content : '',
+                          });
                         },
                       ),
                       Row(
@@ -586,7 +597,12 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                               ? getFormattedTime(message.sentAt!)
                               : '';
 
+                          final bool isPrevSystemMessage = index > 0 &&
+                              (messages[index - 1].content.contains("님이 대여를 승인했어요") ||
+                                  messages[index - 1].content.startsWith("반납이 완료되었습니다."));
+
                           final isSameAsPrevious = index > 0 &&
+                              !isPrevSystemMessage &&
                               messages[index - 1].isMe == message.isMe;
 
                           final isSameAsNext = index < messages.length - 1 &&

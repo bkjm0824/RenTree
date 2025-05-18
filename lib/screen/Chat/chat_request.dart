@@ -384,8 +384,10 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                         iconSize: 30,
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
-                          Navigator.pop(
-                              context, true); // ✅ 무조건 true로 반환해서 새로고침 유도
+                          Navigator.pop(context, {
+                            'lastMessageTime': _messages.isNotEmpty ? _messages.last.sentAt : DateTime.now(),
+                            'lastMessage': _messages.isNotEmpty ? _messages.last.content : '',
+                          });
                         },
                       ),
                       Row(
@@ -594,18 +596,34 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                               ? getFormattedTime(message.sentAt!)
                               : '';
 
-                          final isSameAsPrevious = index > 0 &&
-                              messages[index - 1].isMe == message.isMe;
+                          bool isSystem(String content) =>
+                              content.contains("님이 대여를 승인했어요") || content.contains("반납이 완료되었습니다.");
 
-                          final isSameAsNext = index < messages.length - 1 &&
-                              messages[index + 1].isMe == message.isMe &&
-                              messages[index + 1].sentAt != null &&
-                              message.sentAt != null &&
-                              messages[index + 1]
-                                      .sentAt!
-                                      .difference(message.sentAt!)
-                                      .inMinutes <
-                                  1;
+                          bool isSameAsPrevious = false;
+                          if (index == 0) {
+                            isSameAsPrevious = false;
+                          } else {
+                            for (int i = index - 1; i >= 0; i--) {
+                              final prev = messages[i];
+                              if (!isSystem(prev.content)) {
+                                isSameAsPrevious = prev.isMe == message.isMe;
+                                break;
+                              }
+                            }
+                          }
+
+                          bool isSameAsNext = false;
+                          for (int i = index + 1; i < messages.length; i++) {
+                            final next = messages[i];
+                            final bool isSystem = next.content.contains("님이 대여를 승인했어요") || next.content.contains("반납이 완료되었습니다.");
+                            if (!isSystem) {
+                              isSameAsNext = next.isMe == message.isMe &&
+                                  next.sentAt != null &&
+                                  message.sentAt != null &&
+                                  next.sentAt!.difference(message.sentAt!).inMinutes < 1;
+                              break;
+                            }
+                          }
 
                           final timeWidget = Padding(
                             padding: const EdgeInsets.only(top: 2, bottom: 6),
