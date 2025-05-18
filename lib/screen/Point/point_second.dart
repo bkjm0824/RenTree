@@ -27,7 +27,8 @@ class _PointedScreenState extends State<PointedScreen> {
         final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
 
         // 렌탈카운트 내림차순 정렬
-        data.sort((a, b) => (b['rentalCount'] ?? 0).compareTo(a['rentalCount'] ?? 0));
+        data.sort(
+            (a, b) => (b['rentalCount'] ?? 0).compareTo(a['rentalCount'] ?? 0));
 
         // 전체 학생을 rankingList에 매핑
         setState(() {
@@ -37,6 +38,7 @@ class _PointedScreenState extends State<PointedScreen> {
               "rank": (index + 1).toString(),
               "name": item["nickname"] ?? "익명",
               "count": item["rentalCount"].toString(),
+              "profileImage": item["profileImage"].toString(),
             };
           });
         });
@@ -48,8 +50,24 @@ class _PointedScreenState extends State<PointedScreen> {
     }
   }
 
+  String _mapIndexToProfileFile(int index) {
+    switch (index) {
+      case 1:
+        return 'Bugi_profile.png';
+      case 2:
+        return 'GgoGgu_profile.png';
+      case 3:
+        return 'Nyangi_profile.png';
+      case 4:
+        return 'Sangzzi_profile.png';
+      default:
+        return 'Bugi_profile.png';
+    }
+  }
+
   Future<void> _deductPoint(String studentNum, int cost) async {
-    final url = Uri.parse('http://10.0.2.2:8080/Rentree/students/rental-point?studentNum=$studentNum&rentalPoint=$cost');
+    final url = Uri.parse(
+        'http://10.0.2.2:8080/Rentree/students/rental-point?studentNum=$studentNum&rentalPoint=$cost');
     final response = await http.patch(url);
 
     if (response.statusCode == 200) {
@@ -122,7 +140,8 @@ class _PointedScreenState extends State<PointedScreen> {
       final prefs = await SharedPreferences.getInstance();
       final studentNum = prefs.getString('studentNum');
 
-      final me = data.firstWhere((e) => e['studentNum'] == studentNum, orElse: () => null);
+      final me = data.firstWhere((e) => e['studentNum'] == studentNum,
+          orElse: () => null);
       if (me != null) {
         setState(() {
           _myPoint = me['rentalPoint'] ?? 0;
@@ -130,7 +149,6 @@ class _PointedScreenState extends State<PointedScreen> {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +249,7 @@ class _PointedScreenState extends State<PointedScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20),
+                            SizedBox(height: 30),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -240,12 +258,13 @@ class _PointedScreenState extends State<PointedScreen> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontFamily: 'Inter',
                                     fontWeight: FontWeight.w700,
                                     height: 1.57,
                                   ),
                                 ),
+                                SizedBox(width: 5),
                                 Image.asset(
                                   'assets/clover.png',
                                   width: 16,
@@ -255,7 +274,7 @@ class _PointedScreenState extends State<PointedScreen> {
                             ),
                             SizedBox(height: 5),
                             Container(
-                              width: 300,
+                              width: 320,
                               height: 430,
                               decoration: ShapeDecoration(
                                 color: Color(0xFFD3D3D3),
@@ -267,26 +286,109 @@ class _PointedScreenState extends State<PointedScreen> {
                                 alignment: Alignment.center,
                                 children: [
                                   // podium 위 아이콘들
-                                  Positioned(top: 41, left: 62, child: Icon(Icons.account_circle, size: 38, color: Colors.grey)),
-                                  Positioned(top: 28, child: Icon(Icons.account_circle, size: 38, color: Colors.amber)),
-                                  Positioned(top: 46, right: 62, child: Icon(Icons.account_circle, size: 38, color: Colors.grey)),
-                                  Positioned(bottom: 330, child: Image.asset('assets/podium.png', width: 214, height: 44)),
+                                  if (rankingList.length >= 3) ...[
+                                    Positioned(
+                                      top: 33,
+                                      left: 70,
+                                      child: CircleAvatar(
+                                        radius: 21,
+                                        backgroundImage: AssetImage(
+                                          'assets/Profile/${_mapIndexToProfileFile(
+                                            int.tryParse(rankingList[1]
+                                                        ['profileImage'] ??
+                                                    '') ??
+                                                1,
+                                          )}',
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 20,
+                                      child: Container(
+                                        padding: EdgeInsets.all(2), // 테두리 두께
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: Colors.amber,
+                                              width: 2), // 황금색 테두리
+                                        ),
+                                        child: CircleAvatar(
+                                          radius: 21,
+                                          backgroundImage: AssetImage(
+                                            'assets/Profile/${_mapIndexToProfileFile(
+                                              int.tryParse(rankingList[0]
+                                                          ['profileImage'] ??
+                                                      '') ??
+                                                  1,
+                                            )}',
+                                          ),
+                                          backgroundColor: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 38,
+                                      right: 70,
+                                      child: CircleAvatar(
+                                        radius: 21,
+                                        backgroundImage: AssetImage(
+                                          'assets/Profile/${_mapIndexToProfileFile(
+                                            int.tryParse(rankingList[2]
+                                                        ['profileImage'] ??
+                                                    '') ??
+                                                1,
+                                          )}',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+
+                                  Positioned(
+                                      bottom: 330,
+                                      child: Image.asset('assets/podium.png',
+                                          width: 214, height: 44)),
                                   // 🟩 podium 밑 랭킹 출력
                                   Positioned.fill(
                                     top: 110,
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 77),
                                       child: ListView.builder(
                                         itemCount: rankingList.length,
                                         itemBuilder: (context, index) {
                                           final item = rankingList[index];
                                           return Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 4),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
-                                                Text('${item["rank"]}등 ${item["name"]}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
-                                                Text('${item["count"]}회', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text('${item["rank"]}등',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                                0xff606060),
+                                                            fontSize: 16)),
+                                                    SizedBox(width: 10),
+                                                    Text('${item["name"]}',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 14)),
+                                                  ],
+                                                ),
+                                                Text('${item["count"]}회',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 14)),
                                               ],
                                             ),
                                           );
@@ -297,9 +399,7 @@ class _PointedScreenState extends State<PointedScreen> {
                                 ],
                               ),
                             ),
-
                             SizedBox(height: 50),
-
                             Text(
                               '🎁 포인트 교환소',
                               style: TextStyle(
@@ -308,8 +408,10 @@ class _PointedScreenState extends State<PointedScreen> {
                               ),
                             ),
                             SizedBox(height: 10),
-                            _buildExchangeItem('비교과 포인트 5점', '100 상추', 'assets/clover.png'),
-                            _buildExchangeItem('더베이크 아메리카노(I)', '100 상추', 'assets/americano.png'),
+                            _buildExchangeItem(
+                                '비교과 포인트 5점', '100 상추', 'assets/clover.png'),
+                            _buildExchangeItem('더베이크 아메리카노(I)', '100 상추',
+                                'assets/americano.png'),
                           ],
                         ),
                       ),
@@ -370,6 +472,7 @@ class _PointedScreenState extends State<PointedScreen> {
       ),
     );
   }
+
   Widget _buildExchangeItem(String name, String cost, String imagePath) {
     return GestureDetector(
       onTap: () {
@@ -412,13 +515,17 @@ class _PointedScreenState extends State<PointedScreen> {
       ),
     );
   }
+
   void _showExchangeDialog(String itemName, int cost) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: Color(0xffF4F1F1),
-          title: Text('포인트 교환', style: TextStyle(fontWeight: FontWeight.bold),),
+          title: Text(
+            '포인트 교환',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Text('$itemName을(를) $cost 상추로 교환하시겠습니까?'),
           actions: [
             ElevatedButton(
@@ -431,7 +538,7 @@ class _PointedScreenState extends State<PointedScreen> {
               ),
               onPressed: () {
                 Navigator.pop(context); // 닫기
-                _exchangeItem(cost);     // 차감 로직 호출
+                _exchangeItem(cost); // 차감 로직 호출
               },
               child: Text('확인'),
             ),
@@ -447,6 +554,7 @@ class _PointedScreenState extends State<PointedScreen> {
       },
     );
   }
+
   _exchangeItem(int cost) async {
     if (_myPoint >= cost) {
       final prefs = await SharedPreferences.getInstance();
@@ -467,5 +575,4 @@ class _PointedScreenState extends State<PointedScreen> {
       );
     }
   }
-
 }
