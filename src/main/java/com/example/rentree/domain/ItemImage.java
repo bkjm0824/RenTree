@@ -19,6 +19,6 @@ public class ItemImage {
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
-    @Column(name = "rental_item_id", nullable = false)
+    @Column(name = "rental_item_id")
     private Long rentalItemId;
 }

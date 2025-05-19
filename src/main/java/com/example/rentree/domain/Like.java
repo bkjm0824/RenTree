@@ -22,7 +22,7 @@ public class Like {
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "rental_item_id", nullable = false)
+    @JoinColumn(name = "rental_item_id")
     private RentalItem rentalItem;
 
     public Like(Student student, RentalItem rentalItem) {
