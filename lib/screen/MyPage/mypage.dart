@@ -682,7 +682,7 @@ class _MypageScreenState extends State<MypageScreen> {
           _buildMenuItem('이용 가이드', onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => GuideScreen()),
+              MaterialPageRoute(builder: (context) => MyPageUserGuide()),
             );
           }),
           _buildMenuItem('고객 지원', isLast: true, onTap: () {
