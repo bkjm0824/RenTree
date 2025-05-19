@@ -27,4 +27,7 @@ public class ChatRoomSummaryDTO {
     private Integer responderProfileImage;
 
     private LocalDateTime createdAt;
+
+    private boolean requesterExited;
+    private boolean responderExited;
 }

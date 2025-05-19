@@ -6,9 +6,7 @@ import com.example.rentree.domain.Student;
 import com.example.rentree.dto.ItemRequestDTO;
 import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.dto.ItemRequestResponseDTO;
-import com.example.rentree.repository.ItemRequestRepository;
-import com.example.rentree.repository.RequestChatRoomRepository;
-import com.example.rentree.repository.StudentRepository;
+import com.example.rentree.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -32,6 +30,7 @@ public class ItemRequestService {
     private final NotificationService notificationService;
 
     private final RequestChatRoomRepository requestChatRoomRepository;
+    private final RequestHistoryRepository requestHistoryRepository;
 
     // 전체 게시글 가져오기 (createdAt이 최신순인 순서로 정렬)
     @Transactional(readOnly = true)
@@ -112,6 +111,8 @@ public class ItemRequestService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 게시글을 찾을 수 없습니다: " + Id));
 
         requestChatRoomRepository.updateItemRequestIdToNull(Id);
+
+        requestHistoryRepository.updateItemRequestIdToNull(Id);
 
         itemRequestRepository.delete(itemRequest);
     }

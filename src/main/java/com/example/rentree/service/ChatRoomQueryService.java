@@ -60,6 +60,8 @@ public class ChatRoomQueryService {
                 .requesterProfileImage(chatRoom.getRequester().getProfileImage())
                 .responderProfileImage(chatRoom.getResponder().getProfileImage())
                 .createdAt(chatRoom.getCreatedAt())
+                .requesterExited(chatRoom.isRequesterExited())   // ✅ 추가
+                .responderExited(chatRoom.isResponderExited())   // ✅ 추가
                 .build();
     }
 
@@ -78,6 +80,8 @@ public class ChatRoomQueryService {
                 .requesterProfileImage(chatRoom.getRequester().getProfileImage())
                 .responderProfileImage(chatRoom.getResponder().getProfileImage())
                 .createdAt(chatRoom.getCreatedAt())
+                .requesterExited(chatRoom.isRequesterExited())   // ✅ 추가
+                .responderExited(chatRoom.isResponderExited())   // ✅ 추가
                 .build();
     }}
 

@@ -17,7 +17,7 @@ public class RentalHistory {
     private Long id; // 대여 이력 식별자
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rental_item_id", nullable = false)
+    @JoinColumn(name = "rental_item_id")
     private RentalItem rentalItem; // 대여된 물품
 
     @ManyToOne(fetch = FetchType.LAZY)

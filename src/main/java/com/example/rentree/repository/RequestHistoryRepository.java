@@ -3,6 +3,9 @@ package com.example.rentree.repository;
 import com.example.rentree.domain.RequestHistory;
 import com.example.rentree.domain.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +18,9 @@ public interface RequestHistoryRepository extends JpaRepository<RequestHistory, 
 
     List<RequestHistory> findByRequester(Student requester);
     List<RequestHistory> findByResponder(Student responder);
+
+    @Modifying
+    @Query("UPDATE RequestHistory c SET c.itemRequest = NULL WHERE c.itemRequest.id = :itemRequestId")
+    void updateItemRequestIdToNull(@Param("itemRequestId") Long itemRequestId);
+
 }
