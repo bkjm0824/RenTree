@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rentree/screen/MyPage/mypage_userguide.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -63,68 +64,108 @@ class _passwordPopupState extends State<passwordPopup> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        width: screenWidth * 0.8,
-        padding: EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _isVerified ? '🔓 사물함 비밀번호' : '계정 비밀번호 입력',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: Stack(
+        children: [
+          Container(
+            width: screenWidth * 0.8,
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: _isVerified
+                      ? MainAxisAlignment.spaceBetween
+                      : MainAxisAlignment.center,
+                  children: [
+                    SizedBox(width: _isVerified ? 50 : 0),
+                    Text(
+                      _isVerified ? '🔓 사물함 비밀번호' : '계정 비밀번호 입력',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    if (_isVerified)
+                      IconButton(
+                        icon: Icon(Icons.help_outlined,
+                            color: Colors.grey[700], size: 25),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+                                constraints: BoxConstraints(
+                                    maxHeight: 750, maxWidth: 320),
+                                child: MyPageUserGuide(
+                                    isPopup: true), // 팝업 버전임을 구분할 수 있게 하면 좋아
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                if (_isVerified)
+                  Text(
+                    _lockerPassword ?? '비밀번호 없음',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff6DB129),
+                    ),
+                  )
+                else ...[
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: '비밀번호',
+                      errorText: _errorText,
+                      filled: true,
+                      fillColor: Color(0xffF0F0F0),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xff6DB129),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    ),
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            SizedBox(height: 20),
-            if (_isVerified)
-              Text(
-                _lockerPassword ?? '비밀번호 없음',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff6DB129),
-                ),
-              )
-            else ...[
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: '비밀번호',
-                  errorText: _errorText,
-                  filled: true,
-                  fillColor: Color(0xffF0F0F0),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff6DB129),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                ),
-                child: Text(
-                  '확인',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
