@@ -41,6 +41,18 @@ public class Student {
     @Column(name = "rental_point", nullable = false, columnDefinition = "int default 0")
     private int rentalPoint = 0;
 
+    // 페널티 점수
+    @Column(name = "penalty_score", nullable = false, columnDefinition = "int default 0")
+    private int penaltyScore = 0;
+
+    public void addPenalty() {
+        this.penaltyScore++;
+    }
+
+    public boolean isBanned() {
+        return this.penaltyScore >= 3; // 예: 페널티 3점 이상일 경우 사용 정지
+    }
+
     public void incrementRentalCount() {
         this.rentalCount++; // 대여 횟수 증가
     }

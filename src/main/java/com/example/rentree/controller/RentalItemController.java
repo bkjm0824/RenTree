@@ -80,7 +80,7 @@ public class RentalItemController {
         return ResponseEntity.ok("물품 대여 완료 처리됨");
     }
 
-    // 다시 대여 가능하게 변경
+    // 다시 대여 가능하게 변경 + 반납 처리 + 포인트 및 기록
     @PatchMapping("/{itemId}/return/{chatRoomId}")
     public ResponseEntity<String> markAsAvailable(
             @PathVariable Long itemId,
@@ -88,28 +88,35 @@ public class RentalItemController {
 
         RentalItem rentalItem = rentalItemService.getRentalItemDetails(itemId);
 
+        // 1. 반납 처리 및 페널티 부여
+        rentalItemService.returnItem(itemId);
+
+        // 2. 채팅방 정보 조회
         RentalChatRoom rentalChatRoom = rentalchatRoomRepository.findByRentalItemIdAndId(itemId, chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다. 글 ID: " + itemId + ", 채팅방 ID: " + chatRoomId));
 
-        Student responder = rentalChatRoom.getResponder(); // 대여 하는 사람
-        Student requester = rentalChatRoom.getRequester(); // 대여 받는 사람
+        Student responder = rentalChatRoom.getResponder(); // 대여한 사람
+        Student requester = rentalChatRoom.getRequester(); // 대여받은 사람
 
+        // 3. 대여 기록 저장
         RentalHistory rentalHistory = RentalHistory.builder()
                 .rentalItem(rentalItem)
                 .responder(responder)
                 .requester(requester)
                 .build();
-
         rentalHistoryRepository.save(rentalHistory);
 
-        responder.incrementRentalCount(); // 대여한 사람의 대여 횟수 증가
+        // 4. 대여자 포인트 및 횟수 증가
+        responder.incrementRentalCount();
         responder.incrementRentalPoint();
-        studentRepository.save(responder); // 대여한 사람의 정보 저장
+        studentRepository.save(responder);
 
+        // 5. 아이템 상태 변경
         rentalItemService.markAsAvailable(itemId);
 
-        return ResponseEntity.ok("물품을 다시 대여 가능 상태로 변경");
+        return ResponseEntity.ok("물품 반납 처리 완료 및 다시 대여 가능 상태로 변경되었습니다.");
     }
+
 
     // 특정 카테고리의 대여 가능한 물품 목록 조회
     @GetMapping("/available/category/{categoryId}")

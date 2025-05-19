@@ -53,6 +53,12 @@ public class RentalItem {
     @Column(nullable = false)
     private Boolean isAvailable = true;
 
+    @Column(name = "returned", nullable = false)
+    private Boolean isReturned = false;
+
+    @Column(name = "actual_return_time")
+    private LocalDateTime actualReturnTime;
+
     protected RentalItem() {}
 
     public RentalItem(Student student, String title, String description, Boolean isFaceToFace,

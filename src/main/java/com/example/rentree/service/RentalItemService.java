@@ -1,7 +1,6 @@
 package com.example.rentree.service;
 
 import com.example.rentree.domain.Category;
-import com.example.rentree.domain.ItemRequest;
 import com.example.rentree.domain.RentalItem;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.RentalItemCreateRequest;
@@ -11,8 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RentalItemService {
@@ -183,4 +182,32 @@ public class RentalItemService {
 
         return rentalItem.getPassword();
     }
+
+    @Transactional
+    public void returnItem(Long id) {
+        RentalItem item = rentalItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 물품이 존재하지 않습니다."));
+
+        if (Boolean.TRUE.equals(item.getIsReturned())) {
+            throw new IllegalStateException("이미 반납된 물품입니다.");
+        }
+
+        item.setIsReturned(true);
+        item.setActualReturnTime(LocalDateTime.now());
+
+        if (item.getActualReturnTime().isAfter(item.getRentalEndTime())) {
+            Student student = item.getStudent();
+            student.addPenalty();
+
+            if (student.isBanned()) {
+                // 필요 시 알림, 로그, 상태 처리 등을 여기에 추가할 수 있음
+                System.out.println("학생 " + student.getStudentNum() + " 은 페널티 누적으로 사용이 정지되었습니다.");
+            }
+
+            studentRepository.save(student);
+        }
+
+        rentalItemRepository.save(item);
+    }
+
 }
