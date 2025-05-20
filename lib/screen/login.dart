@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _loginAttempted = true;
       _invalidCredentials = false;
-
       _idErrorText = studentIdInput.isEmpty ? '학번을 입력해주세요.' : null;
       _pwErrorText = password.isEmpty ? '비밀번호를 입력해주세요.' : null;
     });
@@ -33,7 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_idErrorText != null || _pwErrorText != null) return;
 
     final url = Uri.parse('http://10.0.2.2:8080/Rentree/login');
-
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -48,16 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final nickname = data['nickname'] ?? '1';
       final studentNum = studentIdInput;
       final profileImage = data['profileImage'];
-      print('🎯 받은 프로필 이미지 값: $profileImage');
+
       if (profileImage != null) {
         await prefs.setInt('profileImage', profileImage);
-      } else {
-        print('❌ 서버 응답에 profileImage가 없음!');
       }
-      final rentalCount = data['rentalCount'];
-      if (rentalCount != null) {
-        await prefs.setInt('rentalCount', rentalCount);
-        print('📦 저장된 rentalCount: $rentalCount');
+      if (data['rentalCount'] != null) {
+        await prefs.setInt('rentalCount', data['rentalCount']);
       }
 
       if (studentId != null) {
@@ -66,12 +60,51 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('nickname', nickname);
         await prefs.setInt('profileImage', data['profileImage']);
         await prefs.setString('accountPassword', password);
-
-        print('✅ 저장된 studentId: $studentId');
-        print('✅ 저장된 nickname: $nickname');
-        print('🎯 로그인 응답 데이터: $data');
       }
 
+      // ✅ 페널티 점수 확인
+      final penaltyResponse = await http.get(
+        Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      );
+
+      if (penaltyResponse.statusCode == 200) {
+        final penaltyData = jsonDecode(utf8.decode(penaltyResponse.bodyBytes));
+        final isBanned = penaltyData['banned'];
+        final penaltyScore = penaltyData['penaltyScore'];
+
+        if (isBanned == true || penaltyScore >= 3) {
+          // ⚠️ 정지 안내 팝업
+          await showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: Text("계정 정지 안내"),
+              content: Text("페널티 누적으로 계정이 일시 정지되어 로그인할 수 없습니다."),
+              actions: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xff97C663),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context); // 닫기
+                  },
+                  child: Text('확인'),
+                ),
+              ],
+            ),
+          );
+
+          // 로그아웃 처리
+          await prefs.clear();
+
+          return; // 홈으로 이동하지 않음
+        }
+      }
+
+      // ✅ 닉네임 설정 여부 확인 후 이동
       if (nickname == '1') {
         Navigator.pushReplacement(
           context,
@@ -81,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
-          (route) => false,
+              (route) => false,
         );
       }
     } else {
@@ -90,6 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
