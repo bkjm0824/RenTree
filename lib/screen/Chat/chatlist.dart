@@ -388,8 +388,8 @@ class _ChatScreenState extends State<ChatListScreen> {
                                 'responderProfileImage: ${room['responderProfileImage']}');
                             final opponentNickname =
                                 (_myStudentNum == room['writerStudentNum'])
-                                    ? (room['requesterNickname'] ?? '익명')
-                                    : (room['writerNickname'] ?? '익명');
+                                    ? (room['requesterNickname'] ?? '(알수없음)')
+                                    : (room['writerNickname'] ?? '(알수없음)');
                             final title = room['relatedItemTitle'];
                             return GestureDetector(
                               onTap: () {
@@ -398,34 +398,23 @@ class _ChatScreenState extends State<ChatListScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChatRentalScreen(
-                                        chatRoomId: room['roomId'],
-                                        userName: (_myStudentNum ==
-                                                room['writerStudentNum'])
-                                            ? room['requesterNickname']
-                                            : room['writerNickname'],
-                                        title:
-                                            room['rentalItemTitle'] ?? '제목 없음',
-                                        rentalItemId: room['relatedItemId'],
-                                        rentalTimeText:
-                                            room['rentalTimeText'] ??
-                                                '시간 정보 없음',
-                                        isFaceToFace:
-                                            room['isFaceToFace'] ?? true,
+                                        chatRoomId: room['roomId'] ?? -1,
+                                        userName: (_myStudentNum == room['writerStudentNum'])
+                                            ? (room['requesterNickname'] ?? '(알수없음)')
+                                            : (room['writerNickname'] ?? '(알수없음)'),
+                                        title: room['rentalItemTitle'] ?? '삭제된 글입니다.',
+                                        rentalItemId: room['relatedItemId'] ?? -1,
+                                        rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
+                                        isFaceToFace: room['isFaceToFace'] ?? true,
                                         imageUrl: room['imageUrl'] ?? '',
-                                        writerStudentNum:
-                                            room['writerStudentNum'] ?? '',
-                                        requesterStudentNum:
-                                            room['requesterStudentNum'] ?? '',
-                                        receiverStudentNum: (_myStudentNum ==
-                                                room['writerStudentNum'])
-                                            ? room['requesterStudentNum']
-                                            : room['writerStudentNum'],
-                                        receiverProfileIndex: (_myStudentNum ==
-                                                room['writerStudentNum'])
-                                            ? (room['requesterProfileImage'] ??
-                                                1)
-                                            : (room['responderProfileImage'] ??
-                                                1),
+                                        writerStudentNum: room['writerStudentNum'] ?? ' ',
+                                        requesterStudentNum: room['requesterStudentNum'] ?? '',
+                                        receiverStudentNum: (_myStudentNum == room['writerStudentNum'])
+                                            ? (room['requesterStudentNum'] ?? '')
+                                            : (room['writerStudentNum'] ?? ''),
+                                        receiverProfileIndex: (_myStudentNum == room['writerStudentNum'])
+                                            ? (room['requesterProfileImage'] ?? 1)
+                                            : (room['responderProfileImage'] ?? 1),
                                       ),
                                     ),
                                   ).then((result) {
@@ -436,43 +425,31 @@ class _ChatScreenState extends State<ChatListScreen> {
                                         room['lastMessage'] = result['lastMessage'] ?? '';
                                       });
                                     } else if (result == true) {
-                                      // 삭제 등으로 변경된 경우 전체 새로고침
-                                      _fetchChatRooms();
+                                      _fetchChatRooms(); // 삭제 등으로 인해 새로고침 필요
                                     }
                                   });
+
                                 } else {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChatRequestScreen(
-                                        chatRoomId: room['roomId'],
-                                        userName: (_myStudentNum ==
-                                                room['writerStudentNum'])
-                                            ? room['requesterNickname']
-                                            : room['writerNickname'],
-                                        title:
-                                            room['itemRequestTitle'] ?? '제목 없음',
-                                        requestId: room[
-                                            'relatedItemId'], // ✅ request 전용
-                                        writerStudentNum:
-                                            room['writerStudentNum'] ?? '',
-                                        requesterStudentNum:
-                                            room['requesterStudentNum'] ?? '',
-                                        receiverStudentNum: (_myStudentNum ==
-                                                room['writerStudentNum'])
-                                            ? room['requesterStudentNum']
-                                            : room['writerStudentNum'],
-                                        rentalTimeText:
-                                            room['rentalTimeText'] ??
-                                                '시간 정보 없음',
-                                        isFaceToFace:
-                                            room['isFaceToFace'] ?? true,
-                                        receiverProfileIndex: (_myStudentNum ==
-                                                room['writerStudentNum'])
-                                            ? (room['requesterProfileImage'] ??
-                                                1)
-                                            : (room['responderProfileImage'] ??
-                                                1),
+                                        chatRoomId: room['roomId'] ?? -1,
+                                        userName: (_myStudentNum == (room['writerStudentNum'] ?? ''))
+                                            ? (room['requesterNickname'] ?? '(알수없음)')
+                                            : (room['writerNickname'] ?? '(알수없음)'),
+                                        title: room['itemRequestTitle'] ?? '삭제된 글입니다.',
+                                        requestId: room['relatedItemId'] ?? -1,
+                                        writerStudentNum: room['writerStudentNum'] ?? '',
+                                        requesterStudentNum: room['requesterStudentNum'] ?? '',
+                                        receiverStudentNum: (_myStudentNum == (room['writerStudentNum'] ?? ''))
+                                            ? (room['requesterStudentNum'] ?? '')
+                                            : (room['writerStudentNum'] ?? ''),
+                                        rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
+                                        isFaceToFace: room['isFaceToFace'] ?? true,
+                                        receiverProfileIndex: (_myStudentNum == (room['writerStudentNum'] ?? ''))
+                                            ? (room['requesterProfileImage'] ?? 1)
+                                            : (room['responderProfileImage'] ?? 1),
                                       ),
                                     ),
                                   ).then((result) {
@@ -500,29 +477,29 @@ class _ChatScreenState extends State<ChatListScreen> {
                                         ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          child: (room['type'] == 'rental' &&
-                                                  room['imageUrl'] != null)
+                                          child: (room['type'] == 'rental' && room['imageUrl'] != null)
                                               ? Image.network(
-                                                  room['imageUrl'],
-                                                  width: 70,
-                                                  height: 70,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error,
-                                                      stackTrace) {
-                                                    return Image.asset(
-                                                      'assets/box.png',
-                                                      width: 70,
-                                                      height: 70,
-                                                      fit: BoxFit.cover,
-                                                    );
-                                                  },
-                                                )
+                                            room['imageUrl'],
+                                            width: 70,
+                                            height: 70,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Image.asset(
+                                                'assets/box.png',
+                                                width: 70,
+                                                height: 70,
+                                                fit: BoxFit.cover,
+                                              );
+                                            },
+                                          )
                                               : Image.asset(
-                                                  'assets/requestIcon.png',
-                                                  width: 70,
-                                                  height: 70,
-                                                  fit: BoxFit.cover,
-                                                ),
+                                            room['type'] == 'rental'
+                                                ? 'assets/box.png'
+                                                : 'assets/requestIcon.png',
+                                            width: 70,
+                                            height: 70,
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
 
                                         SizedBox(width: 16), // 🔼 이미지-텍스트 간격 넓힘
@@ -535,7 +512,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                               Row(
                                                 children: [
                                                   Text(
-                                                    opponentNickname ?? '익명',
+                                                    opponentNickname ?? '(알수없음)',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -544,7 +521,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                                                   ),
                                                   SizedBox(width: 5),
                                                   Text(
-                                                    title ?? '제목 없음',
+                                                    title ?? '삭제된 글입니다.',
                                                     style: TextStyle(
                                                       fontSize: 13,
                                                       color: Color(0xff7c7c7c),

@@ -61,15 +61,20 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     final requestMyRes = await http.get(Uri.parse('http://10.0.2.2:8080/api/history/requests/my?studentNum=$myStudentNum'));
     final requestGivenRes = await http.get(Uri.parse('http://10.0.2.2:8080/api/history/requests/got?studentNum=$myStudentNum'));
 
-    final rentalMy = jsonDecode(utf8.decode(rentalMyRes.bodyBytes));
-    final rentalGiven = jsonDecode(utf8.decode(rentalGivenRes.bodyBytes));
-    final requestMy = jsonDecode(utf8.decode(requestMyRes.bodyBytes));
-    final requestGiven = jsonDecode(utf8.decode(requestGivenRes.bodyBytes));
+    List<dynamic> parseToList(dynamic body) {
+      if (body is List) return body;
+      if (body is Map && body['data'] is List) return body['data'];
+      return []; // fallback
+    }
+
+    final rentalMy = parseToList(jsonDecode(utf8.decode(rentalMyRes.bodyBytes)));
+    final rentalGiven = parseToList(jsonDecode(utf8.decode(rentalGivenRes.bodyBytes)));
+    final requestMy = parseToList(jsonDecode(utf8.decode(requestMyRes.bodyBytes)));
+    final requestGiven = parseToList(jsonDecode(utf8.decode(requestGivenRes.bodyBytes)));
 
     List<Map<String, dynamic>> received = [];
     List<Map<String, dynamic>> given = [];
 
-    // 🔄 렌탈 이미지 fetch 함수
     Future<String?> fetchImageUrl(int rentalItemId) async {
       final res = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
       if (res.statusCode == 200) {
@@ -91,6 +96,7 @@ class _MyPageHistoryState extends State<MyPageHistory> {
 
     for (var item in rentalMy) {
       final rentalItem = item["rentalItem"];
+      if (rentalItem == null) continue;
       final rentalItemId = rentalItem["id"];
       final imageUrl = await fetchImageUrl(rentalItemId);
       final likeCount = await fetchLikeCount(rentalItemId);
@@ -111,6 +117,7 @@ class _MyPageHistoryState extends State<MyPageHistory> {
 
     for (var item in requestMy) {
       final requestItem = item["requestItem"];
+      if (requestItem == null) continue;
       given.add({
         "id": requestItem["id"],
         "title": requestItem["title"],
@@ -125,6 +132,7 @@ class _MyPageHistoryState extends State<MyPageHistory> {
 
     for (var item in rentalGiven) {
       final rentalItem = item["rentalItem"];
+      if (rentalItem == null) continue;
       final rentalItemId = rentalItem["id"];
       final imageUrl = await fetchImageUrl(rentalItemId);
       final likeCount = await fetchLikeCount(rentalItemId);
@@ -145,10 +153,13 @@ class _MyPageHistoryState extends State<MyPageHistory> {
 
     for (var item in requestGiven) {
       final requestItem = item["requestItem"];
-      final responderNum = item["responder"]["studentNum"];
+      final responder = item["responder"];
+      if (requestItem == null || responder == null) continue;
+
+      final responderNum = responder["studentNum"];
+      if (responderNum == null) continue;
 
       if (responderNum == myStudentNum) {
-        // ✅ 내가 응답한 요청글 = 내가 빌려준 내역
         received.add({
           "id": requestItem["id"],
           "title": requestItem["title"],
@@ -163,15 +174,14 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     }
 
     setState(() {
-      // 🔽 최신순 정렬
       received.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
       given.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
-
       receivedList = received;
       givenList = given;
       isLoading = false;
     });
   }
+
 
 
   @override
