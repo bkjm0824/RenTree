@@ -182,9 +182,13 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
   void _confirmDeleteChatRoom() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xffF4F1F1),
-        title: Text('채팅방 나가기', style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text(
+          '채팅방 나가기',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
         actions: [
           ElevatedButton(
@@ -398,8 +402,12 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                         padding: EdgeInsets.only(left: 10),
                         onPressed: () {
                           Navigator.pop(context, {
-                            'lastMessageTime': _messages.isNotEmpty ? _messages.last.sentAt : DateTime.now(),
-                            'lastMessage': _messages.isNotEmpty ? _messages.last.content : '',
+                            'lastMessageTime': _messages.isNotEmpty
+                                ? _messages.last.sentAt
+                                : DateTime.now(),
+                            'lastMessage': _messages.isNotEmpty
+                                ? _messages.last.content
+                                : '',
                           });
                         },
                       ),
@@ -610,7 +618,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                               : '';
 
                           bool isSystem(String content) =>
-                              content.contains("님이 대여를 승인했어요") || content.contains("반납이 완료되었습니다.");
+                              content.contains("님이 대여를 승인했어요") ||
+                              content.contains("반납이 완료되었습니다.");
 
                           bool isSameAsPrevious = false;
                           if (index == 0) {
@@ -628,12 +637,17 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                           bool isSameAsNext = false;
                           for (int i = index + 1; i < messages.length; i++) {
                             final next = messages[i];
-                            final bool isSystem = next.content.contains("님이 대여를 승인했어요") || next.content.contains("반납이 완료되었습니다.");
+                            final bool isSystem =
+                                next.content.contains("님이 대여를 승인했어요") ||
+                                    next.content.contains("반납이 완료되었습니다.");
                             if (!isSystem) {
                               isSameAsNext = next.isMe == message.isMe &&
                                   next.sentAt != null &&
                                   message.sentAt != null &&
-                                  next.sentAt!.difference(message.sentAt!).inMinutes < 1;
+                                  next.sentAt!
+                                          .difference(message.sentAt!)
+                                          .inMinutes <
+                                      1;
                               break;
                             }
                           }
@@ -784,7 +798,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                             await showDialog(
                                                               context: context,
                                                               barrierDismissible:
-                                                                  true,
+                                                                  false,
                                                               builder: (context) =>
                                                                   setPasswordPopup(
                                                                 postId: widget

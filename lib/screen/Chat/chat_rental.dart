@@ -84,7 +84,6 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   int _receiverProfileIndex = 1;
   DateTime? _lastMessageTime;
 
-
   @override
   void initState() {
     super.initState();
@@ -154,7 +153,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
 
       final messages =
-      data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
+          data.map((json) => ChatMessage.fromJson(json, studentNum)).toList();
 
       // ✅ 마지막 메시지 시간 저장
       if (messages.isNotEmpty) {
@@ -183,9 +182,13 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
   void _confirmDeleteChatRoom() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xffF4F1F1),
-        title: Text('채팅방 나가기', style: TextStyle(fontWeight: FontWeight.bold),),
+        title: Text(
+          '채팅방 나가기',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
         actions: [
           ElevatedButton(
@@ -337,7 +340,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                         onPressed: () {
                           Navigator.pop(context, {
                             'lastMessageTime': _lastMessageTime,
-                            'lastMessage': _messages.isNotEmpty ? _messages.last.content : '',
+                            'lastMessage': _messages.isNotEmpty
+                                ? _messages.last.content
+                                : '',
                           });
                         },
                       ),
@@ -609,8 +614,12 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                               : '';
 
                           final bool isPrevSystemMessage = index > 0 &&
-                              (messages[index - 1].content.contains("님이 대여를 승인했어요") ||
-                                  messages[index - 1].content.startsWith("반납이 완료되었습니다."));
+                              (messages[index - 1]
+                                      .content
+                                      .contains("님이 대여를 승인했어요") ||
+                                  messages[index - 1]
+                                      .content
+                                      .startsWith("반납이 완료되었습니다."));
 
                           final isSameAsPrevious = index > 0 &&
                               !isPrevSystemMessage &&
@@ -771,7 +780,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                             showDialog(
                                                               context: context,
                                                               barrierDismissible:
-                                                                  true,
+                                                                  false,
                                                               builder: (context) =>
                                                                   setPasswordPopup(
                                                                 postId: widget
