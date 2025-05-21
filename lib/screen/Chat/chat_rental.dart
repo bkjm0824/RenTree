@@ -776,18 +776,17 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                           ),
                                                         )
                                                       : TextButton(
-                                                          onPressed: () async {
-                                                            showDialog(
-                                                              context: context,
-                                                              barrierDismissible:
-                                                                  false,
-                                                              builder: (context) =>
-                                                                  setPasswordPopup(
-                                                                postId: widget
-                                                                    .rentalItemId,
-                                                                type: 'rental',
-                                                              ),
-                                                            );
+                                                    onPressed: () async {
+                                                      if (!widget.isFaceToFace) {
+                                                        await showDialog(
+                                                          context: context,
+                                                          barrierDismissible: false,
+                                                          builder: (context) => setPasswordPopup(
+                                                            postId: widget.rentalItemId,
+                                                            type: 'rental',
+                                                          ),
+                                                        );
+                                                      }
                                                             final prefs =
                                                                 await SharedPreferences
                                                                     .getInstance();
