@@ -19,6 +19,7 @@ import 'mypage_mypost.dart';
 import 'mypage_history.dart';
 import 'mypage_customersupport.dart';
 import 'mypage_userguide.dart';
+import '../login.dart';
 
 class MypageScreen extends StatefulWidget {
   @override
@@ -37,9 +38,67 @@ class _MypageScreenState extends State<MypageScreen> {
   @override
   void initState() {
     super.initState();
+    checkPenaltyAndForceLogout(context);
     _loadUserInfo();
     _loadLatestHistories();
   }
+
+  Future<void> checkPenaltyAndForceLogout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final isBanned = data['banned'];
+      final penaltyScore = data['penaltyScore'];
+
+      if (isBanned == true || penaltyScore >= 3) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            title: Text("계정 정지 안내"),
+            content: Text("페널티 누적으로 계정이 정지되었습니다.\n로그아웃 후 로그인 화면으로 이동합니다."),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff97C663),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.clear();
+
+                  Navigator.of(context).pop(); // 팝업 먼저 닫고
+
+                  // pop 이후 반드시 context mounted 체크
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                          (route) => false,
+                    );
+                  }
+                },
+                child: Text('확인'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+
+
 
   Future<void> _loadLatestHistories() async {
     final prefs = await SharedPreferences.getInstance();
