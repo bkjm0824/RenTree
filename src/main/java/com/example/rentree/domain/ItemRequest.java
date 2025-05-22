@@ -62,6 +62,13 @@ public class ItemRequest {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "returned", nullable = false)
+    private Boolean isReturned = false;
+
+    @Column(name = "actual_return_time")
+    private LocalDateTime actualReturnTime;
+
+
     public void incrementViewCount() {
         this.viewCount++;
     }

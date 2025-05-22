@@ -142,6 +142,8 @@ public class ItemRequestController {
 
         ItemRequest itemRequest = itemRequestService.getItemRequestDetail(itemId);
 
+        itemRequestService.returnItem(itemId);
+
         RequestChatRoom requestChatRoom = requestChatRoomRepository.findByItemRequestIdAndId(itemId, chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 대여 채팅방을 찾을 수 없습니다. 글 ID: " + itemId + ", 채팅방 ID: " + chatRoomId));
 

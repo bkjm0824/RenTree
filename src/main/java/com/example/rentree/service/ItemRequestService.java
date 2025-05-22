@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -139,5 +140,35 @@ public class ItemRequestService {
                 .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found"));
 
         return itemRequest.getPassword(); // 비밀번호 반환
+    }
+
+    @Transactional
+    public void returnItem(Long id) {
+        ItemRequest item = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 물품이 존재하지 않습니다."));
+
+        if (Boolean.TRUE.equals(item.getIsReturned())) {
+            throw new IllegalStateException("이미 반납된 물품입니다.");
+        }
+
+        item.setIsReturned(true);
+        item.setActualReturnTime(LocalDateTime.now());
+
+        if (item.getActualReturnTime().isAfter(item.getRentalEndTime())) {
+            RequestChatRoom chatRoom = requestChatRoomRepository.findByItemRequestId(id)
+                    .orElseThrow(() -> new IllegalStateException("채팅방을 찾을 수 없습니다."));
+
+            Student borrower = chatRoom.getResponder();
+            borrower.addPenalty();
+
+            if (borrower.isBanned()) {
+                System.out.println("학생 " + borrower.getStudentNum() + " 은 페널티 누적으로 사용이 정지되었습니다.");
+            }
+
+            studentRepository.save(borrower);
+        }
+
+        itemRequestRepository.save(item);
+
     }
 }
