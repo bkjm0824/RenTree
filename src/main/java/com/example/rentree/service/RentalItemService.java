@@ -1,6 +1,7 @@
 package com.example.rentree.service;
 
 import com.example.rentree.domain.Category;
+import com.example.rentree.domain.RentalChatRoom;
 import com.example.rentree.domain.RentalItem;
 import com.example.rentree.domain.Student;
 import com.example.rentree.dto.RentalItemCreateRequest;
@@ -196,18 +197,20 @@ public class RentalItemService {
         item.setActualReturnTime(LocalDateTime.now());
 
         if (item.getActualReturnTime().isAfter(item.getRentalEndTime())) {
-            Student student = item.getStudent();
-            student.addPenalty();
+            // 빌린 사람 기준으로 페널티 부과
+            RentalChatRoom chatRoom = rentalChatRoomRepository.findByRentalItemId(id)
+                    .orElseThrow(() -> new IllegalStateException("채팅방을 찾을 수 없습니다."));
 
-            if (student.isBanned()) {
-                // 필요 시 알림, 로그, 상태 처리 등을 여기에 추가할 수 있음
-                System.out.println("학생 " + student.getStudentNum() + " 은 페널티 누적으로 사용이 정지되었습니다.");
+            Student borrower = chatRoom.getRequester(); // 요청자 = 빌린 사람
+            borrower.addPenalty();
+
+            if (borrower.isBanned()) {
+                System.out.println("학생 " + borrower.getStudentNum() + " 은 페널티 누적으로 사용이 정지되었습니다.");
             }
 
-            studentRepository.save(student);
+            studentRepository.save(borrower);
         }
 
         rentalItemRepository.save(item);
     }
-
 }
