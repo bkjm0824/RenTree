@@ -49,8 +49,18 @@ class _LikeScreenState extends State<LikeScreen> {
           context: context,
           barrierDismissible: false,
           builder: (_) => AlertDialog(
-            title: Text("계정 정지 안내"),
-            content: Text("페널티 누적으로 계정이 정지되었습니다.\n로그아웃 후 로그인 화면으로 이동합니다."),
+            title: Row(
+              children: [
+                Text("계정 정지 안내", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(width: 8),
+                Image.asset(
+                  'assets/redCard.png', // ← 경로 확인 필수
+                  width: 24,
+                  height: 24,
+                ),
+              ],
+            ),
+            content: Text("페널티 누적으로 계정이 정지되었습니다.\n자동으로 로그아웃 됩니다."),
             actions: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
