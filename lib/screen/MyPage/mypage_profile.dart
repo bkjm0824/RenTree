@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Home/home.dart';
 import '../login.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MyPageProfile extends StatefulWidget {
   @override
@@ -17,6 +18,9 @@ class _MyPageProfileState extends State<MyPageProfile> {
   int _profileImageIndex = 1;
   String _selectedProfileImage = 'assets/Profile/Bugi_profile.png'; // 기본 이미지
   bool _isLoading = true;
+  int _rentalCount = 0;
+  int _rentalPoint = 0;
+  int _penaltyScore = 0;
 
   String _mapIndexToProfileFile(int index) {
     switch (index) {
@@ -37,18 +41,73 @@ class _MyPageProfileState extends State<MyPageProfile> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadPenaltyScore();
   }
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt('profileImage') ?? 1;
-    setState(() {
-      _nickname = prefs.getString('nickname') ?? '사용자';
-      _studentNum = prefs.getString('studentNum') ?? '';
-      _profileImageIndex = index;
-      _selectedProfileImage = 'assets/Profile/${_mapIndexToProfileFile(index)}';
-      _isLoading = false; // ✅ 데이터 로딩 완료
-    });
+    final studentNum = prefs.getString('studentNum') ?? '';
+
+    // 전체 학생 리스트 가져오기
+    final studentRes = await http.get(
+      Uri.parse('http://10.0.2.2:8080/Rentree/students'),
+    );
+
+
+    if (studentRes.statusCode == 200) {
+      final List<dynamic> allStudents = jsonDecode(utf8.decode(studentRes.bodyBytes));
+      final me = allStudents.firstWhere(
+            (e) => e['studentNum'] == studentNum,
+        orElse: () => null,
+      );
+
+      if (me != null) {
+        final nickname = me['nickname'] ?? '사용자';
+        final profileImage = me['profileImage'] ?? 1;
+        final rentalCount = me['rentalCount'] ?? 0;
+        final rentalPoint = me['rentalPoint'] ?? 0;
+
+        await prefs.setString('nickname', nickname);
+        await prefs.setInt('profileImage', profileImage);
+        await prefs.setInt('rentalCount', rentalCount);
+        await prefs.setInt('rentalPoint', rentalPoint);
+
+        setState(() {
+          _nickname = nickname;
+          _studentNum = studentNum;
+          _profileImageIndex = profileImage;
+          _selectedProfileImage = 'assets/Profile/${_mapIndexToProfileFile(profileImage)}';
+          _rentalCount = rentalCount;
+          _rentalPoint = rentalPoint;
+          _isLoading = false;
+        });
+      } else {
+        print("❌ 내 studentNum에 해당하는 사용자 정보를 찾을 수 없음");
+        setState(() => _isLoading = false);
+      }
+    } else {
+      print("❌ 학생 전체 목록 불러오기 실패");
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadPenaltyScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      setState(() {
+        _penaltyScore = data['penaltyScore'] ?? 0;
+      });
+    } else {
+      print("❌ 페널티 점수 불러오기 실패");
+    }
   }
 
   void _showProfileImageDialog() {
@@ -191,74 +250,92 @@ class _MyPageProfileState extends State<MyPageProfile> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_nickname,
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              Text(
+                                _nickname,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (_penaltyScore > 0 && _penaltyScore < 3)
+                                Row(
+                                  children: List.generate(
+                                    _penaltyScore,
+                                        (_) => Padding(
+                                      padding: const EdgeInsets.only(left: 3),
+                                      child: Image.asset(
+                                        'assets/yellowCard.png',
+                                        width: 20,
+                                        height: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                           SizedBox(height: 8),
-                          Text('학번: $_studentNum',
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.grey[700])),
+                          Text(
+                            '학번: $_studentNum',
+                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          ),
                         ],
                       ),
+
                     ],
                   ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _showProfileImageDialog,
-                          child: Text('프로필 이미지 변경',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFEBEBEB),
-                            padding: EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 24),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
+
+                  SizedBox(height: 30),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          children: [
+                            Text('대여 횟수',
+                                style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                            SizedBox(height: 4),
+                            Text('$_rentalCount회',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NickNameScreen()),
-                            );
-                          },
-                          child: Text('닉네임 변경',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFEBEBEB),
-                            padding: EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 24),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
+                        Container(
+                          height: 30,
+                          child: VerticalDivider(color: Colors.grey),
                         ),
-                      ),
-                    ],
+                        Column(
+                          children: [
+                            Text('나의 상추',
+                                style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                            SizedBox(height: 4),
+                            Text('$_rentalPoint장',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+
                   SizedBox(height: 20),
                   Column(
                     children: [
                       ListTile(
-                        title: Text('회원 정보 변경'),
+                        title: Text('프로필 이미지 변경'),
                         trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: () {},
+                        onTap: _showProfileImageDialog, // ✅ 기존 함수 그대로 재사용
                       ),
                       ListTile(
-                        title: Text('비밀번호 변경'),
+                        title: Text('닉네임 변경'),
                         trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NickNameScreen()),
+                          );
+                        },
                       ),
                       ListTile(
                         title: Text('로그아웃'),
@@ -271,8 +348,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
                               content: Text('정말로 로그아웃하시겠습니까?'),
                               actions: [
                                 TextButton(
-                                  child: Text('취소',
-                                      style: TextStyle(color: Colors.grey)),
+                                  child: Text('취소', style: TextStyle(color: Colors.grey)),
                                   onPressed: () => Navigator.pop(context),
                                 ),
                                 ElevatedButton(
@@ -281,8 +357,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
                                     await prefs.clear();
                                     Navigator.pushAndRemoveUntil(
                                       context,
-                                      MaterialPageRoute(
-                                          builder: (context) => LoginScreen()),
+                                      MaterialPageRoute(builder: (context) => LoginScreen()),
                                           (route) => false,
                                     );
                                   },
@@ -291,13 +366,11 @@ class _MyPageProfileState extends State<MyPageProfile> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15),
                                     ),
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 12),
+                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                   ),
                                   child: Text('확인',
                                       style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
+                                          color: Colors.white, fontWeight: FontWeight.bold)),
                                 ),
                               ],
                             ),
