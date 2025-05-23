@@ -84,7 +84,7 @@ class _MypageScreenState extends State<MypageScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => LoginScreen()),
-                          (route) => false,
+                      (route) => false,
                     );
                   }
                 },
@@ -97,97 +97,112 @@ class _MypageScreenState extends State<MypageScreen> {
     }
   }
 
-
-
+  // 마이페이지 화면
+// ... (생략)
 
   Future<void> _loadLatestHistories() async {
     final prefs = await SharedPreferences.getInstance();
     final studentNum = prefs.getString('studentNum');
     if (studentNum == null) return;
 
-    final res1 = await http.get(Uri.parse(
-        'http://10.0.2.2:8080/api/history/rentals/my?studentNum=$studentNum'));
-    final res2 = await http.get(Uri.parse(
-        'http://10.0.2.2:8080/api/history/requests/got?studentNum=$studentNum'));
-    final res3 = await http.get(Uri.parse(
-        'http://10.0.2.2:8080/api/history/rentals/given?studentNum=$studentNum'));
-    final res4 = await http.get(Uri.parse(
-        'http://10.0.2.2:8080/api/history/requests/my?studentNum=$studentNum'));
+    try {
+      final resMy = await http.get(Uri.parse(
+          'http://10.0.2.2:8080/api/history/rentals/my?studentNum=$studentNum'));
+      final resGiven = await http.get(Uri.parse(
+          'http://10.0.2.2:8080/api/history/rentals/given?studentNum=$studentNum'));
+      final resRequestMy = await http.get(Uri.parse(
+          'http://10.0.2.2:8080/api/history/requests/my?studentNum=$studentNum'));
+      final resRequestGot = await http.get(Uri.parse(
+          'http://10.0.2.2:8080/api/history/requests/got?studentNum=$studentNum'));
 
-    final rentalMy = jsonDecode(utf8.decode(res1.bodyBytes));
-    final requestGot = jsonDecode(utf8.decode(res2.bodyBytes));
-    final rentalGiven = jsonDecode(utf8.decode(res3.bodyBytes));
-    final requestMy = jsonDecode(utf8.decode(res4.bodyBytes));
+      final decodedMy = jsonDecode(utf8.decode(resMy.bodyBytes));
+      final decodedGiven = jsonDecode(utf8.decode(resGiven.bodyBytes));
+      final decodedRequestMy = jsonDecode(utf8.decode(resRequestMy.bodyBytes));
+      final decodedRequestGot =
+          jsonDecode(utf8.decode(resRequestGot.bodyBytes));
 
-    List<Map<String, dynamic>> received = [];
-    List<Map<String, dynamic>> given = [];
+      final rentalMy = decodedMy is List ? decodedMy : <dynamic>[];
+      final rentalGiven = decodedGiven is List ? decodedGiven : <dynamic>[];
+      final requestMy =
+          decodedRequestMy is List ? decodedRequestMy : <dynamic>[];
+      final requestGot =
+          decodedRequestGot is List ? decodedRequestGot : <dynamic>[];
 
-    for (var item in rentalMy) {
-      final rentalItem = item['rentalItem'];
-      received.add({
-        'source': 'rental',
-        'id': rentalItem['id'],
-        'title': rentalItem['title'],
-        'description': rentalItem['description'],
-        'imageUrl': await _fetchImageUrl(rentalItem['id']),
-        'startTime': rentalItem['rentalStartTime'],
-        'endTime': rentalItem['rentalEndTime'],
-        'createdAt': rentalItem['createdAt'],
-      });
-    }
+      Map<String, dynamic>? latestMyItem;
+      Map<String, dynamic>? latestGivenItem;
 
-    for (var item in requestGot) {
-      final responder = item['responder'];
-      if (responder['studentNum'] == studentNum) {
-        final requestItem = item['requestItem'];
-        received.add({
-          'source': 'request',
-          'id': requestItem['id'],
-          'title': requestItem['title'],
-          'description': requestItem['description'],
-          'imageUrl': null,
-          'startTime': requestItem['rentalStartTime'],
-          'endTime': requestItem['rentalEndTime'],
-          'createdAt': requestItem['createdAt'],
-        });
+      final combinedReceived = [...rentalMy, ...requestGot]
+          .map((item) {
+            final data = item['rentalItem'] ?? item['requestItem'];
+            final id = data['id'];
+            return {
+              'source': item.containsKey('rentalItem') ? 'rental' : 'request',
+              'id': id is int ? id : int.tryParse(id.toString()),
+              'title': data['title'],
+              'description': data['description'],
+              'imageUrl': null,
+              'startTime': data['rentalStartTime'],
+              'endTime': data['rentalEndTime'],
+              'actualReturnTime': data['actualReturnTime'],
+              'isAvailable': data['isAvailable'],
+            };
+          })
+          .where((item) => item['actualReturnTime'] != null)
+          .toList();
+
+      if (combinedReceived.isNotEmpty) {
+        combinedReceived.sort((a, b) => b['actualReturnTime']
+            .toString()
+            .compareTo(a['actualReturnTime'].toString()));
+        latestMyItem = combinedReceived.first;
       }
-    }
 
-    for (var item in rentalGiven) {
-      final rentalItem = item['rentalItem'];
-      given.add({
-        'source': 'rental',
-        'id': rentalItem['id'],
-        'title': rentalItem['title'],
-        'description': rentalItem['description'],
-        'imageUrl': await _fetchImageUrl(rentalItem['id']),
-        'startTime': rentalItem['rentalStartTime'],
-        'endTime': rentalItem['rentalEndTime'],
-        'createdAt': rentalItem['createdAt'],
+      final combinedGiven = [...rentalGiven, ...requestMy]
+          .map((item) {
+            final data = item['rentalItem'] ?? item['requestItem'];
+            final id = data['id'];
+            return {
+              'source': item.containsKey('rentalItem') ? 'rental' : 'request',
+              'id': id is int ? id : int.tryParse(id.toString()),
+              'title': data['title'],
+              'description': data['description'],
+              'imageUrl': null,
+              'startTime': data['rentalStartTime'],
+              'endTime': data['rentalEndTime'],
+              'actualReturnTime': data['actualReturnTime'],
+              'isAvailable': data['isAvailable'],
+            };
+          })
+          .where((item) => item['actualReturnTime'] != null)
+          .toList();
+
+      if (combinedGiven.isNotEmpty) {
+        combinedGiven.sort((a, b) => b['actualReturnTime']
+            .toString()
+            .compareTo(a['actualReturnTime'].toString()));
+        latestGivenItem = combinedGiven.first;
+      }
+
+      if (latestMyItem != null && latestMyItem['source'] == 'rental') {
+        final imageUrl = await _fetchImageUrl(latestMyItem['id']);
+        latestMyItem['imageUrl'] = imageUrl;
+      }
+
+      if (latestGivenItem != null && latestGivenItem['source'] == 'rental') {
+        final imageUrl = await _fetchImageUrl(latestGivenItem['id']);
+        latestGivenItem['imageUrl'] = imageUrl;
+      }
+
+      setState(() {
+        _latestReceived = latestMyItem;
+        _latestGiven = latestGivenItem;
       });
+
+      print('✅ 최신 대여 기록 세팅 완료');
+    } catch (e, stack) {
+      print('❌ 최신 대여 기록 로딩 실패: \$e');
+      print(stack);
     }
-
-    for (var item in requestMy) {
-      final requestItem = item['requestItem'];
-      given.add({
-        'source': 'request',
-        'id': requestItem['id'],
-        'title': requestItem['title'],
-        'description': requestItem['description'],
-        'imageUrl': null,
-        'startTime': requestItem['rentalStartTime'],
-        'endTime': requestItem['rentalEndTime'],
-        'createdAt': requestItem['createdAt'],
-      });
-    }
-
-    received.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
-    given.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
-
-    setState(() {
-      _latestReceived = received.isNotEmpty ? received.first : null;
-      _latestGiven = given.isNotEmpty ? given.first : null;
-    });
   }
 
   Future<String?> _fetchImageUrl(int rentalItemId) async {
@@ -555,37 +570,33 @@ class _MypageScreenState extends State<MypageScreen> {
   Widget _buildRentalItemFromData(Map<String, dynamic> item) {
     final imageUrl = item['imageUrl'];
     final title = item['title'] ?? '';
-    final description = item['description'] ?? '';
-    final start = item['startTime'];
     final end = item['endTime'];
     final type = item['source']; // ← 'type'이 아니라 'source'
     final itemId = item['id'];
-    final isAvailable = item['isAvailable']; // ← 이 필드가 API에 포함되어 있어야 함
+    final isAvailable = item['isAvailable'];
+    final actualReturnTime = item['actualReturnTime'];
 
     String timeStatusText = '';
+    Color timeTextColor = Colors.grey[600]!;
+
     try {
       if (end != null) {
         final endTime = DateTime.parse(end);
-        final now = DateTime.now().add(Duration(hours: 9));
-        final diff = now.difference(endTime);
-
-        if (diff.isNegative) {
-          // 아직 대여 중
-          final left = endTime.difference(now);
-          if (left.inHours > 0) {
-            timeStatusText = '${left.inHours}시간 ${left.inMinutes % 60}분 남음';
+        final now = DateTime.now().toUtc().add(Duration(hours: 9)); // 한국 기준
+        final actualReturn = DateTime.parse(actualReturnTime);
+        final isWarning = endTime.difference(actualReturn);
+        if (isWarning.isNegative) {
+          if (isWarning.inDays < 0) {
+            timeStatusText = '${isWarning.inDays.abs()}일 늦게 반납 완료됨';
+          } else if (isWarning.inHours < 0) {
+            timeStatusText =
+                '${isWarning.inHours.abs()}시간 ${isWarning.inMinutes.abs() % 60}분 늦게 반납 완료됨';
           } else {
-            timeStatusText = '${left.inMinutes}분 남음';
+            timeStatusText = '${isWarning.inMinutes.abs()}분 늦게 반납 완료됨';
           }
+          timeTextColor = Colors.red;
         } else {
-          // 대여 종료됨 → 경과 시간 표시
-          if (diff.inDays > 0) {
-            timeStatusText = '${diff.inDays}일 지남';
-          } else if (diff.inHours > 0) {
-            timeStatusText = '${diff.inHours}시간 ${diff.inMinutes % 60}분 지남';
-          } else {
-            timeStatusText = '${diff.inMinutes}분 지남';
-          }
+          timeStatusText = '반납 완료됨';
         }
       } else {
         timeStatusText = '대여 시간 없음';
@@ -638,61 +649,10 @@ class _MypageScreenState extends State<MypageScreen> {
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                   SizedBox(height: 4),
-                  Text(timeStatusText,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-// 🔹 대여 물품 아이템
-  Widget _buildRentalItem(BuildContext context, int itemId, String imagePath,
-      String title, String timeLeft, String description) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PostRentalScreen(itemId: itemId),
-          ),
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Color(0xFFF4F1F1),
-          borderRadius: BorderRadius.circular(35),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage(imagePath),
-              backgroundColor: Colors.white,
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 4),
-                  Text(timeLeft,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  Text(
+                    timeStatusText,
+                    style: TextStyle(fontSize: 12, color: timeTextColor),
+                  ),
                 ],
               ),
             ),
