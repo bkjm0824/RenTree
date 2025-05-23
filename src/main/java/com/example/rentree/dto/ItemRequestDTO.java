@@ -33,12 +33,13 @@ public class ItemRequestDTO {
     private Boolean isFaceToFace; // 대면 여부
 
     private Timestamp createdAt; // 요청 시간
-
+    private Boolean isAvailable;
     private Integer viewCount;
 
     private Integer profileImage;
 
     private String password;
+    private LocalDateTime actualReturnTime;
 
 
     /*
@@ -62,6 +63,8 @@ public class ItemRequestDTO {
         dto.setViewCount(itemRequest.getViewCount());
         dto.setProfileImage(itemRequest.getStudent().getProfileImage());
         dto.setPassword(itemRequest.getPassword());
+        dto.setIsAvailable(itemRequest.getIsAvailable());
+        dto.setActualReturnTime(itemRequest.getActualReturnTime());
         return dto;
     }
 

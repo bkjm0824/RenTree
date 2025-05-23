@@ -35,9 +35,10 @@ public class ItemRequestResponseDTO {
     private Timestamp createdAt; // 요청 시간
 
     private Integer profileImage;
+    private Boolean isAvailable;
 
     private String password;
-
+    private LocalDateTime actualReturnTime;
     //private Integer viewCount = 0; // 조회수
 
     /*
@@ -60,6 +61,8 @@ public class ItemRequestResponseDTO {
         dto.setCreatedAt(itemRequest.getCreatedAt());
         dto.setProfileImage(itemRequest.getStudent().getProfileImage());
         dto.setPassword(itemRequest.getPassword());
+        dto.setActualReturnTime(itemRequest.getActualReturnTime());
+        dto.setIsAvailable(itemRequest.getIsAvailable());
         return dto;
     }
 

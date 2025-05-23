@@ -24,6 +24,7 @@ public class RentalItemDTO {
     private Boolean isAvailable;
     private Integer profileImage;
     private String password;
+    private LocalDateTime actualReturnTime;
 
     public static RentalItemDTO fromEntity(RentalItem item) {
         RentalItemDTO dto = new RentalItemDTO();
@@ -44,6 +45,7 @@ public class RentalItemDTO {
         }
         dto.setIsAvailable(item.getIsAvailable());
         dto.setPassword(item.getPassword());
+        dto.setActualReturnTime(item.getActualReturnTime());
         return dto;
     }
 }
