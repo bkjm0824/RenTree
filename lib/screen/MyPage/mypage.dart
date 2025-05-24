@@ -34,6 +34,7 @@ class _MypageScreenState extends State<MypageScreen> {
   bool _isLoading = true;
   Map<String, dynamic>? _latestReceived;
   Map<String, dynamic>? _latestGiven;
+  int _penaltyScore = 0;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _MypageScreenState extends State<MypageScreen> {
     checkPenaltyAndForceLogout(context);
     _loadUserInfo();
     _loadLatestHistories();
+    _loadPenaltyScore();
   }
 
   Future<void> checkPenaltyAndForceLogout(BuildContext context) async {
@@ -62,7 +64,17 @@ class _MypageScreenState extends State<MypageScreen> {
           context: context,
           barrierDismissible: false,
           builder: (_) => AlertDialog(
-            title: Text("계정 정지 안내"),
+            title: Row(
+              children: [
+                Text("계정 정지 안내", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(width: 8),
+                Image.asset(
+                  'assets/redCard.png', // ← 경로 확인 필수
+                  width: 24,
+                  height: 24,
+                ),
+              ],
+            ),
             content: Text("페널티 누적으로 계정이 정지되었습니다.\n로그아웃 후 로그인 화면으로 이동합니다."),
             actions: [
               ElevatedButton(
@@ -97,8 +109,24 @@ class _MypageScreenState extends State<MypageScreen> {
     }
   }
 
-  // 마이페이지 화면
-// ... (생략)
+  Future<void> _loadPenaltyScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentNum = prefs.getString('studentNum');
+    if (studentNum == null) return;
+
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      setState(() {
+        _penaltyScore = data['penaltyScore'] ?? 0;
+      });
+    } else {
+      print("❌ 페널티 점수 불러오기 실패");
+    }
+  }
 
   Future<void> _loadLatestHistories() async {
     final prefs = await SharedPreferences.getInstance();
@@ -452,9 +480,27 @@ class _MypageScreenState extends State<MypageScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _nickname ?? '',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Text(
+                      _nickname ?? '',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    if (_penaltyScore > 0 && _penaltyScore < 3)
+                      Row(
+                        children: List.generate(
+                          _penaltyScore,
+                              (_) => Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Image.asset(
+                              'assets/yellowCard.png',
+                              width: 16,
+                              height: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 SizedBox(height: 4),
                 Text(
