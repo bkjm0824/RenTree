@@ -31,8 +31,8 @@ class _setPasswordPopupState extends State<setPasswordPopup> {
     }
 
     final String url = widget.type == 'request'
-        ? 'http://10.0.2.2:8080/ItemRequest/${widget.postId}/password?password=$password'
-        : 'http://10.0.2.2:8080/rental-item/${widget.postId}/generate-password?password=$password';
+        ? 'http://54.79.35.255:8080/ItemRequest/${widget.postId}/password?password=$password'
+        : 'http://54.79.35.255:8080/rental-item/${widget.postId}/generate-password?password=$password';
 
     final res = await http.patch(Uri.parse(url));
 

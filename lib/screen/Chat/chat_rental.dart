@@ -144,7 +144,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
 
   Future<void> _loadPreviousMessages() async {
     final url = Uri.parse(
-        'http://10.0.2.2:8080/chatmessages/rental/${widget.chatRoomId}');
+        'http://54.79.35.255:8080/chatmessages/rental/${widget.chatRoomId}');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -222,7 +222,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
     final myStudentNum = prefs.getString('studentNum') ?? '';
 
     final url = Uri.parse(
-      'http://10.0.2.2:8080/chatrooms/rental/id/${widget.chatRoomId}?studentNum=$myStudentNum',
+      'http://54.79.35.255/chatrooms/rental/id/${widget.chatRoomId}?studentNum=$myStudentNum',
     );
 
     final res = await http.delete(url);
@@ -776,17 +776,24 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                           ),
                                                         )
                                                       : TextButton(
-                                                    onPressed: () async {
-                                                      if (!widget.isFaceToFace) {
-                                                        await showDialog(
-                                                          context: context,
-                                                          barrierDismissible: false,
-                                                          builder: (context) => setPasswordPopup(
-                                                            postId: widget.rentalItemId,
-                                                            type: 'rental',
-                                                          ),
-                                                        );
-                                                      }
+                                                          onPressed: () async {
+                                                            if (!widget
+                                                                .isFaceToFace) {
+                                                              await showDialog(
+                                                                context:
+                                                                    context,
+                                                                barrierDismissible:
+                                                                    false,
+                                                                builder:
+                                                                    (context) =>
+                                                                        setPasswordPopup(
+                                                                  postId: widget
+                                                                      .rentalItemId,
+                                                                  type:
+                                                                      'rental',
+                                                                ),
+                                                              );
+                                                            }
                                                             final prefs =
                                                                 await SharedPreferences
                                                                     .getInstance();
@@ -799,7 +806,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                                     nickname);
 
                                                             final url = Uri.parse(
-                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/rent/${widget.chatRoomId}');
+                                                                'http://54.79.35.255:8080/rental-item/${widget.rentalItemId}/rent/${widget.chatRoomId}');
                                                             final res =
                                                                 await http
                                                                     .patch(url);
@@ -857,7 +864,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                       : TextButton(
                                                           onPressed: () async {
                                                             final url = Uri.parse(
-                                                                'http://10.0.2.2:8080/rental-item/${widget.rentalItemId}/return/${widget.chatRoomId}');
+                                                                'http://54.79.35.255:8080/rental-item/${widget.rentalItemId}/return/${widget.chatRoomId}');
                                                             final res =
                                                                 await http
                                                                     .patch(url);

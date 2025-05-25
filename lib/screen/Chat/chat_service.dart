@@ -22,7 +22,7 @@ class ChatService {
   }) {
     stompClient = StompClient(
       config: StompConfig.SockJS(
-        url: 'http://10.0.2.2:8080/ws-chat',
+        url: 'http://54.79.35.255:8080/ws-chat',
         onConnect: (frame) {
           print('✅ WebSocket 연결 성공');
 
@@ -51,7 +51,6 @@ class ChatService {
     stompClient.activate();
   }
 
-
   static void disconnect() {
     print("🧹 ChatService.disconnect() 호출됨");
     try {
@@ -62,14 +61,9 @@ class ChatService {
     stompClient.deactivate();
   }
 
-
-  static void sendMessage(
-      int chatRoomId,
-      String senderStudentNum,
-      String receiverStudentNum,
-      String message,
+  static void sendMessage(int chatRoomId, String senderStudentNum,
+      String receiverStudentNum, String message,
       {required String type}) {
-
     final dto = {
       'chatRoomId': chatRoomId,
       'senderStudentNum': senderStudentNum,
@@ -77,9 +71,8 @@ class ChatService {
       'message': message,
     };
 
-    final endpoint = type == 'rental'
-        ? '/app/chat/rental/send'
-        : '/app/chat/request/send';
+    final endpoint =
+        type == 'rental' ? '/app/chat/rental/send' : '/app/chat/request/send';
 
     // ✅ WebSocket 전송만 수행 (HTTP 저장 제거)
     stompClient.send(

@@ -36,7 +36,7 @@ class _LikeScreenState extends State<LikeScreen> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -81,7 +81,7 @@ class _LikeScreenState extends State<LikeScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => LoginScreen()),
-                          (route) => false,
+                      (route) => false,
                     );
                   }
                 },
@@ -120,7 +120,7 @@ class _LikeScreenState extends State<LikeScreen> {
     if (studentNum == null) return;
 
     final res = await http
-        .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+        .get(Uri.parse('http://54.79.35.255:8080/likes/student/$studentNum'));
 
     if (res.statusCode == 200) {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -131,8 +131,8 @@ class _LikeScreenState extends State<LikeScreen> {
         final rentalItemId = e['rentalItemId'];
         String imageUrl = 'assets/box.png';
 
-        final imageRes = await http.get(
-            Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
+        final imageRes = await http.get(Uri.parse(
+            'http://54.79.35.255:8080/images/api/item/$rentalItemId'));
         if (imageRes.statusCode == 200) {
           final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (images.isNotEmpty) {
@@ -140,7 +140,7 @@ class _LikeScreenState extends State<LikeScreen> {
             // ✅ 절대경로 vs 상대경로 판단
             imageUrl = rawUrl.toString().startsWith('http')
                 ? rawUrl
-                : 'http://10.0.2.2:8080$rawUrl';
+                : 'http://54.79.35.255:8080$rawUrl';
           }
         }
 
@@ -165,7 +165,7 @@ class _LikeScreenState extends State<LikeScreen> {
     if (studentNum == null) return;
 
     final url = Uri.parse(
-        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=$rentalItemId');
+        'http://54.79.35.255:8080/likes?studentNum=$studentNum&rentalItemId=$rentalItemId');
     final res = await http.post(url);
 
     if (res.statusCode == 200) {

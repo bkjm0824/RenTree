@@ -44,7 +44,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
 
   Future<void> uploadImagesToServer(int rentalItemId) async {
     for (var imageFile in _imageFiles) {
-      final uri = Uri.parse('http://10.0.2.2:8080/images/api');
+      final uri = Uri.parse('http://54.79.35.255:8080/images/api');
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['rentalItemId'] = rentalItemId.toString();
@@ -87,7 +87,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
   }
 
   Future<void> submitGivePost() async {
-    final rentalUrl = Uri.parse('http://10.0.2.2:8080/rental-item');
+    final rentalUrl = Uri.parse('http://54.79.35.255:8080/rental-item');
 
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();

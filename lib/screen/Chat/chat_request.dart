@@ -152,7 +152,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
 
   Future<void> _loadPreviousMessages() async {
     final url = Uri.parse(
-        'http://10.0.2.2:8080/chatmessages/request/${widget.chatRoomId}');
+        'http://54.79.35.255:8080/chatmessages/request/${widget.chatRoomId}');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -222,7 +222,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
     final myStudentNum = prefs.getString('studentNum') ?? '';
 
     final url = Uri.parse(
-      'http://10.0.2.2:8080/chatrooms/request/id/${widget.chatRoomId}?studentNum=$myStudentNum',
+      'http://54.79.35.255:8080/chatrooms/request/id/${widget.chatRoomId}?studentNum=$myStudentNum',
     );
 
     final res = await http.delete(url);
@@ -820,7 +820,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
 
                                                           // ✅ 1. 서버에 승인 API 호출
                                                           final url = Uri.parse(
-                                                              'http://10.0.2.2:8080/ItemRequest/${widget.requestId}/rent/${widget.chatRoomId}');
+                                                              'http://54.79.35.255:8080/ItemRequest/${widget.requestId}/rent/${widget.chatRoomId}');
                                                           final res = await http
                                                               .patch(url);
 
@@ -883,7 +883,7 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                               widget.requestId);
                                                           // ✅ 1. 서버에 반납 완료 요청
                                                           final url = Uri.parse(
-                                                              'http://10.0.2.2:8080/ItemRequest/${widget.requestId}/return/${widget.chatRoomId}');
+                                                              'http://54.79.35.255:8080/ItemRequest/${widget.requestId}/return/${widget.chatRoomId}');
                                                           final res = await http
                                                               .patch(url);
 

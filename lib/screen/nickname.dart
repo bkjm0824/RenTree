@@ -46,7 +46,7 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
     }
 
     final url = Uri.parse(
-        'http://10.0.2.2:8080/Rentree/nickname/$studentNum'); // ✅ 에뮬레이터 주소
+        'http://54.79.35.255:8080/Rentree/nickname/$studentNum'); // ✅ 에뮬레이터 주소
     final response = await http.put(
       url,
       headers: {'Content-Type': 'application/json'},

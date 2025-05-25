@@ -67,7 +67,10 @@ class _RequestScreenState extends State<RequestScreen> {
       return;
     }
 
-    if (title.isEmpty || startTime.isEmpty || endTime.isEmpty || description.isEmpty) {
+    if (title.isEmpty ||
+        startTime.isEmpty ||
+        endTime.isEmpty ||
+        description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('모든 필드를 입력해주세요')),
       );
@@ -78,7 +81,7 @@ class _RequestScreenState extends State<RequestScreen> {
     final rentalStartTime = '${rentalDate}T$startTime';
     final rentalEndTime = '${rentalDate}T$endTime';
 
-    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest');
+    final url = Uri.parse('http://54.79.35.255:8080/ItemRequest');
 
     final response = await http.post(
       url,

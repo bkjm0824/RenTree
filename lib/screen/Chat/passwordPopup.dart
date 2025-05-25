@@ -40,7 +40,7 @@ class _passwordPopupState extends State<passwordPopup> {
       final endpoint = widget.type == 'request' ? 'ItemRequest' : 'rental-item';
 
       final res = await http.get(Uri.parse(
-          'http://10.0.2.2:8080/$endpoint/${widget.rentalItemId}/password'));
+          'http://54.79.35.255:8080/$endpoint/${widget.rentalItemId}/password'));
 
       if (res.statusCode == 200) {
         final password = utf8.decode(res.bodyBytes).trim();
