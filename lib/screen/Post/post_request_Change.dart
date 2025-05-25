@@ -62,7 +62,7 @@ class _RequestChangeScreenState extends State<RequestChangeScreen> {
   }
 
   Future<void> fetchItemRequest() async {
-    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.id}');
+    final url = Uri.parse('http://54.79.35.255:8080/ItemRequest/${widget.id}');
 
     try {
       final response = await http.get(url);
@@ -121,7 +121,7 @@ class _RequestChangeScreenState extends State<RequestChangeScreen> {
     final rentalStartTime = '${rentalDate}T$startTime';
     final rentalEndTime = '${rentalDate}T$endTime';
 
-    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.id}');
+    final url = Uri.parse('http://54.79.35.255:8080/ItemRequest/${widget.id}');
 
     final response = await http.put(
       url,

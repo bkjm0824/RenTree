@@ -50,7 +50,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
 
     // 전체 학생 리스트 가져오기
     final studentRes = await http.get(
-      Uri.parse('http://10.0.2.2:8080/Rentree/students'),
+      Uri.parse('http://54.79.35.255:8080/Rentree/students'),
     );
 
 

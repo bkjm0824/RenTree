@@ -53,7 +53,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     if (studentNum == null) return;
 
     final res = await http
-        .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+        .get(Uri.parse('http://54.79.35.255:8080/likes/student/$studentNum'));
     if (res.statusCode == 200) {
       final List<dynamic> data = jsonDecode(utf8.decode(res.bodyBytes));
       likedItemIds = data.map<int>((e) => e['rentalItemId'] as int).toSet();
@@ -62,9 +62,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   Future<void> _fetchResults(String keyword) async {
     final rentalUrl =
-        Uri.parse('http://10.0.2.2:8080/rental-item/search?keyword=$keyword');
+        Uri.parse('http://54.79.35.255:8080/rental-item/search?keyword=$keyword');
     final requestUrl =
-        Uri.parse('http://10.0.2.2:8080/ItemRequest/search?keyword=$keyword');
+        Uri.parse('http://54.79.35.255:8080/ItemRequest/search?keyword=$keyword');
 
     final rentalResponse = await http.get(rentalUrl);
     final requestResponse = await http.get(requestUrl);
@@ -86,7 +86,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       item['likeCount'] = await _fetchLikeCount(item['id']);
 
       final imageRes = await http.get(
-        Uri.parse('http://10.0.2.2:8080/images/api/item/${item['id']}'),
+        Uri.parse('http://54.79.35.255:8080/images/api/item/${item['id']}'),
       );
       if (imageRes.statusCode == 200) {
         final imageList = jsonDecode(utf8.decode(imageRes.bodyBytes));
@@ -94,7 +94,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           final rawUrl = imageList[0]['imageUrl'];
           item['imageUrl'] = rawUrl.toString().startsWith('http')
               ? rawUrl
-              : 'http://10.0.2.2:8080$rawUrl';
+              : 'http://54.79.35.255:8080$rawUrl';
         }
       }
     }
@@ -110,7 +110,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   Future<int> _fetchLikeCount(int rentalItemId) async {
     final url =
-        Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
+        Uri.parse('http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count');
     final res = await http.get(url);
     if (res.statusCode == 200) {
       return int.parse(res.body);

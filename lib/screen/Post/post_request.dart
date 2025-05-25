@@ -195,7 +195,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   }
 
   Future<void> fetchItemDetail() async {
-    final baseUrl = 'http://10.0.2.2:8080/ItemRequest/${widget.itemId}';
+    final baseUrl = 'http://54.79.35.255:8080/ItemRequest/${widget.itemId}';
 
     try {
       print("🔍 요청 URL: $baseUrl");
@@ -276,7 +276,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   }
 
   Future<void> _deletePost() async {
-    final url = Uri.parse('http://10.0.2.2:8080/ItemRequest/${widget.itemId}');
+    final url = Uri.parse('http://54.79.35.255:8080/ItemRequest/${widget.itemId}');
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
@@ -292,7 +292,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   Future<Map<String, dynamic>?> getOrCreateChatRoom(
       int requestItemId, String studentNum) async {
     final existingUrl =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+        Uri.parse('http://54.79.35.255:8080/chatrooms/student/$studentNum');
     final existingRes = await http.get(existingUrl);
 
     if (existingRes.statusCode == 200) {
@@ -312,7 +312,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
     }
 
     final createUrl = Uri.parse(
-      'http://10.0.2.2:8080/chatrooms/request/$requestItemId?requesterStudentNum=$studentNum',
+      'http://54.79.35.255:8080/chatrooms/request/$requestItemId?requesterStudentNum=$studentNum',
     );
     final createRes = await http.post(createUrl);
 
@@ -332,7 +332,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
     if (writerStudentNum.isEmpty) return;
 
     final url =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+        Uri.parse('http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
 
     try {
       final response = await http.get(url);
@@ -534,7 +534,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                   ),
                                 ),
                           onPressed: () async {
-                            final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+                            final url = Uri.parse('http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
                             final response = await http.get(url);
                             if (response.statusCode == 200) {
                               final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
@@ -547,7 +547,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                               for (var room in filtered) {
                                 final type = room['type'];
                                 final roomId = room['roomId'];
-                                final res = await http.get(Uri.parse('http://10.0.2.2:8080/chatmessages/$type/$roomId'));
+                                final res = await http.get(Uri.parse('http://54.79.35.255:8080/chatmessages/$type/$roomId'));
                                 if (res.statusCode == 200) {
                                   final List<dynamic> messages = jsonDecode(utf8.decode(res.bodyBytes));
                                   if (messages.isNotEmpty) {
