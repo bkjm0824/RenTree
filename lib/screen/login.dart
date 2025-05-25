@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_idErrorText != null || _pwErrorText != null) return;
 
-    final url = Uri.parse('http://10.0.2.2:8080/Rentree/login');
+    final url = Uri.parse('http://54.79.35.255:8080/Rentree/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // ✅ 페널티 점수 확인
       final penaltyResponse = await http.get(
-        Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+        Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
       );
 
       if (penaltyResponse.statusCode == 200) {
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
-              (route) => false,
+          (route) => false,
         );
       }
     } else {
@@ -123,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

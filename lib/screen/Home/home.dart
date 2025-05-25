@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => LoginScreen()),
-                          (route) => false,
+                      (route) => false,
                     );
                   }
                 },
@@ -100,7 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchItemsWithImage() async {
-    final res = await http.get(Uri.parse('http://10.0.2.2:8080/home/items'));
+    final res =
+        await http.get(Uri.parse('http://54.79.35.255:8080/home/items'));
 
     if (res.statusCode == 204) {
       _allItems = [];
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Set<int> likedRentalItemIds = {};
     if (studentNum != null) {
       final likeRes = await http
-          .get(Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum'));
+          .get(Uri.parse('http://54.79.35.255:8080/likes/student/$studentNum'));
       if (likeRes.statusCode == 200) {
         final List<dynamic> likeData =
             jsonDecode(utf8.decode(likeRes.bodyBytes));
@@ -143,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final itemId = item['id'];
 
       final imageRes = await http
-          .get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
+          .get(Uri.parse('http://54.79.35.255:8080/images/api/item/$itemId'));
       if (imageRes.statusCode == 200) {
         final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (images.isNotEmpty) {
@@ -170,8 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<int> fetchLikeCount(int rentalItemId) async {
     //좋아요 수 가져오기
-    final url =
-        Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count');
+    final url = Uri.parse(
+        'http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {

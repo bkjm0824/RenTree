@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatListScreen> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -83,7 +83,7 @@ class _ChatScreenState extends State<ChatListScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => LoginScreen()),
-                          (route) => false,
+                      (route) => false,
                     );
                   }
                 },
@@ -96,8 +96,6 @@ class _ChatScreenState extends State<ChatListScreen> {
     }
   }
 
-
-
   Future<void> _fetchChatRooms() async {
     final prefs = await SharedPreferences.getInstance();
     final studentNum = prefs.getString('studentNum');
@@ -106,7 +104,8 @@ class _ChatScreenState extends State<ChatListScreen> {
     if (studentNum == null) return;
     final Map<String, Map<String, dynamic>> uniqueRooms = {};
 
-    final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+    final url =
+        Uri.parse('http://54.79.35.255:8080/chatrooms/student/$studentNum');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -129,7 +128,8 @@ class _ChatScreenState extends State<ChatListScreen> {
 
         print('📌 isRequester: $isRequester, isResponder: $isResponder');
 
-        if ((isRequester && requesterExited) || (isResponder && responderExited)) {
+        if ((isRequester && requesterExited) ||
+            (isResponder && responderExited)) {
           print('🚫 내가 나간 채팅방이므로 숨김: roomId=${room['roomId']}');
           continue; // 이 채팅방은 리스트에 추가하지 않음
         }
@@ -144,21 +144,21 @@ class _ChatScreenState extends State<ChatListScreen> {
           final itemId = room['relatedItemId'];
 
           // 이미지 가져오기
-          final imageRes = await http
-              .get(Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId'));
+          final imageRes = await http.get(
+              Uri.parse('http://54.79.35.255:8080/images/api/item/$itemId'));
           if (imageRes.statusCode == 200) {
             final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
             if (images.isNotEmpty) {
               final rawUrl = images[0]['imageUrl'];
               room['imageUrl'] = rawUrl.toString().startsWith('http')
                   ? rawUrl
-                  : 'http://10.0.2.2:8080$rawUrl';
+                  : 'http://54.79.35.255:8080$rawUrl';
             }
           }
 
           // 상세 정보 가져오기
           final itemRes = await http
-              .get(Uri.parse('http://10.0.2.2:8080/rental-item/$itemId'));
+              .get(Uri.parse('http://54.79.35.255:8080/rental-item/$itemId'));
           if (itemRes.statusCode == 200) {
             final itemData = jsonDecode(utf8.decode(itemRes.bodyBytes));
             final start = itemData['rentalStartTime'];
@@ -188,7 +188,7 @@ class _ChatScreenState extends State<ChatListScreen> {
           final itemId = room['relatedItemId'];
 
           final itemRes = await http
-              .get(Uri.parse('http://10.0.2.2:8080/ItemRequest/$itemId'));
+              .get(Uri.parse('http://54.79.35.255:8080/ItemRequest/$itemId'));
           if (itemRes.statusCode == 200) {
             final itemData = jsonDecode(utf8.decode(itemRes.bodyBytes));
             room['itemRequestTitle'] = itemData['title'] ?? '제목 없음';
@@ -259,7 +259,7 @@ class _ChatScreenState extends State<ChatListScreen> {
 
   Future<String?> getLastMessageForRoom(int chatRoomId, String type) async {
     final url =
-        Uri.parse('http://10.0.2.2:8080/chatmessages/$type/$chatRoomId');
+        Uri.parse('http://54.79.35.255:8080/chatmessages/$type/$chatRoomId');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -467,64 +467,105 @@ class _ChatScreenState extends State<ChatListScreen> {
                                     MaterialPageRoute(
                                       builder: (context) => ChatRentalScreen(
                                         chatRoomId: room['roomId'] ?? -1,
-                                        userName: (_myStudentNum == room['writerStudentNum'])
-                                            ? (room['requesterNickname'] ?? '(알수없음)')
-                                            : (room['writerNickname'] ?? '(알수없음)'),
-                                        title: room['rentalItemTitle'] ?? '삭제된 글입니다.',
-                                        rentalItemId: room['relatedItemId'] ?? -1,
-                                        rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
-                                        isFaceToFace: room['isFaceToFace'] ?? true,
+                                        userName: (_myStudentNum ==
+                                                room['writerStudentNum'])
+                                            ? (room['requesterNickname'] ??
+                                                '(알수없음)')
+                                            : (room['writerNickname'] ??
+                                                '(알수없음)'),
+                                        title: room['rentalItemTitle'] ??
+                                            '삭제된 글입니다.',
+                                        rentalItemId:
+                                            room['relatedItemId'] ?? -1,
+                                        rentalTimeText:
+                                            room['rentalTimeText'] ??
+                                                '시간 정보 없음',
+                                        isFaceToFace:
+                                            room['isFaceToFace'] ?? true,
                                         imageUrl: room['imageUrl'] ?? '',
-                                        writerStudentNum: room['writerStudentNum'] ?? ' ',
-                                        requesterStudentNum: room['requesterStudentNum'] ?? '',
-                                        receiverStudentNum: (_myStudentNum == room['writerStudentNum'])
-                                            ? (room['requesterStudentNum'] ?? '')
+                                        writerStudentNum:
+                                            room['writerStudentNum'] ?? ' ',
+                                        requesterStudentNum:
+                                            room['requesterStudentNum'] ?? '',
+                                        receiverStudentNum: (_myStudentNum ==
+                                                room['writerStudentNum'])
+                                            ? (room['requesterStudentNum'] ??
+                                                '')
                                             : (room['writerStudentNum'] ?? ''),
-                                        receiverProfileIndex: (_myStudentNum == room['writerStudentNum'])
-                                            ? (room['requesterProfileImage'] ?? 1)
-                                            : (room['responderProfileImage'] ?? 1),
+                                        receiverProfileIndex: (_myStudentNum ==
+                                                room['writerStudentNum'])
+                                            ? (room['requesterProfileImage'] ??
+                                                1)
+                                            : (room['responderProfileImage'] ??
+                                                1),
                                       ),
                                     ),
                                   ).then((result) {
-                                    if (result is Map && result.containsKey('lastMessageTime')) {
+                                    if (result is Map &&
+                                        result.containsKey('lastMessageTime')) {
                                       setState(() {
                                         room['lastMessageTime'] =
-                                            (result['lastMessageTime'] as DateTime).toIso8601String();
-                                        room['lastMessage'] = result['lastMessage'] ?? '';
+                                            (result['lastMessageTime']
+                                                    as DateTime)
+                                                .toIso8601String();
+                                        room['lastMessage'] =
+                                            result['lastMessage'] ?? '';
                                       });
                                     } else if (result == true) {
                                       _fetchChatRooms(); // 삭제 등으로 인해 새로고침 필요
                                     }
                                   });
-
                                 } else {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChatRequestScreen(
                                         chatRoomId: room['roomId'] ?? -1,
-                                        userName: (_myStudentNum == (room['writerStudentNum'] ?? ''))
-                                            ? (room['requesterNickname'] ?? '(알수없음)')
-                                            : (room['writerNickname'] ?? '(알수없음)'),
-                                        title: room['itemRequestTitle'] ?? '삭제된 글입니다.',
+                                        userName: (_myStudentNum ==
+                                                (room['writerStudentNum'] ??
+                                                    ''))
+                                            ? (room['requesterNickname'] ??
+                                                '(알수없음)')
+                                            : (room['writerNickname'] ??
+                                                '(알수없음)'),
+                                        title: room['itemRequestTitle'] ??
+                                            '삭제된 글입니다.',
                                         requestId: room['relatedItemId'] ?? -1,
-                                        writerStudentNum: room['writerStudentNum'] ?? '',
-                                        requesterStudentNum: room['requesterStudentNum'] ?? '',
-                                        receiverStudentNum: (_myStudentNum == (room['writerStudentNum'] ?? ''))
-                                            ? (room['requesterStudentNum'] ?? '')
+                                        writerStudentNum:
+                                            room['writerStudentNum'] ?? '',
+                                        requesterStudentNum:
+                                            room['requesterStudentNum'] ?? '',
+                                        receiverStudentNum: (_myStudentNum ==
+                                                (room['writerStudentNum'] ??
+                                                    ''))
+                                            ? (room['requesterStudentNum'] ??
+                                                '')
                                             : (room['writerStudentNum'] ?? ''),
-                                        rentalTimeText: room['rentalTimeText'] ?? '시간 정보 없음',
-                                        isFaceToFace: room['isFaceToFace'] ?? true,
-                                        receiverProfileIndex: (_myStudentNum == (room['writerStudentNum'] ?? ''))
-                                            ? (room['requesterProfileImage'] ?? 1)
-                                            : (room['responderProfileImage'] ?? 1),
+                                        rentalTimeText:
+                                            room['rentalTimeText'] ??
+                                                '시간 정보 없음',
+                                        isFaceToFace:
+                                            room['isFaceToFace'] ?? true,
+                                        receiverProfileIndex: (_myStudentNum ==
+                                                (room['writerStudentNum'] ??
+                                                    ''))
+                                            ? (room['requesterProfileImage'] ??
+                                                1)
+                                            : (room['responderProfileImage'] ??
+                                                1),
                                       ),
                                     ),
                                   ).then((result) {
-                                    if (result != null && result is Map && result.containsKey('lastMessageTime')) {
+                                    if (result != null &&
+                                        result is Map &&
+                                        result.containsKey('lastMessageTime')) {
                                       setState(() {
-                                        room['lastMessageTime'] = (result['lastMessageTime'] as DateTime).toIso8601String();
-                                        room['lastMessage'] = result['lastMessage'] ?? '';
+                                        room['lastMessageTime'] =
+                                            (result['lastMessageTime']
+                                                    as DateTime)
+                                                .toIso8601String();
+                                        room['lastMessage'] =
+                                            result['lastMessage'] ?? '';
                                       });
                                     } else if (result == true) {
                                       _fetchChatRooms();
@@ -545,29 +586,31 @@ class _ChatScreenState extends State<ChatListScreen> {
                                         ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          child: (room['type'] == 'rental' && room['imageUrl'] != null)
+                                          child: (room['type'] == 'rental' &&
+                                                  room['imageUrl'] != null)
                                               ? Image.network(
-                                            room['imageUrl'],
-                                            width: 70,
-                                            height: 70,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Image.asset(
-                                                'assets/box.png',
-                                                width: 70,
-                                                height: 70,
-                                                fit: BoxFit.cover,
-                                              );
-                                            },
-                                          )
+                                                  room['imageUrl'],
+                                                  width: 70,
+                                                  height: 70,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return Image.asset(
+                                                      'assets/box.png',
+                                                      width: 70,
+                                                      height: 70,
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  },
+                                                )
                                               : Image.asset(
-                                            room['type'] == 'rental'
-                                                ? 'assets/box.png'
-                                                : 'assets/requestIcon.png',
-                                            width: 70,
-                                            height: 70,
-                                            fit: BoxFit.cover,
-                                          ),
+                                                  room['type'] == 'rental'
+                                                      ? 'assets/box.png'
+                                                      : 'assets/requestIcon.png',
+                                                  width: 70,
+                                                  height: 70,
+                                                  fit: BoxFit.cover,
+                                                ),
                                         ),
 
                                         SizedBox(width: 16), // 🔼 이미지-텍스트 간격 넓힘
@@ -580,7 +623,8 @@ class _ChatScreenState extends State<ChatListScreen> {
                                               Row(
                                                 children: [
                                                   Text(
-                                                    opponentNickname ?? '(알수없음)',
+                                                    opponentNickname ??
+                                                        '(알수없음)',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
