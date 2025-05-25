@@ -311,12 +311,15 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
         final data = json.decode(utf8.decode(response.bodyBytes));
 
         final imageRes = await http.get(
-            Uri.parse('http://54.79.35.255/images/api/item/${widget.itemId}'));
+            Uri.parse('http://54.79.35.255:8080/images/api/item/${widget.itemId}'));
+
         if (imageRes.statusCode == 200) {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
-            imageUrls =
-                imageData.map<String>((e) => e['imageUrl'].toString()).toList();
+            imageUrls = imageData.map<String>((e) {
+              final url = e['imageUrl'].toString();
+              return url.startsWith('http') ? url : 'http://54.79.35.255:8080$url';
+            }).toList();
           }
         }
 
