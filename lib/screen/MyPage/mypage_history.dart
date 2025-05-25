@@ -56,10 +56,10 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     myStudentNum = prefs.getString('studentNum');
     if (myStudentNum == null) return;
 
-    final rentalMyRes = await http.get(Uri.parse('http://10.0.2.2:8080/api/history/rentals/my?studentNum=$myStudentNum'));
-    final rentalGivenRes = await http.get(Uri.parse('http://10.0.2.2:8080/api/history/rentals/given?studentNum=$myStudentNum'));
-    final requestMyRes = await http.get(Uri.parse('http://10.0.2.2:8080/api/history/requests/my?studentNum=$myStudentNum'));
-    final requestGivenRes = await http.get(Uri.parse('http://10.0.2.2:8080/api/history/requests/got?studentNum=$myStudentNum'));
+    final rentalMyRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/rentals/my?studentNum=$myStudentNum'));
+    final rentalGivenRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/rentals/given?studentNum=$myStudentNum'));
+    final requestMyRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/requests/my?studentNum=$myStudentNum'));
+    final requestGivenRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/requests/got?studentNum=$myStudentNum'));
 
     List<dynamic> parseToList(dynamic body) {
       if (body is List) return body;
@@ -76,7 +76,7 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     List<Map<String, dynamic>> given = [];
 
     Future<String?> fetchImageUrl(int rentalItemId) async {
-      final res = await http.get(Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
+      final res = await http.get(Uri.parse('http://54.79.35.255:8080/images/api/item/$rentalItemId'));
       if (res.statusCode == 200) {
         final List<dynamic> images = jsonDecode(utf8.decode(res.bodyBytes));
         if (images.isNotEmpty) return images[0]['imageUrl'];
@@ -85,7 +85,7 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     }
 
     Future<int> fetchLikeCount(int rentalItemId) async {
-      final res = await http.get(Uri.parse('http://10.0.2.2:8080/likes/rentalItem/$rentalItemId/count'));
+      final res = await http.get(Uri.parse('http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count'));
       if (res.statusCode == 200) {
         return int.tryParse(res.body) ?? 0;
       } else {

@@ -51,7 +51,7 @@ class _MypageScreenState extends State<MypageScreen> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -115,7 +115,7 @@ class _MypageScreenState extends State<MypageScreen> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -135,13 +135,13 @@ class _MypageScreenState extends State<MypageScreen> {
 
     try {
       final resMy = await http.get(Uri.parse(
-          'http://10.0.2.2:8080/api/history/rentals/my?studentNum=$studentNum'));
+          'http://54.79.35.255:8080/api/history/rentals/my?studentNum=$studentNum'));
       final resGiven = await http.get(Uri.parse(
-          'http://10.0.2.2:8080/api/history/rentals/given?studentNum=$studentNum'));
+          'http://54.79.35.255:8080/api/history/rentals/given?studentNum=$studentNum'));
       final resRequestMy = await http.get(Uri.parse(
-          'http://10.0.2.2:8080/api/history/requests/my?studentNum=$studentNum'));
+          'http://54.79.35.255:8080/api/history/requests/my?studentNum=$studentNum'));
       final resRequestGot = await http.get(Uri.parse(
-          'http://10.0.2.2:8080/api/history/requests/got?studentNum=$studentNum'));
+          'http://54.79.35.255:8080/api/history/requests/got?studentNum=$studentNum'));
 
       final decodedMy = jsonDecode(utf8.decode(resMy.bodyBytes));
       final decodedGiven = jsonDecode(utf8.decode(resGiven.bodyBytes));
@@ -235,7 +235,7 @@ class _MypageScreenState extends State<MypageScreen> {
 
   Future<String?> _fetchImageUrl(int rentalItemId) async {
     final res = await http
-        .get(Uri.parse('http://10.0.2.2:8080/images/api/item/$rentalItemId'));
+        .get(Uri.parse('http://54.79.35.255:8080/images/api/item/$rentalItemId'));
     if (res.statusCode == 200) {
       final List<dynamic> images = jsonDecode(utf8.decode(res.bodyBytes));
       if (images.isNotEmpty) return images[0]['imageUrl'];

@@ -281,7 +281,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     if (writerStudentNum.isEmpty) return;
 
     final url =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+        Uri.parse('http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
 
     try {
       final response = await http.get(url);
@@ -303,7 +303,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   }
 
   Future<void> fetchItemDetail() async {
-    final baseUrl = 'http://10.0.2.2:8080/rental-item/${widget.itemId}';
+    final baseUrl = 'http://54.79.35.255:8080/rental-item/${widget.itemId}';
 
     try {
       final response = await http.get(Uri.parse(baseUrl));
@@ -311,7 +311,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
         final data = json.decode(utf8.decode(response.bodyBytes));
 
         final imageRes = await http.get(
-            Uri.parse('http://10.0.2.2:8080/images/api/item/${widget.itemId}'));
+            Uri.parse('http://54.79.35.255/images/api/item/${widget.itemId}'));
         if (imageRes.statusCode == 200) {
           final imageData = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (imageData.isNotEmpty) {
@@ -388,7 +388,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     studentNum = prefs.getString('studentNum');
     if (studentNum == null) return;
 
-    final url = Uri.parse('http://10.0.2.2:8080/likes/student/$studentNum');
+    final url = Uri.parse('http://54.79.35.255:8080/likes/student/$studentNum');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -402,7 +402,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
 
   Future<void> fetchLikeCount() async {
     final url = Uri.parse(
-        'http://10.0.2.2:8080/likes/rentalItem/${widget.itemId}/count');
+        'http://54.79.35.255:8080/likes/rentalItem/${widget.itemId}/count');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -416,7 +416,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     if (studentNum == null) return;
 
     final url = Uri.parse(
-        'http://10.0.2.2:8080/likes?studentNum=$studentNum&rentalItemId=${widget.itemId}');
+        'http://54.79.35.255:8080/likes?studentNum=$studentNum&rentalItemId=${widget.itemId}');
     final res = await http.post(url);
 
     if (res.statusCode == 200) {
@@ -433,7 +433,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   Future<Map<String, dynamic>?> getOrCreateChatRoom(
       int rentalItemId, String studentNum) async {
     final existingUrl =
-        Uri.parse('http://10.0.2.2:8080/chatrooms/student/$studentNum');
+        Uri.parse('http://54.79.35.255:8080/chatrooms/student/$studentNum');
     final existingRes = await http.get(existingUrl);
 
     if (existingRes.statusCode == 200) {
@@ -451,7 +451,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     }
 
     final createUrl = Uri.parse(
-      'http://10.0.2.2:8080/chatrooms/rental/$rentalItemId?requesterStudentNum=$studentNum',
+      'http://54.79.35.255:8080/chatrooms/rental/$rentalItemId?requesterStudentNum=$studentNum',
     );
     final createRes = await http.post(createUrl);
 
@@ -494,7 +494,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
   }
 
   Future<void> _deletePost() async {
-    final url = Uri.parse('http://10.0.2.2:8080/rental-item/${widget.itemId}');
+    final url = Uri.parse('http://54.79.35.255:8080/rental-item/${widget.itemId}');
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
@@ -832,7 +832,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                                   ),
                                 ),
                           onPressed: () async {
-                            final url = Uri.parse('http://10.0.2.2:8080/chatrooms/student/$writerStudentNum');
+                            final url = Uri.parse('http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
                             final response = await http.get(url);
                             if (response.statusCode == 200) {
                               final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
@@ -845,7 +845,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
                               for (var room in filtered) {
                                 final type = room['type'];
                                 final roomId = room['roomId'];
-                                final res = await http.get(Uri.parse('http://10.0.2.2:8080/chatmessages/$type/$roomId'));
+                                final res = await http.get(Uri.parse('http://54.79.35.255:8080/chatmessages/$type/$roomId'));
                                 if (res.statusCode == 200) {
                                   final List<dynamic> messages = jsonDecode(utf8.decode(res.bodyBytes));
                                   if (messages.isNotEmpty) {

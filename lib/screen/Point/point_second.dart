@@ -21,7 +21,7 @@ class _PointedScreenState extends State<PointedScreen> {
   List<Map<String, String>> rankingList = [];
 
   Future<void> _loadRankingList() async {
-    final url = Uri.parse('http://10.0.2.2:8080/Rentree/students');
+    final url = Uri.parse('http://54.79.35.255:8080/Rentree/students');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -68,7 +68,7 @@ class _PointedScreenState extends State<PointedScreen> {
 
   Future<void> _deductPoint(String studentNum, int cost) async {
     final url = Uri.parse(
-        'http://10.0.2.2:8080/Rentree/students/rental-point?studentNum=$studentNum&rentalPoint=$cost');
+        'http://54.79.35.255:8080/Rentree/students/rental-point?studentNum=$studentNum&rentalPoint=$cost');
     final response = await http.patch(url);
 
     if (response.statusCode == 200) {
@@ -136,7 +136,7 @@ class _PointedScreenState extends State<PointedScreen> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -199,7 +199,7 @@ class _PointedScreenState extends State<PointedScreen> {
     final studentNum = prefs.getString('studentNum');
     if (studentNum == null) return;
 
-    final url = Uri.parse('http://10.0.2.2:8080/Rentree/students');
+    final url = Uri.parse('http://54.79.35.255:8080/Rentree/students');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
