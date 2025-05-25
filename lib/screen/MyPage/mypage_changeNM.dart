@@ -51,7 +51,7 @@ class _NickNameScreenState extends State<NickNameScreen> {
     }
 
     // ✅ 서버 요청
-    final url = Uri.parse('http://10.0.2.2:8080/Rentree/nickname/$studentNum');
+    final url = Uri.parse('http://54.79.35.255:8080/Rentree/nickname/$studentNum');
     final response = await http.put(
       url,
       headers: {'Content-Type': 'application/json'},

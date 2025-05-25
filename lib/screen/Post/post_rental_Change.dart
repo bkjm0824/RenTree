@@ -51,7 +51,7 @@ class _rentalChangeState extends State<rentalChangeScreen> {
 
   Future<void> uploadImagesToServer(int rentalItemId) async {
     for (var imageFile in _imageFiles) {
-      final uri = Uri.parse('http://10.0.2.2:8080/images/api');
+      final uri = Uri.parse('http://54.79.35.255:8080/images/api');
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['rentalItemId'] = rentalItemId.toString();
@@ -68,7 +68,7 @@ class _rentalChangeState extends State<rentalChangeScreen> {
   }
 
   Future<void> fetchRentalItemDetail(int id) async {
-    final url = Uri.parse('http://10.0.2.2:8080/rental-item/$id');
+    final url = Uri.parse('http://54.79.35.255:8080/rental-item/$id');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -111,7 +111,7 @@ class _rentalChangeState extends State<rentalChangeScreen> {
   }
 
   Future<void> fetchImages(int itemId) async {
-    final url = Uri.parse('http://10.0.2.2:8080/images/api/item/$itemId');
+    final url = Uri.parse('http://54.79.35.255:8080/images/api/item/$itemId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -121,7 +121,7 @@ class _rentalChangeState extends State<rentalChangeScreen> {
             .where(
                 (e) => e['imageUrl'] != null && e['imageUrl'].startsWith('/'))
             .map((e) =>
-                {"id": e['id'], "url": 'http://10.0.2.2:8080${e['imageUrl']}'})
+                {"id": e['id'], "url": 'http://54.79.35.255:8080${e['imageUrl']}'})
             .toList();
       });
     } else {
@@ -130,7 +130,7 @@ class _rentalChangeState extends State<rentalChangeScreen> {
   }
 
   Future<void> deleteImageFromServer(int imageId) async {
-    final url = Uri.parse('http://10.0.2.2:8080/images/api/$imageId');
+    final url = Uri.parse('http://54.79.35.255:8080/images/api/$imageId');
     final response = await http.delete(url);
 
     if (response.statusCode == 200) {
@@ -262,7 +262,7 @@ class _rentalChangeState extends State<rentalChangeScreen> {
       body["rentalEndTime"] = rentalEndTime;
     }
 
-    final url = Uri.parse('http://10.0.2.2:8080/rental-item/${widget.id}');
+    final url = Uri.parse('http://54.79.35.255:8080/rental-item/${widget.id}');
     final response = await http.put(
       url,
       headers: {'Content-Type': 'application/json'},
