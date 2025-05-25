@@ -427,22 +427,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                               BorderRadius.circular(12),
                                         ),
                                         child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(12),
                                           child: item['type'] == 'rental'
-                                              ? (imageUrl != null &&
-                                                      imageUrl
-                                                          .toString()
-                                                          .isNotEmpty
-                                                  ? Image.network(imageUrl,
-                                                      fit: BoxFit.cover)
-                                                  : Image.asset(
-                                                      'assets/box.png',
-                                                      fit: BoxFit.cover))
-                                              : Image.asset(
-                                                  'assets/requestIcon.png',
-                                                  fit: BoxFit.cover),
-                                        ),
+                                              ? (imageUrl != null && imageUrl.toString().isNotEmpty
+                                              ? Image.network(
+                                            'http://54.79.35.255:8080$imageUrl',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) =>
+                                                Image.asset('assets/box.png', fit: BoxFit.cover),
+                                          )
+                                              : Image.asset('assets/box.png', fit: BoxFit.cover))
+                                              : Image.asset('assets/requestIcon.png', fit: BoxFit.cover),
+                                        )
+
                                       ),
                                       SizedBox(width: 20),
                                       Expanded(
