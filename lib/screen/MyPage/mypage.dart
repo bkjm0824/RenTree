@@ -139,9 +139,9 @@ class _MypageScreenState extends State<MypageScreen> {
       final resGiven = await http.get(Uri.parse(
           'http://54.79.35.255:8080/api/history/rentals/given?studentNum=$studentNum'));
       final resRequestMy = await http.get(Uri.parse(
-          'http://54.79.35.255:8080/api/history/requests/my?studentNum=$studentNum'));
-      final resRequestGot = await http.get(Uri.parse(
           'http://54.79.35.255:8080/api/history/requests/got?studentNum=$studentNum'));
+      final resRequestGot = await http.get(Uri.parse(
+          'http://54.79.35.255:8080/api/history/requests/my?studentNum=$studentNum'));
 
       final decodedMy = jsonDecode(utf8.decode(resMy.bodyBytes));
       final decodedGiven = jsonDecode(utf8.decode(resGiven.bodyBytes));
@@ -234,13 +234,18 @@ class _MypageScreenState extends State<MypageScreen> {
   }
 
   Future<String?> _fetchImageUrl(int rentalItemId) async {
-    final res = await http
-        .get(Uri.parse('http://54.79.35.255:8080/images/api/item/$rentalItemId'));
+    final res = await http.get(
+        Uri.parse('http://54.79.35.255:8080/images/api/item/$rentalItemId'));
     if (res.statusCode == 200) {
       final List<dynamic> images = jsonDecode(utf8.decode(res.bodyBytes));
-      if (images.isNotEmpty) return images[0]['imageUrl'];
+      if (images.isNotEmpty) {
+        final url = images[0]['imageUrl']?.toString();
+        if (url != null && url.startsWith('/images/')) {
+          return 'http://54.79.35.255:8080$url'; // 상대경로 → 절대경로로 변환
+        }
+      }
     }
-    return null;
+    return null; // 절대경로이거나 잘못된 경우에는 null → box.png 사용
   }
 
   String _mapIndexToProfileFile(int index) {
@@ -484,13 +489,14 @@ class _MypageScreenState extends State<MypageScreen> {
                   children: [
                     Text(
                       _nickname ?? '',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     if (_penaltyScore > 0 && _penaltyScore < 3)
                       Row(
                         children: List.generate(
                           _penaltyScore,
-                              (_) => Padding(
+                          (_) => Padding(
                             padding: const EdgeInsets.only(left: 4),
                             child: Image.asset(
                               'assets/yellowCard.png',
@@ -650,6 +656,14 @@ class _MypageScreenState extends State<MypageScreen> {
     } catch (e) {
       timeStatusText = '시간 파싱 오류';
     }
+    ImageProvider imageProvider;
+    if (type == 'request') {
+      imageProvider = AssetImage('assets/requestIcon.png');
+    } else if (imageUrl != null && imageUrl.toString().startsWith('http')) {
+      imageProvider = NetworkImage(imageUrl);
+    } else {
+      imageProvider = AssetImage('assets/box.png');
+    }
 
     return GestureDetector(
       onTap: () {
@@ -681,9 +695,7 @@ class _MypageScreenState extends State<MypageScreen> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundImage: imageUrl != null
-                  ? NetworkImage(imageUrl)
-                  : AssetImage('assets/requestIcon.png') as ImageProvider,
+              backgroundImage: imageProvider,
               backgroundColor: Colors.white,
             ),
             SizedBox(width: 12),

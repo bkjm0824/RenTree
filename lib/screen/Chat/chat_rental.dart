@@ -385,23 +385,51 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              PostRentalScreen(itemId: widget.rentalItemId),
-                        ),
-                      );
+                    onTap: () async {
+                      final url = Uri.parse(
+                          'http://54.79.35.255:8080/rental-item/${widget.rentalItemId}');
+                      final res = await http.get(url);
+
+                      if (res.statusCode == 200) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PostRentalScreen(itemId: widget.rentalItemId),
+                          ),
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('게시글 없음'),
+                            content: Text('작성자가 삭제한 글입니다.'),
+                            actions: [
+                              TextButton(
+                                child: Text('확인',
+                                    style: TextStyle(color: Color(0xff97C663))),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: widget.imageUrl.isNotEmpty
+                      child: widget.imageUrl.startsWith('http')
                           ? Image.network(
                               widget.imageUrl,
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Image.asset(
+                                'assets/box.png',
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : Image.asset(
                               'assets/box.png',

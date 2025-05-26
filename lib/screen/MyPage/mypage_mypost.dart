@@ -34,8 +34,8 @@ class _MyPageMypostState extends State<MyPageMypost>
 
   Future<int> fetchLikeCount(int rentalItemId) async {
     //좋아요 수 가져오기
-    final url =
-        Uri.parse('http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count');
+    final url = Uri.parse(
+        'http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count');
     final res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -52,7 +52,8 @@ class _MyPageMypostState extends State<MyPageMypost>
     if (studentNum == null) return;
 
     // 전체 글 불러오기
-    final res = await http.get(Uri.parse('http://54.79.35.255:8080/home/items'));
+    final res =
+        await http.get(Uri.parse('http://54.79.35.255:8080/home/items'));
     if (res.statusCode != 200) {
       throw Exception('서버 통신 실패');
     }
@@ -77,15 +78,17 @@ class _MyPageMypostState extends State<MyPageMypost>
 
       if (item['itemType'] == 'RENTAL') {
         // 이미지 불러오기
-        final imageRes = await http.get(
-            Uri.parse('http://54.79.35.255:8080/images/api/item/${item['id']}'));
+        final imageRes = await http.get(Uri.parse(
+            'http://54.79.35.255:8080/images/api/item/${item['id']}'));
         if (imageRes.statusCode == 200) {
           final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (images.isNotEmpty) {
             final rawUrl = images[0]['imageUrl'];
-            item['imageUrl'] = rawUrl.toString().startsWith('http')
-                ? rawUrl
-                : 'http://54.79.35.255:8080$rawUrl';
+
+            // ✅ 상대경로일 때만 도메인 붙이기
+            if (rawUrl != null && rawUrl.toString().startsWith('/')) {
+              item['imageUrl'] = 'http://54.79.35.255:8080$rawUrl';
+            }
           }
         }
 
