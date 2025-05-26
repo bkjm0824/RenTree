@@ -222,7 +222,7 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
     final myStudentNum = prefs.getString('studentNum') ?? '';
 
     final url = Uri.parse(
-      'http://54.79.35.255/chatrooms/rental/id/${widget.chatRoomId}?studentNum=$myStudentNum',
+      'http://54.79.35.255:8080/chatrooms/rental/id/${widget.chatRoomId}?studentNum=$myStudentNum',
     );
 
     final res = await http.delete(url);
