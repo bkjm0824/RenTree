@@ -449,14 +449,35 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                 children: [
                   // ✅ Row는 children 리스트 사용
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              PostRequestScreen(itemId: widget.requestId),
-                        ),
-                      );
+                    onTap: () async {
+                      final url = Uri.parse(
+                          'http://54.79.35.255:8080/rental-item/${widget.requestId}');
+                      final res = await http.get(url);
+
+                      if (res.statusCode == 200) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PostRequestScreen(itemId: widget.requestId),
+                          ),
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('게시글 없음'),
+                            content: Text('작성자가 삭제한 글입니다.'),
+                            actions: [
+                              TextButton(
+                                child: Text('확인',
+                                    style: TextStyle(color: Color(0xff97C663))),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),

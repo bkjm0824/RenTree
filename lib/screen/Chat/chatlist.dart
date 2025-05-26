@@ -149,10 +149,12 @@ class _ChatScreenState extends State<ChatListScreen> {
           if (imageRes.statusCode == 200) {
             final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
             if (images.isNotEmpty) {
-              final rawUrl = images[0]['imageUrl'];
-              room['imageUrl'] = rawUrl.toString().startsWith('http')
-                  ? rawUrl
-                  : 'http://54.79.35.255:8080$rawUrl';
+              final rawUrl = images[0]['imageUrl']?.toString();
+              if (rawUrl != null && rawUrl.startsWith('/images/')) {
+                room['imageUrl'] = 'http://54.79.35.255:8080$rawUrl';
+              } else {
+                room['imageUrl'] = 'assets/box.png';
+              }
             }
           }
 
