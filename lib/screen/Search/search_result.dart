@@ -61,10 +61,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Future<void> _fetchResults(String keyword) async {
-    final rentalUrl =
-        Uri.parse('http://54.79.35.255:8080/rental-item/search?keyword=$keyword');
-    final requestUrl =
-        Uri.parse('http://54.79.35.255:8080/ItemRequest/search?keyword=$keyword');
+    final rentalUrl = Uri.parse(
+        'http://54.79.35.255:8080/rental-item/search?keyword=$keyword');
+    final requestUrl = Uri.parse(
+        'http://54.79.35.255:8080/ItemRequest/search?keyword=$keyword');
 
     final rentalResponse = await http.get(rentalUrl);
     final requestResponse = await http.get(requestUrl);
@@ -92,9 +92,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
         final imageList = jsonDecode(utf8.decode(imageRes.bodyBytes));
         if (imageList.isNotEmpty) {
           final rawUrl = imageList[0]['imageUrl'];
-          item['imageUrl'] = rawUrl.toString().startsWith('http')
-              ? rawUrl
-              : 'http://54.79.35.255:8080$rawUrl';
+          if (rawUrl != null && rawUrl.toString().startsWith('/')) {
+            item['imageUrl'] = 'http://54.79.35.255:8080$rawUrl';
+          }
         }
       }
     }
@@ -109,8 +109,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   Future<int> _fetchLikeCount(int rentalItemId) async {
-    final url =
-        Uri.parse('http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count');
+    final url = Uri.parse(
+        'http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count');
     final res = await http.get(url);
     if (res.statusCode == 200) {
       return int.parse(res.body);
