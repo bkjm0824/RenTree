@@ -503,7 +503,7 @@ class _PostRentalScreenState extends State<PostRentalScreen> {
     if (res.statusCode == 200) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('게시글이 삭제되었습니다.')));
-      Navigator.of(context).pop(); // 이전 화면으로 이동
+      Navigator.of(context).pop(true); // ✅ 삭제됨을 알림
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('삭제 실패: ${res.statusCode}')));

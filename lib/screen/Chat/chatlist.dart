@@ -1,17 +1,16 @@
 // 채팅 목록 화면
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/Point/point_first.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Home/home.dart';
 import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
-import '../Notification/notification.dart';
 import '../Point/point_second.dart';
 import 'chat_rental.dart';
 import 'chat_request.dart';
 import '../login.dart';
+import '../Search/search.dart';
 
 class ChatListScreen extends StatefulWidget {
   @override
@@ -369,36 +368,36 @@ class _ChatScreenState extends State<ChatListScreen> {
               child: Column(
                 children: [
                   SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '채팅',
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 30),
+                        child: Text(
+                          '채팅 목록',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
+                            color: Color(0xff747A82),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded),
-                          color: Color(0xff97C663),
-                          iconSize: 35,
-                          padding: EdgeInsets.only(left: 10),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.search),
+                        color: Color(0xff97C663),
+                        iconSize: 30,
+                        padding: EdgeInsets.only(right: 10),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => SearchScreen()),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
+                  Container(height: 1, color: Colors.grey[300]),
                 ],
               ),
             ),

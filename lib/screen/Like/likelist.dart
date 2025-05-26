@@ -8,8 +8,6 @@ import '../Post/post_rental.dart';
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../MyPage/mypage.dart';
-import '../Notification/notification.dart';
-import '../Post/post_request.dart';
 import '../Search/search.dart';
 import '../login.dart';
 
@@ -221,31 +219,27 @@ class _LikeScreenState extends State<LikeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.notifications_rounded),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NotificationScreen()));
-                        },
-                      ),
-                      Text('관심 목록',
+                      Padding(
+                        padding: EdgeInsets.only(left: 30),
+                        child: Text(
+                          '관심 목록',
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff747A82),
+                          ),
+                        ),
+                      ),
                       IconButton(
-                        icon: const Icon(Icons.search),
+                        icon: Icon(Icons.search),
                         color: Color(0xff97C663),
                         iconSize: 30,
                         padding: EdgeInsets.only(right: 10),
                         onPressed: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SearchScreen()));
+                            context,
+                            MaterialPageRoute(builder: (_) => SearchScreen()),
+                          );
                         },
                       ),
                     ],
