@@ -56,10 +56,14 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     myStudentNum = prefs.getString('studentNum');
     if (myStudentNum == null) return;
 
-    final rentalMyRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/rentals/my?studentNum=$myStudentNum'));
-    final rentalGivenRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/rentals/given?studentNum=$myStudentNum'));
-    final requestMyRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/requests/my?studentNum=$myStudentNum'));
-    final requestGivenRes = await http.get(Uri.parse('http://54.79.35.255:8080/api/history/requests/got?studentNum=$myStudentNum'));
+    final rentalMyRes = await http.get(Uri.parse(
+        'http://54.79.35.255:8080/api/history/rentals/my?studentNum=$myStudentNum'));
+    final rentalGivenRes = await http.get(Uri.parse(
+        'http://54.79.35.255:8080/api/history/rentals/given?studentNum=$myStudentNum'));
+    final requestMyRes = await http.get(Uri.parse(
+        'http://54.79.35.255:8080/api/history/requests/got?studentNum=$myStudentNum'));
+    final requestGivenRes = await http.get(Uri.parse(
+        'http://54.79.35.255:8080/api/history/requests/my?studentNum=$myStudentNum'));
 
     List<dynamic> parseToList(dynamic body) {
       if (body is List) return body;
@@ -67,25 +71,40 @@ class _MyPageHistoryState extends State<MyPageHistory> {
       return []; // fallback
     }
 
-    final rentalMy = parseToList(jsonDecode(utf8.decode(rentalMyRes.bodyBytes)));
-    final rentalGiven = parseToList(jsonDecode(utf8.decode(rentalGivenRes.bodyBytes)));
-    final requestMy = parseToList(jsonDecode(utf8.decode(requestMyRes.bodyBytes)));
-    final requestGiven = parseToList(jsonDecode(utf8.decode(requestGivenRes.bodyBytes)));
+    final rentalMy =
+        parseToList(jsonDecode(utf8.decode(rentalMyRes.bodyBytes)));
+    final rentalGiven =
+        parseToList(jsonDecode(utf8.decode(rentalGivenRes.bodyBytes)));
+    final requestMy =
+        parseToList(jsonDecode(utf8.decode(requestMyRes.bodyBytes)));
+    final requestGiven =
+        parseToList(jsonDecode(utf8.decode(requestGivenRes.bodyBytes)));
+    print('🧪 rentalMy 응답: $rentalMy');
+    print('🧪 rentalGiven 응답: $rentalGiven');
+    print('🧪 requestMy 응답: $requestMy');
+    print('🧪 requestGiven 응답: $requestGiven');
 
     List<Map<String, dynamic>> received = [];
     List<Map<String, dynamic>> given = [];
 
     Future<String?> fetchImageUrl(int rentalItemId) async {
-      final res = await http.get(Uri.parse('http://54.79.35.255:8080/images/api/item/$rentalItemId'));
+      final res = await http.get(
+          Uri.parse('http://54.79.35.255:8080/images/api/item/$rentalItemId'));
       if (res.statusCode == 200) {
         final List<dynamic> images = jsonDecode(utf8.decode(res.bodyBytes));
-        if (images.isNotEmpty) return images[0]['imageUrl'];
+        if (images.isNotEmpty) {
+          final url = images[0]['imageUrl']?.toString();
+          if (url != null && url.startsWith('/images/')) {
+            return 'http://54.79.35.255:8080$url'; // 상대경로 → 절대경로로 변환
+          }
+        }
       }
-      return null;
+      return null; // 절대경로이거나 잘못된 경우에는 null → box.png 사용
     }
 
     Future<int> fetchLikeCount(int rentalItemId) async {
-      final res = await http.get(Uri.parse('http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count'));
+      final res = await http.get(Uri.parse(
+          'http://54.79.35.255:8080/likes/rentalItem/$rentalItemId/count'));
       if (res.statusCode == 200) {
         return int.tryParse(res.body) ?? 0;
       } else {
@@ -182,8 +201,6 @@ class _MyPageHistoryState extends State<MyPageHistory> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final listToShow = selectedTabIndex == 0 ? receivedList : givenList;
@@ -194,26 +211,26 @@ class _MyPageHistoryState extends State<MyPageHistory> {
         child: isLoading
             ? Center(child: CircularProgressIndicator())
             : Column(
-          children: [
-            // 상단바
-            _buildTopBar(),
-            // 탭
-            _buildTabBar(),
-            Container(height: 1, color: Colors.grey[300]),
-            // 리스트
-            Expanded(
-              child: listToShow.isEmpty
-                  ? Center(child: Text('대여 내역이 없습니다.'))
-                  : ListView.builder(
-                itemCount: listToShow.length,
-                itemBuilder: (context, index) {
-                  final item = listToShow[index];
-                  return _buildHistoryItem(item);
-                },
+                children: [
+                  // 상단바
+                  _buildTopBar(),
+                  // 탭
+                  _buildTabBar(),
+                  Container(height: 1, color: Colors.grey[300]),
+                  // 리스트
+                  Expanded(
+                    child: listToShow.isEmpty
+                        ? Center(child: Text('대여 내역이 없습니다.'))
+                        : ListView.builder(
+                            itemCount: listToShow.length,
+                            itemBuilder: (context, index) {
+                              final item = listToShow[index];
+                              return _buildHistoryItem(item);
+                            },
+                          ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
       ),
     );
   }
@@ -232,11 +249,13 @@ class _MyPageHistoryState extends State<MyPageHistory> {
                 color: Color(0xff97C663),
                 onPressed: () => Navigator.pop(context),
               ),
-              Text('대여 내역', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('대여 내역',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               IconButton(
                 icon: Icon(Icons.home),
                 color: Color(0xff97C663),
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen())),
+                onPressed: () => Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => HomeScreen())),
               ),
             ],
           ),
@@ -272,7 +291,9 @@ class _MyPageHistoryState extends State<MyPageHistory> {
                   color: selected ? Color(0xff97C663) : Colors.grey,
                 )),
             SizedBox(height: 6),
-            Container(height: 2, color: selected ? Color(0xff97C663) : Colors.transparent),
+            Container(
+                height: 2,
+                color: selected ? Color(0xff97C663) : Colors.transparent),
           ],
         ),
       ),
@@ -313,11 +334,11 @@ class _MyPageHistoryState extends State<MyPageHistory> {
           );
         }
       },
-
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -333,9 +354,10 @@ class _MyPageHistoryState extends State<MyPageHistory> {
                     borderRadius: BorderRadius.circular(12),
                     child: item['type'] == 'rental'
                         ? (isValidImageUrl(imageUrl)
-                        ? Image.network(imageUrl, fit: BoxFit.cover)
-                        : Image.asset('assets/box.png', fit: BoxFit.cover))
-                        : Image.asset('assets/requestIcon.png', fit: BoxFit.cover),
+                            ? Image.network(imageUrl, fit: BoxFit.cover)
+                            : Image.asset('assets/box.png', fit: BoxFit.cover))
+                        : Image.asset('assets/requestIcon.png',
+                            fit: BoxFit.cover),
                   ),
                 ),
                 SizedBox(width: 20),
@@ -346,10 +368,12 @@ class _MyPageHistoryState extends State<MyPageHistory> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(item['title'] ?? '',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 4),
                       Text(timeText,
-                          style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                          style:
+                              TextStyle(color: Colors.grey[700], fontSize: 13)),
                     ],
                   ),
                 ),
@@ -382,5 +406,4 @@ class _MyPageHistoryState extends State<MyPageHistory> {
       ),
     );
   }
-
 }

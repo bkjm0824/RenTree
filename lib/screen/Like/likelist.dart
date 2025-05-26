@@ -136,11 +136,10 @@ class _LikeScreenState extends State<LikeScreen> {
         if (imageRes.statusCode == 200) {
           final images = jsonDecode(utf8.decode(imageRes.bodyBytes));
           if (images.isNotEmpty) {
-            final rawUrl = images[0]['imageUrl'];
-            // ✅ 절대경로 vs 상대경로 판단
-            imageUrl = rawUrl.toString().startsWith('http')
-                ? rawUrl
-                : 'http://54.79.35.255:8080$rawUrl';
+            final rawUrl = images[0]['imageUrl']?.toString();
+            if (rawUrl != null && rawUrl.startsWith('/images/')) {
+              imageUrl = 'http://54.79.35.255:8080$rawUrl';
+            }
           }
         }
 
@@ -154,7 +153,14 @@ class _LikeScreenState extends State<LikeScreen> {
       }
 
       setState(() {
-        likedItems = tempList;
+        likedItems = tempList
+          ..sort((a, b) {
+            final aTime =
+                DateTime.tryParse(a['rentalStartTime'] ?? '') ?? DateTime(2000);
+            final bTime =
+                DateTime.tryParse(b['rentalStartTime'] ?? '') ?? DateTime(2000);
+            return bTime.compareTo(aTime); // 최신순 정렬
+          });
       });
     } else {
       print('❌ 찜 목록 불러오기 실패');
@@ -297,13 +303,13 @@ class _LikeScreenState extends State<LikeScreen> {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          child: item['imageUrl']
-                                                  .toString()
-                                                  .startsWith('http')
-                                              ? Image.network(item['imageUrl'],
-                                                  fit: BoxFit.cover)
-                                              : Image.asset(item['imageUrl'],
-                                                  fit: BoxFit.cover),
+                                          child: Image.network(
+                                            item['imageUrl'],
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error,
+                                                    stackTrace) =>
+                                                Image.asset('assets/box.png'),
+                                          ),
                                         ),
                                       ),
                                       SizedBox(width: 16),
