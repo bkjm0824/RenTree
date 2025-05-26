@@ -389,24 +389,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           return GestureDetector(
                             onTap: () async {
                               if (item['type'] == 'rental') {
-                                final result = await Navigator.push(
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        PostRentalScreen(itemId: item['id']),
+                                    builder: (_) => PostRentalScreen(itemId: item['id']),
                                   ),
                                 );
-                                if (result == true) {
-                                  fetchItemsWithImage(); // ✅ 좋아요 변경 시 목록 다시 불러오기
-                                }
+                                await fetchItemsWithImage(); // ✅ 무조건 최신 정보로 반영
                               } else {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        PostRequestScreen(itemId: item['id']),
+                                    builder: (_) => PostRequestScreen(itemId: item['id']),
                                   ),
                                 );
+                                await fetchItemsWithImage(); // ✅ 요청글도 마찬가지
                               }
                             },
                             child: Column(
