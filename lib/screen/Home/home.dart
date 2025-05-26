@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-import '../Point/point_first.dart';
 import '../Chat/chatlist.dart';
 import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
@@ -12,7 +11,6 @@ import 'addpost_give.dart';
 import 'addpost_request.dart';
 import '../Post/post_rental.dart';
 import '../Post/post_request.dart';
-import '../Notification/notification.dart';
 import '../Search/search.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import '../login.dart';
@@ -311,16 +309,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.notifications_rounded),
-                      color: Color(0xff97C663),
-                      iconSize: 30,
-                      padding: EdgeInsets.only(left: 10),
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => NotificationScreen())),
-                    ),
                     Image.asset('assets/rentree.png', height: 40),
                     IconButton(
                         icon: Icon(Icons.search),

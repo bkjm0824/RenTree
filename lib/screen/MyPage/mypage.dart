@@ -2,17 +2,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:rentree/screen/Point/point_first.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../Chat/chatlist.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
-import '../Notification/notification.dart';
 import '../Post/post_request.dart';
 import '../Search/search.dart';
 import '../Point/point_second.dart';
-import '../guide.dart';
 import '../Post/post_rental.dart';
 import 'mypage_profile.dart';
 import 'mypage_mypost.dart';
@@ -353,38 +350,26 @@ class _MypageScreenState extends State<MypageScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.notifications_rounded),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    NotificationScreen()), // notification.dart에서 NotificationScreen 클래스로 변경
-                          );
-                        },
-                      ),
-                      Text(
-                        '마이페이지',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Padding(
+                        padding: EdgeInsets.only(left: 30),
+                        child: Text(
+                          '마이페이지',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff747A82),
+                          ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.search),
+                        icon: Icon(Icons.search),
                         color: Color(0xff97C663),
                         iconSize: 30,
                         padding: EdgeInsets.only(right: 10),
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    SearchScreen()), // SearchScreen으로 이동
+                            MaterialPageRoute(builder: (context) => SearchScreen()),
                           );
                         },
                       ),
