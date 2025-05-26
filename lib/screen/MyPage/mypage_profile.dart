@@ -97,7 +97,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
     if (studentNum == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/penalties/$studentNum'),
+      Uri.parse('http://54.79.35.255:8080/penalties/$studentNum'),
     );
 
     if (response.statusCode == 200) {
@@ -137,7 +137,7 @@ class _MyPageProfileState extends State<MyPageProfile> {
                         final studentNum = prefs.getString('studentNum') ?? '';
 
                         final res = await http.put(
-                          Uri.parse('http://10.0.2.2:8080/Rentree/students/profile-image'
+                          Uri.parse('http://54.79.35.255:8080/Rentree/students/profile-image'
                               '?studentNum=$studentNum&profileImage=${index + 1}'),
                         );
 
