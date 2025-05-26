@@ -35,14 +35,14 @@ public class HistoryService {
 
     // 내가 요청한 내역 조회
     public List<RequestHistoryDTO> getMyRequestHistories(Student me) {
-        return requestHistoryRepository.findByRequester(me).stream()
+        return requestHistoryRepository.findByResponder(me).stream()
                 .map(this::convertToRequestHistoryDTO)
                 .collect(Collectors.toList());
     }
 
     // 내가 응답한 요청 내역 조회
     public List<RequestHistoryDTO> getRequestsIGot(Student me) {
-        return requestHistoryRepository.findByResponder(me).stream()
+        return requestHistoryRepository.findByRequester(me).stream()
                 .map(this::convertToRequestHistoryDTO)
                 .collect(Collectors.toList());
     }
