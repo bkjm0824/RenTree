@@ -29,6 +29,40 @@ class _RequestScreenState extends State<RequestScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
+              hourMinuteTextColor: Colors.black,
+              hourMinuteColor: MaterialStateColor.resolveWith(
+                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+              ),
+              dialHandColor: const Color(0xff97C663),
+              dialBackgroundColor: const Color(0xffEBEBEB),
+              dayPeriodColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Color(0xff97C663); // ✅ 선택된 AM/PM 배경색
+                }
+                return Color(0xffF0F0F0); // 비선택 상태 배경색
+              }),
+              dayPeriodTextColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white; // ✅ 선택된 텍스트 색
+                }
+                return Colors.black; // 비선택 텍스트 색
+              }),
+              entryModeIconColor: const Color(0xff97C663),
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
+              onPrimary: Colors.white,    // Accent text color
+              onSurface: Colors.black,    // 일반 텍스트 색
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -42,6 +76,40 @@ class _RequestScreenState extends State<RequestScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
+              hourMinuteTextColor: Colors.black,
+              hourMinuteColor: MaterialStateColor.resolveWith(
+                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+              ),
+              dialHandColor: const Color(0xff97C663),
+              dialBackgroundColor: const Color(0xffEBEBEB),
+              dayPeriodColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Color(0xff97C663); // ✅ 선택된 AM/PM 배경색
+                }
+                return Color(0xffF0F0F0); // 비선택 상태 배경색
+              }),
+              dayPeriodTextColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white; // ✅ 선택된 텍스트 색
+                }
+                return Colors.black; // 비선택 텍스트 색
+              }),
+              entryModeIconColor: const Color(0xff97C663),
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
+              onPrimary: Colors.white,    // Accent text color
+              onSurface: Colors.black,    // 일반 텍스트 색
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {

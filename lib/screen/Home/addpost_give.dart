@@ -64,7 +64,42 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
+              hourMinuteTextColor: Colors.black,
+              hourMinuteColor: MaterialStateColor.resolveWith(
+                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+              ),
+              dialHandColor: const Color(0xff97C663),
+              dialBackgroundColor: const Color(0xffEBEBEB),
+              dayPeriodColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Color(0xff97C663); // ✅ 선택된 AM/PM 배경색
+                }
+                return Color(0xffF0F0F0); // 비선택 상태 배경색
+              }),
+              dayPeriodTextColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white; // ✅ 선택된 텍스트 색
+                }
+                return Colors.black; // 비선택 텍스트 색
+              }),
+              entryModeIconColor: const Color(0xff97C663),
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
+              onPrimary: Colors.white,    // Accent text color
+              onSurface: Colors.black,    // 일반 텍스트 색
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+
     if (picked != null) {
       setState(() {
         _startTime = picked;
@@ -73,10 +108,45 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     }
   }
 
+
   Future<void> _selectEndTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
+              hourMinuteTextColor: Colors.black,
+              hourMinuteColor: MaterialStateColor.resolveWith(
+                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+              ),
+              dialHandColor: const Color(0xff97C663),
+              dialBackgroundColor: const Color(0xffEBEBEB),
+              dayPeriodColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Color(0xff97C663); // ✅ 선택된 AM/PM 배경색
+                }
+                return Color(0xffF0F0F0); // 비선택 상태 배경색
+              }),
+              dayPeriodTextColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white; // ✅ 선택된 텍스트 색
+                }
+                return Colors.black; // 비선택 텍스트 색
+              }),
+              entryModeIconColor: const Color(0xff97C663),
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
+              onPrimary: Colors.white,    // Accent text color
+              onSurface: Colors.black,    // 일반 텍스트 색
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -100,7 +170,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
       '학용품': 2,
       '서적': 3,
       '생활용품': 4,
-      '양도(무료나눔)': 5,
     };
     final categoryId = categoryMap[category] ?? 1;
 
@@ -333,7 +402,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedCategory = newValue;
-                                        isTransfer = newValue == '양도(무료나눔)';
                                       });
                                     },
                                     items: <String>[
@@ -341,7 +409,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                       '학용품',
                                       '서적',
                                       '생활용품',
-                                      '양도(무료나눔)',
                                     ].map<DropdownMenuItem<String>>(
                                         (String value) {
                                       return DropdownMenuItem<String>(
