@@ -258,16 +258,26 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           title: Text("게시글 삭제"),
           content: Text("정말 삭제하시겠습니까?"),
           actions: [
-            TextButton(
-              child: Text("취소"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text("삭제", style: TextStyle(color: Colors.red)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff97C663),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 _deletePost();
               },
+              child: Text('삭제'),
+            ),
+            TextButton(
+              child: Text("취소"),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );

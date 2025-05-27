@@ -68,13 +68,13 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             timePickerTheme: TimePickerThemeData(
-              backgroundColor: Color(0xffEBEBEB), // 다이얼로그 배경
+              backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
               hourMinuteTextColor: Colors.black,
               hourMinuteColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xffF4F1F1), // 시간 선택 배경
+                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
               ),
               dialHandColor: const Color(0xff97C663),
-              dialBackgroundColor: const Color(0xffF4F1F1),
+              dialBackgroundColor: const Color(0xffEBEBEB),
               dayPeriodColor: MaterialStateColor.resolveWith((states) {
                 if (states.contains(MaterialState.selected)) {
                   return Color(0xff97C663); // ✅ 선택된 AM/PM 배경색
@@ -117,13 +117,13 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             timePickerTheme: TimePickerThemeData(
-              backgroundColor: Color(0xffEBEBEB), // 다이얼로그 배경
+              backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
               hourMinuteTextColor: Colors.black,
               hourMinuteColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xffF4F1F1), // 시간 선택 배경
+                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
               ),
               dialHandColor: const Color(0xff97C663),
-              dialBackgroundColor: const Color(0xffF4F1F1),
+              dialBackgroundColor: const Color(0xffEBEBEB),
               dayPeriodColor: MaterialStateColor.resolveWith((states) {
                 if (states.contains(MaterialState.selected)) {
                   return Color(0xff97C663); // ✅ 선택된 AM/PM 배경색
