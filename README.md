@@ -28,10 +28,8 @@ Frontend
 
 
 ### 프로젝트 구조
-RenTree/
-├── backend/ # Spring Boot API 서버
-├── frontend/ # Flutter (또는 웹 프론트)
-└── README.md
+![image](https://github.com/user-attachments/assets/846c46b9-254a-459b-ad13-339b454865ec)
+
 
 ## 🛠️ 기술 스택
 ![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=java&logoColor=white) ![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white) ![Flutter](https://img.shields.io/badge/Flutter-000000?style=for-the-badge&logo=flutter&logoColor=white) ![Dart](https://img.shields.io/badge/Dart-2590D?style=for-the-badge&logo=dart&logoColor=white) 
