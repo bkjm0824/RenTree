@@ -36,8 +36,8 @@ Frontend
 
 | **Category** | **Stack** |
 |:------------:|:----------:|
-| **Back-end** | `Java` |
-| Uncategorized | `Spring`, `Flutter`, `Dart` |
+| **Back-end** | `Spring`,`Java` |
+| **Front-end** |  `Flutter`, `Dart` |
 
 
 ## 💻 설치 방법
