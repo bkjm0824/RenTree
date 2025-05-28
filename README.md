@@ -62,7 +62,7 @@ cd [프로젝트명]
 ```bash
 java -jar build/libs/[프로젝트명]-0.0.1-SNAPSHOT.jar
 ```
-# 안드로이드 설치 링크
+#### 안드로이드 설치 링크
 https://github.com/oowhyun/RenTree/releases/download/rentree/app-release.apk
 ## 👥 팀원
 | **Name** | **Position** |
