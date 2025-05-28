@@ -177,7 +177,10 @@ class _RequestChangeScreenState extends State<RequestChangeScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text('요청 글 수정하기',
-                                    style: TextStyle(fontSize: 24)),
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600)),
                               ],
                             ),
                             SizedBox(height: 40),
@@ -273,7 +276,8 @@ class _RequestChangeScreenState extends State<RequestChangeScreen> {
                                     Text('대면',
                                         style: TextStyle(
                                             fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
                                             color: Color(0xff606060))),
                                     Checkbox(
                                       value: isFaceToFace,
@@ -296,7 +300,8 @@ class _RequestChangeScreenState extends State<RequestChangeScreen> {
                                     Text('비대면',
                                         style: TextStyle(
                                             fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
                                             color: Color(0xff606060))),
                                     Checkbox(
                                       value: isNonFaceToFace,
@@ -333,7 +338,11 @@ class _RequestChangeScreenState extends State<RequestChangeScreen> {
                         ),
                         child: Text(
                           '수정 완료',
-                          style: TextStyle(fontSize: 24, color: Colors.white),
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),

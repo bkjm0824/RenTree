@@ -71,7 +71,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
               backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
               hourMinuteTextColor: Colors.black,
               hourMinuteColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+                (states) => const Color(0xffEBEBEB), // 시간 선택 배경
               ),
               dialHandColor: const Color(0xff97C663),
               dialBackgroundColor: const Color(0xffEBEBEB),
@@ -91,8 +91,8 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
             ),
             colorScheme: ColorScheme.light(
               primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
-              onPrimary: Colors.white,    // Accent text color
-              onSurface: Colors.black,    // 일반 텍스트 색
+              onPrimary: Colors.white, // Accent text color
+              onSurface: Colors.black, // 일반 텍스트 색
             ),
           ),
           child: child!,
@@ -108,7 +108,6 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
     }
   }
 
-
   Future<void> _selectEndTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -120,7 +119,7 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
               backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
               hourMinuteTextColor: Colors.black,
               hourMinuteColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+                (states) => const Color(0xffEBEBEB), // 시간 선택 배경
               ),
               dialHandColor: const Color(0xff97C663),
               dialBackgroundColor: const Color(0xffEBEBEB),
@@ -140,8 +139,8 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
             ),
             colorScheme: ColorScheme.light(
               primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
-              onPrimary: Colors.white,    // Accent text color
-              onSurface: Colors.black,    // 일반 텍스트 색
+              onPrimary: Colors.white, // Accent text color
+              onSurface: Colors.black, // 일반 텍스트 색
             ),
           ),
           child: child!,
@@ -252,7 +251,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                             SizedBox(height: 70),
                             Text('대여 물품 등록하기',
                                 style: TextStyle(
-                                    fontSize: 33, fontWeight: FontWeight.bold)),
+                                  fontSize: 33,
+                                  fontFamily: 'Pretender',
+                                  fontWeight: FontWeight.w700,
+                                )),
                             SizedBox(height: 30),
                             Container(
                               decoration: BoxDecoration(
@@ -275,14 +277,23 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                               children: [
                                                 Text('이미지를 첨부하면',
                                                     style: TextStyle(
-                                                        fontSize: 20)),
+                                                        fontSize: 20,
+                                                        fontFamily: 'Pretender',
+                                                        fontWeight:
+                                                            FontWeight.w600)),
                                                 Text('대여가 원활해집니다',
                                                     style: TextStyle(
-                                                        fontSize: 20)),
+                                                        fontSize: 20,
+                                                        fontFamily: 'Pretender',
+                                                        fontWeight:
+                                                            FontWeight.w600)),
                                                 SizedBox(height: 3),
                                                 Text('최대 5장 첨부 가능',
                                                     style: TextStyle(
-                                                        fontSize: 11)),
+                                                        fontSize: 12,
+                                                        fontFamily: 'Pretender',
+                                                        fontWeight:
+                                                            FontWeight.w500)),
                                               ],
                                             )
                                           : SizedBox(
@@ -355,7 +366,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                           onPressed: _pickImage,
                                         ),
                                         Text('${_imageFiles.length}/5',
-                                            style: TextStyle(fontSize: 14)),
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontFamily: 'Pretender',
+                                                fontWeight: FontWeight.w600)),
                                       ],
                                     ),
                                   ],
@@ -384,7 +398,10 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                             Row(
                               children: [
                                 Text('카테고리를 선택해주세요 : ',
-                                    style: TextStyle(fontSize: 16)),
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600)),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
@@ -427,7 +444,12 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                             if (!isTransfer) ...[
                               Row(
                                 children: [
-                                  Text("대여 시간은"),
+                                  Text(
+                                    "대여 시간은",
+                                    style: TextStyle(
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600),
+                                  ),
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: InkWell(
@@ -457,9 +479,12 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: 10),
-                                  Text("부터"),
-                                  SizedBox(width: 10),
+                                  SizedBox(width: 8),
+                                  Text("부터",
+                                      style: TextStyle(
+                                          fontFamily: 'Pretender',
+                                          fontWeight: FontWeight.w600)),
+                                  SizedBox(width: 8),
                                   Expanded(
                                     child: InkWell(
                                       onTap: _selectEndTime,
@@ -488,8 +513,11 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: 10),
-                                  Text("까지"),
+                                  SizedBox(width: 8),
+                                  Text("까지",
+                                      style: TextStyle(
+                                          fontFamily: 'Pretender',
+                                          fontWeight: FontWeight.w600)),
                                 ],
                               ),
                               SizedBox(height: 20),
@@ -524,14 +552,23 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Text('대면',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xff606060))),
+                                    Text(
+                                      '대면',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xff606060),
+                                      ),
+                                    ),
+                                    SizedBox(width: 4), // 텍스트와 체크박스 사이 간격
                                     Checkbox(
                                       value: isFaceToFace,
                                       activeColor: Color(0xff97C663),
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: VisualDensity(
+                                          horizontal: -4.0, vertical: -4.0),
                                       onChanged: (bool? value) {
                                         setState(() {
                                           if (value == true) {
@@ -545,17 +582,26 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(width: 5),
+                                SizedBox(width: 10), // 대면과 비대면 그룹 사이 간격
                                 Row(
                                   children: [
-                                    Text('비대면',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xff606060))),
+                                    Text(
+                                      '비대면',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xff606060),
+                                      ),
+                                    ),
+                                    SizedBox(width: 4), // 텍스트와 체크박스 사이 간격
                                     Checkbox(
                                       value: isNonFaceToFace,
                                       activeColor: Color(0xff97C663),
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: VisualDensity(
+                                          horizontal: -4.0, vertical: -4.0),
                                       onChanged: (bool? value) {
                                         setState(() {
                                           if (value == true) {
@@ -592,7 +638,8 @@ class _PostGiveScreenState extends State<PostGiveScreen> {
                           style: TextStyle(
                               fontSize: 24,
                               color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),

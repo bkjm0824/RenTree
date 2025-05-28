@@ -58,7 +58,7 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {}); // 검색기록 새로고침
 
     if (result == true) {
-      _likedChangedInSearchResult = true;// 🟢 HomeScreen에 변경 알림
+      _likedChangedInSearchResult = true; // 🟢 HomeScreen에 변경 알림
     }
   }
 
@@ -83,7 +83,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         color: Color(0xff97C663),
                         iconSize: 30,
                         onPressed: () {
-                          Navigator.pop(context, _likedChangedInSearchResult); // 여기서만 pop!
+                          Navigator.pop(context,
+                              _likedChangedInSearchResult); // 여기서만 pop!
                         },
                       ),
                       Expanded(
@@ -124,8 +125,10 @@ class _SearchScreenState extends State<SearchScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('최근 검색',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w600)),
                   TextButton(
                     onPressed: _clearSearchHistory,
                     child: Text('전체 삭제',

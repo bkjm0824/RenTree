@@ -19,6 +19,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+          fontFamily: 'Pretendard', // ← 여기에 폰트 이름 적용
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(fontSize: 16),
+            bodyMedium: TextStyle(fontSize: 14),
+          )),
       //home: FirstScreen(), // 초기 화면을 FirstScreen으로 설정
       home: LoginScreen(), //로그인 스크린 만드느라 경로 설정
       routes: {

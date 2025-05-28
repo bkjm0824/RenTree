@@ -154,7 +154,8 @@ class _PointScreenState extends State<PointScreen> {
                           style: TextStyle(
                             fontSize: 24,
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Pretender',
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),

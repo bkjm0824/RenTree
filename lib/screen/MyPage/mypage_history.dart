@@ -250,7 +250,10 @@ class _MyPageHistoryState extends State<MyPageHistory> {
                 onPressed: () => Navigator.pop(context),
               ),
               Text('대여 내역',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w600)),
               IconButton(
                 icon: Icon(Icons.home),
                 color: Color(0xff97C663),
@@ -287,7 +290,8 @@ class _MyPageHistoryState extends State<MyPageHistory> {
           children: [
             Text('$label $count',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Pretender',
+                  fontWeight: FontWeight.w600,
                   color: selected ? Color(0xff97C663) : Colors.grey,
                 )),
             SizedBox(height: 6),
@@ -369,7 +373,9 @@ class _MyPageHistoryState extends State<MyPageHistory> {
                     children: [
                       Text(item['title'] ?? '',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16)),
                       SizedBox(height: 4),
                       Text(timeText,
                           style:

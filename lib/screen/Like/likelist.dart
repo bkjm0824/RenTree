@@ -224,8 +224,8 @@ class _LikeScreenState extends State<LikeScreen> {
                         child: Text(
                           '관심 목록',
                           style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            fontFamily: 'NanumSquare',
                             color: Color(0xff747A82),
                           ),
                         ),
@@ -323,8 +323,9 @@ class _LikeScreenState extends State<LikeScreen> {
                                                   Text(
                                                     item['title'],
                                                     style: TextStyle(
+                                                        fontFamily: 'Pretender',
                                                         fontWeight:
-                                                            FontWeight.bold,
+                                                            FontWeight.w600,
                                                         fontSize: 16),
                                                   ),
                                                   SizedBox(height: 4),

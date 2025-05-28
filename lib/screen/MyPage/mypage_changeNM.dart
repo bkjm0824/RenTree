@@ -51,7 +51,8 @@ class _NickNameScreenState extends State<NickNameScreen> {
     }
 
     // ✅ 서버 요청
-    final url = Uri.parse('http://54.79.35.255:8080/Rentree/nickname/$studentNum');
+    final url =
+        Uri.parse('http://54.79.35.255:8080/Rentree/nickname/$studentNum');
     final response = await http.put(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -104,15 +105,18 @@ class _NickNameScreenState extends State<NickNameScreen> {
                       '닉네임 변경',
                       style: TextStyle(
                         fontSize: 36,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Pretender',
+                        fontWeight: FontWeight.w700,
                         color: Color(0xff464646),
                       ),
                     ),
                   ),
                   SizedBox(height: 60),
                   Text('변경 전 닉네임',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700)),
                   SizedBox(height: 5),
                   Container(
                     height: 60,
@@ -124,22 +128,28 @@ class _NickNameScreenState extends State<NickNameScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       currentNickname ?? '',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700),
                     ),
                   ),
                   SizedBox(height: 35),
                   Text('변경 후 닉네임',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700)),
                   SizedBox(height: 5),
                   SizedBox(
                     height: 60,
                     child: TextField(
                       controller: _nicknameController,
                       textInputAction: TextInputAction.done,
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: '2~10자의 한글 또는 영문 닉네임',
                         hintStyle: TextStyle(fontSize: 14),
@@ -172,7 +182,8 @@ class _NickNameScreenState extends State<NickNameScreen> {
                         '닉네임 변경하기',
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),

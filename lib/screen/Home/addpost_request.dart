@@ -36,7 +36,7 @@ class _RequestScreenState extends State<RequestScreen> {
               backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
               hourMinuteTextColor: Colors.black,
               hourMinuteColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+                (states) => const Color(0xffEBEBEB), // 시간 선택 배경
               ),
               dialHandColor: const Color(0xff97C663),
               dialBackgroundColor: const Color(0xffEBEBEB),
@@ -56,8 +56,8 @@ class _RequestScreenState extends State<RequestScreen> {
             ),
             colorScheme: ColorScheme.light(
               primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
-              onPrimary: Colors.white,    // Accent text color
-              onSurface: Colors.black,    // 일반 텍스트 색
+              onPrimary: Colors.white, // Accent text color
+              onSurface: Colors.black, // 일반 텍스트 색
             ),
           ),
           child: child!,
@@ -83,7 +83,7 @@ class _RequestScreenState extends State<RequestScreen> {
               backgroundColor: Color(0xffF4F1F1), // 다이얼로그 배경
               hourMinuteTextColor: Colors.black,
               hourMinuteColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xffEBEBEB), // 시간 선택 배경
+                (states) => const Color(0xffEBEBEB), // 시간 선택 배경
               ),
               dialHandColor: const Color(0xff97C663),
               dialBackgroundColor: const Color(0xffEBEBEB),
@@ -103,8 +103,8 @@ class _RequestScreenState extends State<RequestScreen> {
             ),
             colorScheme: ColorScheme.light(
               primary: Color(0xff97C663), // Accent color (확인 버튼, 다이얼)
-              onPrimary: Colors.white,    // Accent text color
-              onSurface: Colors.black,    // 일반 텍스트 색
+              onPrimary: Colors.white, // Accent text color
+              onSurface: Colors.black, // 일반 텍스트 색
             ),
           ),
           child: child!,
@@ -204,7 +204,10 @@ class _RequestScreenState extends State<RequestScreen> {
                             SizedBox(height: 70),
                             Text('물건 대여 요청하기',
                                 style: TextStyle(
-                                    fontSize: 33, fontWeight: FontWeight.bold)),
+                                  fontSize: 33,
+                                  fontFamily: 'Pretender',
+                                  fontWeight: FontWeight.w700,
+                                )),
                             SizedBox(height: 50),
                             TextField(
                               controller: _titleController,
@@ -223,7 +226,10 @@ class _RequestScreenState extends State<RequestScreen> {
                             SizedBox(height: 20),
                             Row(
                               children: [
-                                Text("대여 시간은"),
+                                Text("대여 시간은",
+                                    style: TextStyle(
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600)),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: InkWell(
@@ -248,7 +254,10 @@ class _RequestScreenState extends State<RequestScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                Text("부터"),
+                                Text("부터",
+                                    style: TextStyle(
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600)),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: InkWell(
@@ -273,7 +282,10 @@ class _RequestScreenState extends State<RequestScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                Text("까지"),
+                                Text("까지",
+                                    style: TextStyle(
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600)),
                               ],
                             ),
                             SizedBox(height: 20),
@@ -304,51 +316,73 @@ class _RequestScreenState extends State<RequestScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Text('대면',
-                                        style: TextStyle(
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '대면',
+                                          style: TextStyle(
                                             fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xff606060))),
-                                    Checkbox(
-                                      value: isFaceToFace,
-                                      activeColor: Color(0xff97C663),
-                                      onChanged: (bool? value) {
-                                        setState(() {
-                                          if (value == true) {
-                                            isFaceToFace = true;
-                                            isNonFaceToFace = false;
-                                          } else {
-                                            isFaceToFace = false;
-                                          }
-                                        });
-                                      },
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xff606060),
+                                          ),
+                                        ),
+                                        SizedBox(width: 4), // 텍스트와 체크박스 사이 간격
+                                        Checkbox(
+                                          value: isFaceToFace,
+                                          activeColor: Color(0xff97C663),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity(
+                                              horizontal: -4.0, vertical: -4.0),
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              if (value == true) {
+                                                isFaceToFace = true;
+                                                isNonFaceToFace = false;
+                                              } else {
+                                                isFaceToFace = false;
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: 10), // 대면과 비대면 그룹 사이 간격
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '비대면',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xff606060),
+                                          ),
+                                        ),
+                                        SizedBox(width: 4), // 텍스트와 체크박스 사이 간격
+                                        Checkbox(
+                                          value: isNonFaceToFace,
+                                          activeColor: Color(0xff97C663),
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity(
+                                              horizontal: -4.0, vertical: -4.0),
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              if (value == true) {
+                                                isNonFaceToFace = true;
+                                                isFaceToFace = false;
+                                              } else {
+                                                isNonFaceToFace = false;
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ],
                                     ),
                                   ],
-                                ),
-                                SizedBox(width: 5),
-                                Row(
-                                  children: [
-                                    Text('비대면',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xff606060))),
-                                    Checkbox(
-                                      value: isNonFaceToFace,
-                                      activeColor: Color(0xff97C663),
-                                      onChanged: (bool? value) {
-                                        setState(() {
-                                          if (value == true) {
-                                            isNonFaceToFace = true;
-                                            isFaceToFace = false;
-                                          } else {
-                                            isNonFaceToFace = false;
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
+                                )
                               ],
                             ),
                             SizedBox(height: 20),
@@ -371,7 +405,8 @@ class _RequestScreenState extends State<RequestScreen> {
                           style: TextStyle(
                               fontSize: 24,
                               color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),

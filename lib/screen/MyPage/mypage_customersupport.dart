@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../Home/home.dart';
 
 class MyPageCustomerSupport extends StatelessWidget {
-
   final List<Map<String, String>> faqList = [
     {
       "question": "Q. 학번이 아니어도 가입할 수 있나요?",
@@ -38,10 +37,7 @@ class MyPageCustomerSupport extends StatelessWidget {
       "question": "Q. 상대방이 시간을 어겼어요.",
       "answer": "반납 시간이 지났음에도 반납하지 않으면 페널티가 1점이 부과됩니다."
     },
-    {
-      "question": "Q. 계정이 정지되었어요.",
-      "answer": "페널티가 3점이 되면 계정이 일시적으로 정지됩니다."
-    },
+    {"question": "Q. 계정이 정지되었어요.", "answer": "페널티가 3점이 되면 계정이 일시적으로 정지됩니다."},
     {
       "question": "Q. 누적된 페널티는 어디서 볼 수 있나요?",
       "answer": "페널티가 누적된 만큼 본인의 이름 옆에 옐로카드가 표시됩니다."
@@ -81,7 +77,8 @@ class MyPageCustomerSupport extends StatelessWidget {
                         '고객 지원',
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       IconButton(
@@ -92,7 +89,8 @@ class MyPageCustomerSupport extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => HomeScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => HomeScreen()),
                           ); // 🔥 홈으로 이동
                         },
                       ),
@@ -115,7 +113,8 @@ class MyPageCustomerSupport extends StatelessWidget {
                   '자주 묻는 질문',
                   style: TextStyle(
                     fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w700,
                     color: Colors.black87,
                   ),
                 ),
@@ -132,17 +131,21 @@ class MyPageCustomerSupport extends StatelessWidget {
                   final faq = faqList[index];
                   return Card(
                     color: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     child: ExpansionTile(
-                      iconColor: Color(0xff97C663),              // 펼쳐졌을 때 아이콘 색
-                      collapsedIconColor: Color(0xff97C663),         // 닫혀있을 때 아이콘 색
+                      iconColor: Color(0xff97C663), // 펼쳐졌을 때 아이콘 색
+                      collapsedIconColor: Color(0xff97C663), // 닫혀있을 때 아이콘 색
                       title: Text(
                         faq['question']!,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontFamily: 'Pretender',
+                            fontWeight: FontWeight.w600),
                       ),
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 10),
                           child: Align(
                             alignment: Alignment.centerLeft, // 🔹 텍스트 왼쪽 정렬
                             child: Text(
@@ -163,7 +166,6 @@ class MyPageCustomerSupport extends StatelessWidget {
             ),
 
             SizedBox(height: 20),
-
           ],
         ),
       ),

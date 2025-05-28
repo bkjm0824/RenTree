@@ -53,11 +53,11 @@ class _MyPageProfileState extends State<MyPageProfile> {
       Uri.parse('http://54.79.35.255:8080/Rentree/students'),
     );
 
-
     if (studentRes.statusCode == 200) {
-      final List<dynamic> allStudents = jsonDecode(utf8.decode(studentRes.bodyBytes));
+      final List<dynamic> allStudents =
+          jsonDecode(utf8.decode(studentRes.bodyBytes));
       final me = allStudents.firstWhere(
-            (e) => e['studentNum'] == studentNum,
+        (e) => e['studentNum'] == studentNum,
         orElse: () => null,
       );
 
@@ -76,7 +76,8 @@ class _MyPageProfileState extends State<MyPageProfile> {
           _nickname = nickname;
           _studentNum = studentNum;
           _profileImageIndex = profileImage;
-          _selectedProfileImage = 'assets/Profile/${_mapIndexToProfileFile(profileImage)}';
+          _selectedProfileImage =
+              'assets/Profile/${_mapIndexToProfileFile(profileImage)}';
           _rentalCount = rentalCount;
           _rentalPoint = rentalPoint;
           _isLoading = false;
@@ -125,40 +126,45 @@ class _MyPageProfileState extends State<MyPageProfile> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('프로필 이미지를 선택하세요',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w600)),
               SizedBox(height: 20),
               GridView.count(
                 crossAxisCount: 4,
                 shrinkWrap: true,
-                  children: List.generate(4, (index) {
-                    return GestureDetector(
-                      onTap: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        final studentNum = prefs.getString('studentNum') ?? '';
+                children: List.generate(4, (index) {
+                  return GestureDetector(
+                    onTap: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      final studentNum = prefs.getString('studentNum') ?? '';
 
-                        final res = await http.put(
-                          Uri.parse('http://54.79.35.255:8080/Rentree/students/profile-image'
-                              '?studentNum=$studentNum&profileImage=${index + 1}'),
-                        );
+                      final res = await http.put(
+                        Uri.parse(
+                            'http://54.79.35.255:8080/Rentree/students/profile-image'
+                            '?studentNum=$studentNum&profileImage=${index + 1}'),
+                      );
 
-                        if (res.statusCode == 200) {
-                          await prefs.setInt('profileImage', index + 1);
-                          setState(() {
-                            _profileImageIndex = index + 1;
-                            _selectedProfileImage = 'assets/Profile/${_mapIndexToProfileFile(index + 1)}'; // 이 줄 추가!
-                          });
-                          Navigator.pop(context);
-                        } else {
-                          print("❌ 프로필 이미지 업데이트 실패");
-                        }
-                      },
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage(
-                            'assets/Profile/${_mapIndexToProfileFile(index + 1)}'),
-                        backgroundColor: Colors.grey[200],
-                      ),
-                    );
-                  }),
+                      if (res.statusCode == 200) {
+                        await prefs.setInt('profileImage', index + 1);
+                        setState(() {
+                          _profileImageIndex = index + 1;
+                          _selectedProfileImage =
+                              'assets/Profile/${_mapIndexToProfileFile(index + 1)}'; // 이 줄 추가!
+                        });
+                        Navigator.pop(context);
+                      } else {
+                        print("❌ 프로필 이미지 업데이트 실패");
+                      }
+                    },
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage(
+                          'assets/Profile/${_mapIndexToProfileFile(index + 1)}'),
+                      backgroundColor: Colors.grey[200],
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -175,215 +181,239 @@ class _MyPageProfileState extends State<MyPageProfile> {
         child: _isLoading
             ? Center(child: CircularProgressIndicator()) // ✅ 로딩 중이면 스피너 표시
             : Column(
-          children: [
-            // 상단바
-            Container(
-              color: Color(0xffF4F1F1),
-              child: Column(
                 children: [
-                  SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(left: 10),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => MypageScreen()),
-                          );
-                        },
-                      ),
-                      Text('내 정보',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: const Icon(Icons.home),
-                        color: Color(0xff97C663),
-                        iconSize: 30,
-                        padding: EdgeInsets.only(right: 10),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => HomeScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Container(height: 1, color: Colors.grey[300]),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 20),
-
-            // 상세 정보 박스
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 32),
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Color(0xFFE6E9BA),
-                borderRadius: BorderRadius.circular(35),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundImage: AssetImage(_selectedProfileImage),
-                        backgroundColor: Colors.white,
-                      ),
-                      SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                _nickname,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (_penaltyScore > 0 && _penaltyScore < 3)
-                                Row(
-                                  children: List.generate(
-                                    _penaltyScore,
-                                        (_) => Padding(
-                                      padding: const EdgeInsets.only(left: 3),
-                                      child: Image.asset(
-                                        'assets/yellowCard.png',
-                                        width: 20,
-                                        height: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            '학번: $_studentNum',
-                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                          ),
-                        ],
-                      ),
-
-                    ],
-                  ),
-
-                  SizedBox(height: 30),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  // 상단바
+                  Container(
+                    color: Color(0xffF4F1F1),
+                    child: Column(
                       children: [
-                        Column(
+                        SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('대여 횟수',
-                                style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                            SizedBox(height: 4),
-                            Text('$_rentalCount회',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_new),
+                              color: Color(0xff97C663),
+                              iconSize: 30,
+                              padding: EdgeInsets.only(left: 10),
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MypageScreen()),
+                                );
+                              },
+                            ),
+                            Text('내 정보',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
+                            IconButton(
+                              icon: const Icon(Icons.home),
+                              color: Color(0xff97C663),
+                              iconSize: 30,
+                              padding: EdgeInsets.only(right: 10),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => HomeScreen()),
+                                );
+                              },
+                            ),
                           ],
                         ),
-                        Container(
-                          height: 30,
-                          child: VerticalDivider(color: Colors.grey),
-                        ),
-                        Column(
-                          children: [
-                            Text('나의 상추',
-                                style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                            SizedBox(height: 4),
-                            Text('$_rentalPoint장',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
+                        SizedBox(height: 10),
+                        Container(height: 1, color: Colors.grey[300]),
                       ],
                     ),
                   ),
 
                   SizedBox(height: 20),
-                  Column(
-                    children: [
-                      ListTile(
-                        title: Text('프로필 이미지 변경'),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: _showProfileImageDialog, // ✅ 기존 함수 그대로 재사용
-                      ),
-                      ListTile(
-                        title: Text('닉네임 변경'),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => NickNameScreen()),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        title: Text('로그아웃'),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('로그아웃'),
-                              content: Text('정말로 로그아웃하시겠습니까?'),
-                              actions: [
-                                TextButton(
-                                  child: Text('취소', style: TextStyle(color: Colors.grey)),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    final prefs = await SharedPreferences.getInstance();
-                                    await prefs.clear();
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                                          (route) => false,
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xff97C663),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  ),
-                                  child: Text('확인',
+
+                  // 상세 정보 박스
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 32),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE6E9BA),
+                      borderRadius: BorderRadius.circular(35),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 5,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage:
+                                  AssetImage(_selectedProfileImage),
+                              backgroundColor: Colors.white,
+                            ),
+                            SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      _nickname,
                                       style: TextStyle(
-                                          color: Colors.white, fontWeight: FontWeight.bold)),
+                                        fontSize: 16,
+                                        fontFamily: 'Pretender',
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    if (_penaltyScore > 0 && _penaltyScore < 3)
+                                      Row(
+                                        children: List.generate(
+                                          _penaltyScore,
+                                          (_) => Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 3),
+                                            child: Image.asset(
+                                              'assets/yellowCard.png',
+                                              width: 20,
+                                              height: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  '학번: $_studentNum',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey[700]),
                                 ),
                               ],
                             ),
-                          );
-                        },
-                      ),
-                    ],
+                          ],
+                        ),
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  Text('대여 횟수',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[700])),
+                                  SizedBox(height: 4),
+                                  Text('$_rentalCount회',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontFamily: 'Pretender',
+                                          fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                              Container(
+                                height: 30,
+                                child: VerticalDivider(color: Colors.grey),
+                              ),
+                              Column(
+                                children: [
+                                  Text('나의 상추',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[700])),
+                                  SizedBox(height: 4),
+                                  Text('$_rentalPoint장',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontFamily: 'Pretender',
+                                          fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Column(
+                          children: [
+                            ListTile(
+                              title: Text('프로필 이미지 변경'),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              onTap: _showProfileImageDialog, // ✅ 기존 함수 그대로 재사용
+                            ),
+                            ListTile(
+                              title: Text('닉네임 변경'),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => NickNameScreen()),
+                                );
+                              },
+                            ),
+                            ListTile(
+                              title: Text('로그아웃'),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('로그아웃'),
+                                    content: Text('정말로 로그아웃하시겠습니까?'),
+                                    actions: [
+                                      TextButton(
+                                        child: Text('취소',
+                                            style:
+                                                TextStyle(color: Colors.grey)),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          final prefs = await SharedPreferences
+                                              .getInstance();
+                                          await prefs.clear();
+                                          Navigator.pushAndRemoveUntil(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LoginScreen()),
+                                            (route) => false,
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color(0xff97C663),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                        ),
+                                        child: Text('확인',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: 'Pretender',
+                                                fontWeight: FontWeight.w600)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

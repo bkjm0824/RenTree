@@ -140,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text(
                   '로그인',
                   style: TextStyle(
+                    fontFamily: 'NanumSquare',
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Color(0xff464646),
@@ -148,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 50),
               Text('학번',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               SizedBox(height: 5),
               TextField(
                 controller: _idController,
@@ -165,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 35),
               Text('비밀번호',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               SizedBox(height: 5),
               TextField(
                 controller: _pwController,
@@ -195,8 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text(
                     '로그인',
                     style: TextStyle(
+                      fontFamily: 'NanumSquare',
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),

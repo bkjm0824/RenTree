@@ -63,7 +63,9 @@ class _MypageScreenState extends State<MypageScreen> {
           builder: (_) => AlertDialog(
             title: Row(
               children: [
-                Text("계정 정지 안내", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("계정 정지 안내",
+                    style: TextStyle(
+                        fontFamily: 'Pretender', fontWeight: FontWeight.w600)),
                 SizedBox(width: 8),
                 Image.asset(
                   'assets/redCard.png', // ← 경로 확인 필수
@@ -355,8 +357,8 @@ class _MypageScreenState extends State<MypageScreen> {
                         child: Text(
                           '마이페이지',
                           style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            fontFamily: 'NanumSquare',
                             color: Color(0xff747A82),
                           ),
                         ),
@@ -369,7 +371,8 @@ class _MypageScreenState extends State<MypageScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => SearchScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => SearchScreen()),
                           );
                         },
                       ),
@@ -474,8 +477,10 @@ class _MypageScreenState extends State<MypageScreen> {
                   children: [
                     Text(
                       _nickname ?? '',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w600),
                     ),
                     if (_penaltyScore > 0 && _penaltyScore < 3)
                       Row(
@@ -532,7 +537,11 @@ class _MypageScreenState extends State<MypageScreen> {
         children: [
           Row(children: [
             SizedBox(width: 5),
-            Text('최근 대여 받은 물품', style: TextStyle(fontSize: 16))
+            Text('최근 대여 받은 물품',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w600))
           ]),
           SizedBox(height: 8),
           _latestReceived != null
@@ -558,7 +567,8 @@ class _MypageScreenState extends State<MypageScreen> {
                         '대여해준 물품이 없어요',
                         style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Pretender',
+                            fontWeight: FontWeight.w600,
                             color: Colors.grey),
                       )
                     ],
@@ -567,7 +577,11 @@ class _MypageScreenState extends State<MypageScreen> {
           SizedBox(height: 16),
           Row(children: [
             SizedBox(width: 5),
-            Text('최근 대여 해준 물품', style: TextStyle(fontSize: 16))
+            Text('최근 대여 해준 물품',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w600))
           ]),
           SizedBox(height: 8),
           _latestGiven != null
@@ -593,7 +607,8 @@ class _MypageScreenState extends State<MypageScreen> {
                         '대여해준 물품이 없어요',
                         style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Pretender',
+                            fontWeight: FontWeight.w600,
                             color: Colors.grey),
                       )
                     ],
@@ -689,8 +704,10 @@ class _MypageScreenState extends State<MypageScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w600)),
                   SizedBox(height: 4),
                   Text(
                     timeStatusText,
@@ -766,7 +783,10 @@ class _MypageScreenState extends State<MypageScreen> {
         ListTile(
           title: Text(
             title,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Pretender',
+                fontWeight: FontWeight.w600),
           ),
           trailing:
               Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54),

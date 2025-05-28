@@ -244,7 +244,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                         children: [
                                           Text(item['title'] ?? '',
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Pretender',
+                                                  fontWeight: FontWeight.w600,
                                                   fontSize: 16)),
                                           SizedBox(height: 4),
                                           Text(

@@ -187,7 +187,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
         backgroundColor: Color(0xffF4F1F1),
         title: Text(
           '채팅방 나가기',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style:
+              TextStyle(fontFamily: 'Pretender', fontWeight: FontWeight.w600),
         ),
         content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
         actions: [
@@ -424,7 +425,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                             widget.userName,
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -498,7 +500,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                         Text(
                           widget.title,
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w600),
                           overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 5),
@@ -539,7 +543,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                             ),
                             child: Text('대여 요청',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else if (_currentState == RentalState.approved) {
                           bottomActionButton = ElevatedButton(
@@ -562,7 +568,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                             ),
                             child: Text('반납하기',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else if (_currentState == RentalState.returned ||
                             _currentState == RentalState.completed) {
@@ -578,7 +586,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                             ),
                             child: Text('반납하기',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else {
                           bottomActionButton = ElevatedButton(
@@ -593,7 +603,9 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                             ),
                             child: Text('승인 대기',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         }
                       }
@@ -628,7 +640,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                             date,
                             style: TextStyle(
                                 color: Colors.grey[600],
-                                fontWeight: FontWeight.bold),
+                                fontFamily: 'Pretender',
+                                fontWeight: FontWeight.w600),
                           ),
                         ),
                         ...messages.asMap().entries.map((entry) {
@@ -738,7 +751,8 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                           style: TextStyle(
                                             color: Colors.blue,
                                             fontSize: 11,
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
@@ -806,8 +820,10 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                           style: TextStyle(
                                                             color: Colors
                                                                 .grey, // ✅ 바꿔줘
+                                                            fontFamily:
+                                                                'Pretender',
                                                             fontWeight:
-                                                                FontWeight.bold,
+                                                                FontWeight.w600,
                                                             fontSize: 18,
                                                           ),
                                                         ),
@@ -875,8 +891,10 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                         child: Text(
                                                           '승인',
                                                           style: TextStyle(
+                                                            fontFamily:
+                                                                'Pretender',
                                                             fontWeight:
-                                                                FontWeight.bold,
+                                                                FontWeight.w600,
                                                             color: Color(
                                                                 0xffBCF69C),
                                                             fontSize: 20,
@@ -893,8 +911,10 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                         style: TextStyle(
                                                           color: Colors
                                                               .grey, // ✅ 이 부분도 바꿔줘
+                                                          fontFamily:
+                                                              'Pretender',
                                                           fontWeight:
-                                                              FontWeight.bold,
+                                                              FontWeight.w600,
                                                           fontSize: 18,
                                                         ),
                                                       )
@@ -936,8 +956,10 @@ class _ChatRequestScreenState extends State<ChatRequestScreen> {
                                                         child: Text(
                                                           '승인',
                                                           style: TextStyle(
+                                                            fontFamily:
+                                                                'Pretender',
                                                             fontWeight:
-                                                                FontWeight.bold,
+                                                                FontWeight.w600,
                                                             color: Color(
                                                                 0xffBCF69C),
                                                             fontSize: 18,

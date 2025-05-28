@@ -164,8 +164,10 @@ class _MyPageMypostState extends State<MyPageMypost>
                   Center(
                     child: Text(
                       '나의 게시글',
-                      style:
-                          TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 21,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700),
                     ),
                   ),
                   Align(
@@ -201,8 +203,10 @@ class _MyPageMypostState extends State<MyPageMypost>
                 indicatorColor: Color(0xff97C663),
                 labelColor: Color(0xff97C663),
                 unselectedLabelColor: Color(0xff918B8B),
-                labelStyle:
-                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                labelStyle: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w700),
                 tabs: [
                   Tab(text: '대여 요청'),
                   Tab(text: '물품 대여'),
@@ -299,7 +303,9 @@ class _MyPageMypostState extends State<MyPageMypost>
                       Text(
                         item['title'] ?? '',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                            fontFamily: 'Pretender',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16),
                       ),
                       SizedBox(height: 4),
                       Text(
@@ -368,8 +374,10 @@ class _MyPageMypostState extends State<MyPageMypost>
                   _navigateToScreen(RequestScreen());
                 },
                 child: Text("대여 요청하기",
-                    style:
-                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Pretender',
+                        fontWeight: FontWeight.w700)),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -383,8 +391,10 @@ class _MyPageMypostState extends State<MyPageMypost>
                   _navigateToScreen(PostGiveScreen());
                 },
                 child: Text("물품 등록하기",
-                    style:
-                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Pretender',
+                        fontWeight: FontWeight.w700)),
               ),
             ],
           ),
