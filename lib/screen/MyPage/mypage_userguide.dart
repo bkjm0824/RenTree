@@ -52,7 +52,10 @@ class MyPageUserGuide extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               '물품보관소 이용가이드',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'Pretender',
+                  fontWeight: FontWeight.w700),
             ),
             SizedBox(height: 16),
             imageSection,
@@ -88,7 +91,8 @@ class MyPageUserGuide extends StatelessWidget {
                         '물품보관소 이용가이드',
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       IconButton(

@@ -110,7 +110,8 @@ class GuidePage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 22,
                     color: Color(0xff464646),
-                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -167,7 +168,8 @@ class GuidePage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),

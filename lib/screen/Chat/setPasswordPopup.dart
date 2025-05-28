@@ -63,7 +63,10 @@ class _setPasswordPopupState extends State<setPasswordPopup> {
             children: [
               Text(
                 '비밀번호 설정',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w700),
               ),
               SizedBox(height: 20),
               TextField(

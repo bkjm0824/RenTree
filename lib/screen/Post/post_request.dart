@@ -49,88 +49,97 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
           backgroundColor: Color(0xffF4F1F1),
           title: Text(
             "대화 중인 채팅",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style:
+                TextStyle(fontFamily: 'Pretender', fontWeight: FontWeight.w700),
           ),
           content: SizedBox(
             width: double.maxFinite,
             child: chatRooms.isEmpty
                 ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Text("대화 중인 채팅방이 없습니다."),
-            )
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Text("대화 중인 채팅방이 없습니다."),
+                  )
                 : ListView.builder(
-              shrinkWrap: true,
-              itemCount: chatRooms.length,
-              itemBuilder: (context, index) {
-                final room = chatRooms[index];
-                final nickname = room['requesterNickname'] ?? '알 수 없음';
-                final message = room['lastMessage'] ?? '';
-                final date = room['lastMessageDate'] ?? '';
-                final profileIndex = room['requesterProfileImage'] ?? 1;
-                final profilePath = 'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
-                final isWriterRequester = writerStudentNum == room['requesterStudentNum'];
-                final receiverProfileIndex = isWriterRequester
-                    ? room['responderProfileImage']
-                    : room['requesterProfileImage'];
+                    shrinkWrap: true,
+                    itemCount: chatRooms.length,
+                    itemBuilder: (context, index) {
+                      final room = chatRooms[index];
+                      final nickname = room['requesterNickname'] ?? '알 수 없음';
+                      final message = room['lastMessage'] ?? '';
+                      final date = room['lastMessageDate'] ?? '';
+                      final profileIndex = room['requesterProfileImage'] ?? 1;
+                      final profilePath =
+                          'assets/Profile/${_mapIndexToProfileFile(profileIndex)}';
+                      final isWriterRequester =
+                          writerStudentNum == room['requesterStudentNum'];
+                      final receiverProfileIndex = isWriterRequester
+                          ? room['responderProfileImage']
+                          : room['requesterProfileImage'];
 
-                return Card(
-                  color: Color(0xffE7E9C8),
-                  margin: EdgeInsets.symmetric(vertical: 6),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: AssetImage(profilePath),
-                      radius: 24,
-                    ),
-                    title: Text(
-                      nickname,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          message,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 14),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          date.isNotEmpty
-                              ? formatTimeDifference(DateTime.tryParse(date) ?? DateTime.now())
-                              : '',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatRequestScreen(
-                            chatRoomId: room['roomId'],
-                            userName: isWriterRequester
-                                ? room['responderNickname']
-                                : room['requesterNickname'],
-                            title: title,
-                            requestId: widget.itemId,
-                            writerStudentNum: writerStudentNum,
-                            requesterStudentNum: room['requesterStudentNum'],
-                            receiverStudentNum: isWriterRequester
-                                ? room['responderStudentNum']
-                                : room['requesterStudentNum'],
-                            rentalTimeText: rentalTimeRangeText,
-                            isFaceToFace: isFaceToFace,
-                            receiverProfileIndex: receiverProfileIndex,
+                      return Card(
+                        color: Color(0xffE7E9C8),
+                        margin: EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: AssetImage(profilePath),
+                            radius: 24,
                           ),
+                          title: Text(
+                            nickname,
+                            style: TextStyle(
+                                fontFamily: 'Pretender',
+                                fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                message,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                date.isNotEmpty
+                                    ? formatTimeDifference(
+                                        DateTime.tryParse(date) ??
+                                            DateTime.now())
+                                    : '',
+                                style:
+                                    TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatRequestScreen(
+                                  chatRoomId: room['roomId'],
+                                  userName: isWriterRequester
+                                      ? room['responderNickname']
+                                      : room['requesterNickname'],
+                                  title: title,
+                                  requestId: widget.itemId,
+                                  writerStudentNum: writerStudentNum,
+                                  requesterStudentNum:
+                                      room['requesterStudentNum'],
+                                  receiverStudentNum: isWriterRequester
+                                      ? room['responderStudentNum']
+                                      : room['requesterStudentNum'],
+                                  rentalTimeText: rentalTimeRangeText,
+                                  isFaceToFace: isFaceToFace,
+                                  receiverProfileIndex: receiverProfileIndex,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
                   ),
-                );
-              },
-            ),
           ),
           actions: [
             Center(
@@ -286,7 +295,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   }
 
   Future<void> _deletePost() async {
-    final url = Uri.parse('http://54.79.35.255:8080/ItemRequest/${widget.itemId}');
+    final url =
+        Uri.parse('http://54.79.35.255:8080/ItemRequest/${widget.itemId}');
     final res = await http.delete(url);
 
     if (res.statusCode == 200) {
@@ -341,8 +351,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   Future<void> fetchChatRoomCountByWriter() async {
     if (writerStudentNum.isEmpty) return;
 
-    final url =
-        Uri.parse('http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
+    final url = Uri.parse(
+        'http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
 
     try {
       final response = await http.get(url);
@@ -427,7 +437,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                         Text(title,
                                             style: TextStyle(
                                                 fontSize: 23,
-                                                fontWeight: FontWeight.bold)),
+                                                fontFamily: 'Pretender',
+                                                fontWeight: FontWeight.w600)),
                                         if (writerStudentNum == studentNum)
                                           PopupMenuButton<String>(
                                             color: Color(0xffF4F1F1),
@@ -480,8 +491,9 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                                 style: TextStyle(
                                                     fontSize: 16,
                                                     color: Color(0xff747474),
+                                                    fontFamily: 'Pretender',
                                                     fontWeight:
-                                                        FontWeight.bold)),
+                                                        FontWeight.w600)),
                                             Text(
                                                 '${isFaceToFace ? '대면' : '비대면'}',
                                                 style: TextStyle(fontSize: 14)),
@@ -543,43 +555,57 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                 ),
-                          onPressed: () async {
-                            final url = Uri.parse('http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
-                            final response = await http.get(url);
-                            if (response.statusCode == 200) {
-                              final List<dynamic> rooms = jsonDecode(utf8.decode(response.bodyBytes));
-                              final filtered = rooms
-                                  .where((room) => room['type'] == 'request' && room['relatedItemId'] == widget.itemId)
-                                  .toList()
-                                  .cast<Map<String, dynamic>>();
+                                onPressed: () async {
+                                  final url = Uri.parse(
+                                      'http://54.79.35.255:8080/chatrooms/student/$writerStudentNum');
+                                  final response = await http.get(url);
+                                  if (response.statusCode == 200) {
+                                    final List<dynamic> rooms = jsonDecode(
+                                        utf8.decode(response.bodyBytes));
+                                    final filtered = rooms
+                                        .where((room) =>
+                                            room['type'] == 'request' &&
+                                            room['relatedItemId'] ==
+                                                widget.itemId)
+                                        .toList()
+                                        .cast<Map<String, dynamic>>();
 
-                              // ✅ 마지막 메시지 추가
-                              for (var room in filtered) {
-                                final type = room['type'];
-                                final roomId = room['roomId'];
-                                final res = await http.get(Uri.parse('http://54.79.35.255:8080/chatmessages/$type/$roomId'));
-                                if (res.statusCode == 200) {
-                                  final List<dynamic> messages = jsonDecode(utf8.decode(res.bodyBytes));
-                                  if (messages.isNotEmpty) {
-                                    final lastMessage = messages.last;
-                                    final rawSentAt = lastMessage['sentAt'];
-                                    final trimmed = rawSentAt?.split('.')?.first ?? '';
-                                    room['lastMessage'] = lastMessage['message'];
-                                    room['lastMessageDate'] = trimmed;
+                                    // ✅ 마지막 메시지 추가
+                                    for (var room in filtered) {
+                                      final type = room['type'];
+                                      final roomId = room['roomId'];
+                                      final res = await http.get(Uri.parse(
+                                          'http://54.79.35.255:8080/chatmessages/$type/$roomId'));
+                                      if (res.statusCode == 200) {
+                                        final List<dynamic> messages =
+                                            jsonDecode(
+                                                utf8.decode(res.bodyBytes));
+                                        if (messages.isNotEmpty) {
+                                          final lastMessage = messages.last;
+                                          final rawSentAt =
+                                              lastMessage['sentAt'];
+                                          final trimmed =
+                                              rawSentAt?.split('.')?.first ??
+                                                  '';
+                                          room['lastMessage'] =
+                                              lastMessage['message'];
+                                          room['lastMessageDate'] = trimmed;
+                                        }
+                                      }
+                                    }
+
+                                    showChatRoomPopup(filtered);
+                                  } else {
+                                    print(
+                                        '❌ 채팅방 목록 조회 실패: ${response.statusCode}');
                                   }
-                                }
-                              }
-
-                              showChatRoomPopup(filtered);
-                            } else {
-                              print('❌ 채팅방 목록 조회 실패: ${response.statusCode}');
-                            }
-                          },
+                                },
                                 child: Text(
                                   "대화 중인 채팅 $chatRoomCount",
                                   style: TextStyle(
                                       fontSize: 20,
-                                      fontWeight: FontWeight.bold),
+                                      fontFamily: 'Pretender',
+                                      fontWeight: FontWeight.w700),
                                 ),
                               )
                             : ElevatedButton(
@@ -639,7 +665,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
                                   "채팅하기",
                                   style: TextStyle(
                                       fontSize: 24,
-                                      fontWeight: FontWeight.bold),
+                                      fontFamily: 'Pretender',
+                                      fontWeight: FontWeight.w700),
                                 ),
                               ),
                       ],

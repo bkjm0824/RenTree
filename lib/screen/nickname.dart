@@ -85,14 +85,18 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
                   '닉네임 설정',
                   style: TextStyle(
                     fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w700,
                     color: Color(0xff464646),
                   ),
                 ),
               ),
               SizedBox(height: 50),
               Text('닉네임',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w600)),
               SizedBox(height: 5),
               TextField(
                 controller: _nicknameController,
@@ -121,7 +125,8 @@ class _NicknameSetupScreenState extends State<NicknameSetupScreen> {
                     '설정 완료',
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
                   ),

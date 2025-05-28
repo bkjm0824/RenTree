@@ -187,7 +187,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
         backgroundColor: Color(0xffF4F1F1),
         title: Text(
           '채팅방 나가기',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style:
+              TextStyle(fontFamily: 'Pretender', fontWeight: FontWeight.w600),
         ),
         content: Text('정말 이 채팅방을 나가시겠습니까?\n채팅 내역은 복구되지 않습니다.'),
         actions: [
@@ -359,7 +360,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             widget.userName,
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -446,7 +448,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                       Text(
                         widget.title,
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontFamily: 'Pretender',
+                            fontWeight: FontWeight.w600),
                       ),
                       SizedBox(height: 5),
                       Text(
@@ -486,7 +490,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             ),
                             child: Text('대여 요청',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else if (currentState == RentalState.approved) {
                           bottomActionButton = ElevatedButton(
@@ -509,7 +515,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             ),
                             child: Text('반납하기',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else if (currentState == RentalState.returned ||
                             currentState == RentalState.completed) {
@@ -525,7 +533,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             ),
                             child: Text('반납하기',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else {
                           bottomActionButton = ElevatedButton(
@@ -540,7 +550,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             ),
                             child: Text('승인 대기',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         }
                       } else if (_myStudentNum != widget.writerStudentNum) {
@@ -572,7 +584,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             ),
                             child: Text('승인',
                                 style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                                    fontSize: 18,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else if (currentState == RentalState.returned) {
                           bottomActionButton = ElevatedButton(
@@ -595,7 +609,9 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             ),
                             child: Text('반납 완료',
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                                    fontSize: 14,
+                                    fontFamily: 'Pretender',
+                                    fontWeight: FontWeight.w600)),
                           );
                         } else {
                           bottomActionButton = SizedBox.shrink();
@@ -631,7 +647,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                             date,
                             style: TextStyle(
                                 color: Colors.grey[600],
-                                fontWeight: FontWeight.bold),
+                                fontFamily: 'Pretender',
+                                fontWeight: FontWeight.w600),
                           ),
                         ),
                         ...messages.asMap().entries.map((entry) {
@@ -727,7 +744,8 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                           style: TextStyle(
                                             color: Colors.blue,
                                             fontSize: 11,
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
@@ -796,9 +814,11 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                             style: TextStyle(
                                                               color:
                                                                   Colors.grey,
+                                                              fontFamily:
+                                                                  'Pretender',
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .bold,
+                                                                      .w600,
                                                               fontSize: 18,
                                                             ),
                                                           ),
@@ -868,9 +888,11 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                           child: Text(
                                                             '승인',
                                                             style: TextStyle(
+                                                              fontFamily:
+                                                                  'Pretender',
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .bold,
+                                                                      .w600,
                                                               color: Color(
                                                                   0xffBCF69C),
                                                               fontSize: 18,
@@ -884,8 +906,10 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                           '반납 완료',
                                                           style: TextStyle(
                                                             color: Colors.grey,
+                                                            fontFamily:
+                                                                'Pretender',
                                                             fontWeight:
-                                                                FontWeight.bold,
+                                                                FontWeight.w600,
                                                             fontSize: 18,
                                                           ),
                                                         )
@@ -927,9 +951,11 @@ class _ChatDetailScreenState extends State<ChatRentalScreen> {
                                                           child: Text(
                                                             '승인',
                                                             style: TextStyle(
+                                                              fontFamily:
+                                                                  'Pretender',
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .bold,
+                                                                      .w600,
                                                               color: Color(
                                                                   0xffBCF69C),
                                                               fontSize: 18,

@@ -8,6 +8,7 @@ import '../Home/addpost_give.dart';
 import '../Home/home.dart';
 import '../Like/likelist.dart';
 import '../MyPage/mypage.dart';
+import '../Search/search.dart';
 import '../login.dart';
 
 class PointedScreen extends StatefulWidget {
@@ -181,7 +182,7 @@ class _PointedScreenState extends State<PointedScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => LoginScreen()),
-                          (route) => false,
+                      (route) => false,
                     );
                   }
                 },
@@ -226,278 +227,319 @@ class _PointedScreenState extends State<PointedScreen> {
           FocusScope.of(context).unfocus(); // 화면 터치 시 키보드 내리기
         },
         child: SafeArea(
-          child: Stack(
+          child: Column(
             children: [
+              Container(
+                color: Color(0xffF4F1F1),
+                child: Column(
+                  children: [
+                    SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(left: 30),
+                          child: Text(
+                            '포인트',
+                            style: TextStyle(
+                              fontFamily: 'NanumSquare', // ← 여기만 바꿔주면 됨
+                              fontSize: 24,
+                              color: Color(0xff747A82),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.search),
+                          color: Color(0xff97C663),
+                          iconSize: 30,
+                          padding: EdgeInsets.only(right: 10),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => SearchScreen()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Container(height: 1, color: Colors.grey[300]),
+                  ],
+                ),
+              ),
               // 🔹 나머지 내용은 SingleChildScrollView로 감싸서 스크롤 가능하도록 함
-              SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(25.0),
-                  child: Column(
-                    children: [
-                      SingleChildScrollView(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          // 🔹 큰 제목
-                          children: [
-                            SizedBox(height: 100),
-                            Text.rich(
-                              TextSpan(
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(25.0),
+                    child: Column(
+                      children: [
+                        SingleChildScrollView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // 🔹 큰 제목
+
+                            children: [
+                              SizedBox(height: 50),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '물건 대여해주고\n',
+                                      style: TextStyle(
+                                        fontSize: 26,
+                                        fontFamily: 'NanumSquare',
+                                        height: 1.38,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '비교과 포인트',
+                                      style: TextStyle(
+                                        color: Color(0xFF41B642),
+                                        fontSize: 26,
+                                        fontFamily: 'NanumSquare',
+                                        height: 1.38,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' 받기',
+                                      style: TextStyle(
+                                        fontSize: 26,
+                                        fontFamily: 'NanumSquare',
+                                        height: 1.38,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: 50),
+                              Container(
+                                width: 217,
+                                height: 207,
+                                child: Image.asset('assets/sangchoo.png'),
+                              ),
+                              SizedBox(height: 30),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  TextSpan(
-                                    text: '물건 대여해주고\n',
-                                    style: TextStyle(
-                                      fontSize: 26,
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.38,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: '비교과 포인트',
-                                    style: TextStyle(
-                                      color: Color(0xFF41B642),
-                                      fontSize: 26,
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.38,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' 받기',
-                                    style: TextStyle(
-                                      fontSize: 26,
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.38,
+                                  RichText(
+                                    textAlign: TextAlign.center,
+                                    text: TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          alignment:
+                                              PlaceholderAlignment.middle,
+                                          child: Text(
+                                            '보유중인 상추 : ',
+                                            style: TextStyle(
+                                              fontSize: 26,
+                                              fontFamily: 'NanumSquare',
+                                              color: Colors
+                                                  .black, // TextSpan 기본 색 지정 필요
+                                              height: 1.38,
+                                            ),
+                                          ),
+                                        ),
+                                        WidgetSpan(
+                                          alignment:
+                                              PlaceholderAlignment.middle,
+                                          child: Text(
+                                            '$_myPoint',
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.w800,
+                                              fontFamily: 'NanumSquare',
+                                              color: Color(0xFF41B642),
+                                              height: 1.7,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 50),
-                            Container(
-                              width: 217,
-                              height: 207,
-                              child: Image.asset('assets/sangchoo.png'),
-                            ),
-                            SizedBox(height: 30),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '내 상추 : ',
-                                        style: TextStyle(
-                                          fontSize: 26,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.38,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: '$_myPoint',
-                                        style: TextStyle(
-                                          color: Color(0xFF41B642),
-                                          fontSize: 30,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.38,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 30),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '이달의 대여왕 ',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.57,
-                                  ),
-                                ),
-                                SizedBox(width: 5),
-                                Image.asset(
-                                  'assets/clover.png',
-                                  width: 16,
-                                  height: 16,
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 5),
-                            Container(
-                              width: 320,
-                              height: 430,
-                              decoration: ShapeDecoration(
-                                color: Color(0xFFD3D3D3),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: Stack(
-                                alignment: Alignment.center,
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  // podium 위 아이콘들
-                                  if (rankingList.length >= 3) ...[
-                                    Positioned(
-                                      top: 33,
-                                      left: 70,
-                                      child: CircleAvatar(
-                                        radius: 21,
-                                        backgroundImage: AssetImage(
-                                          'assets/Profile/${_mapIndexToProfileFile(
-                                            int.tryParse(rankingList[1]
-                                                        ['profileImage'] ??
-                                                    '') ??
-                                                1,
-                                          )}',
-                                        ),
-                                      ),
+                                  Text(
+                                    '이달의 대여왕 ',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.57,
                                     ),
-                                    Positioned(
-                                      top: 20,
-                                      child: Container(
-                                        padding: EdgeInsets.all(2), // 테두리 두께
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                              color: Colors.amber,
-                                              width: 2), // 황금색 테두리
-                                        ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Image.asset(
+                                    'assets/clover.png',
+                                    width: 16,
+                                    height: 16,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 5),
+                              Container(
+                                width: 320,
+                                height: 430,
+                                decoration: ShapeDecoration(
+                                  color: Color(0xFFD3D3D3),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // podium 위 아이콘들
+                                    if (rankingList.length >= 3) ...[
+                                      Positioned(
+                                        top: 33,
+                                        left: 70,
                                         child: CircleAvatar(
                                           radius: 21,
                                           backgroundImage: AssetImage(
                                             'assets/Profile/${_mapIndexToProfileFile(
-                                              int.tryParse(rankingList[0]
+                                              int.tryParse(rankingList[1]
                                                           ['profileImage'] ??
                                                       '') ??
                                                   1,
                                             )}',
                                           ),
-                                          backgroundColor: Colors.white,
                                         ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        top: 20,
+                                        child: Container(
+                                          padding: EdgeInsets.all(2), // 테두리 두께
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                                color: Colors.amber,
+                                                width: 2), // 황금색 테두리
+                                          ),
+                                          child: CircleAvatar(
+                                            radius: 21,
+                                            backgroundImage: AssetImage(
+                                              'assets/Profile/${_mapIndexToProfileFile(
+                                                int.tryParse(rankingList[0]
+                                                            ['profileImage'] ??
+                                                        '') ??
+                                                    1,
+                                              )}',
+                                            ),
+                                            backgroundColor: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 38,
+                                        right: 70,
+                                        child: CircleAvatar(
+                                          radius: 21,
+                                          backgroundImage: AssetImage(
+                                            'assets/Profile/${_mapIndexToProfileFile(
+                                              int.tryParse(rankingList[2]
+                                                          ['profileImage'] ??
+                                                      '') ??
+                                                  1,
+                                            )}',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+
                                     Positioned(
-                                      top: 38,
-                                      right: 70,
-                                      child: CircleAvatar(
-                                        radius: 21,
-                                        backgroundImage: AssetImage(
-                                          'assets/Profile/${_mapIndexToProfileFile(
-                                            int.tryParse(rankingList[2]
-                                                        ['profileImage'] ??
-                                                    '') ??
-                                                1,
-                                          )}',
+                                        bottom: 330,
+                                        child: Image.asset('assets/podium.png',
+                                            width: 214, height: 44)),
+                                    // 🟩 podium 밑 랭킹 출력
+                                    Positioned.fill(
+                                      top: 110,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 77),
+                                        child: ListView.builder(
+                                          itemCount: rankingList.length,
+                                          itemBuilder: (context, index) {
+                                            final item = rankingList[index];
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 4),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    children: [
+                                                      Text('${item["rank"]}등',
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  'Pretender',
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              color: Color(
+                                                                  0xff606060),
+                                                              fontSize: 16)),
+                                                      SizedBox(width: 12),
+                                                      Text('${item["name"]}',
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  'Pretender',
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize: 13)),
+                                                    ],
+                                                  ),
+                                                  Text('${item["count"]}회',
+                                                      style: TextStyle(
+                                                          fontFamily:
+                                                              'Pretender',
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 14)),
+                                                ],
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ),
                                     ),
                                   ],
-
-                                  Positioned(
-                                      bottom: 330,
-                                      child: Image.asset('assets/podium.png',
-                                          width: 214, height: 44)),
-                                  // 🟩 podium 밑 랭킹 출력
-                                  Positioned.fill(
-                                    top: 110,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 77),
-                                      child: ListView.builder(
-                                        itemCount: rankingList.length,
-                                        itemBuilder: (context, index) {
-                                          final item = rankingList[index];
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 4),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text('${item["rank"]}등',
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Color(
-                                                                0xff606060),
-                                                            fontSize: 16)),
-                                                    SizedBox(width: 10),
-                                                    Text('${item["name"]}',
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 14)),
-                                                  ],
-                                                ),
-                                                Text('${item["count"]}회',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 14)),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 50),
-                            Text(
-                              '🎁 포인트 교환소',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                              SizedBox(height: 50),
+                              Text(
+                                '🎁 포인트 교환소',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontFamily: 'Pretender',
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            _buildExchangeItem(
-                                '비교과 포인트 5점', '100 상추', 'assets/clover.png'),
-                            _buildExchangeItem('더베이크 아메리카노(I)', '100 상추',
-                                'assets/americano.png'),
-                          ],
+                              SizedBox(height: 10),
+                              _buildExchangeItem(
+                                  '비교과 포인트 5점', '100 상추', 'assets/clover.png'),
+                              _buildExchangeItem('더베이크 아메리카노(I)', '100 상추',
+                                  'assets/americano.png'),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ),
-
-              // 🔹 전체 화면 왼쪽 상단에 뒤로가기 버튼 배치
-              Positioned(
-                top: 10,
-                left: 10, // 왼쪽 상단에 위치
-                child: IconButton(
-                  icon: Icon(
-                    Icons.arrow_back_ios_rounded,
-                    size: 35,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
                 ),
               ),
             ],
@@ -565,7 +607,10 @@ class _PointedScreenState extends State<PointedScreen> {
             Expanded(
               child: Text(
                 name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: 'Pretender',
+                    fontWeight: FontWeight.w600),
               ),
             ),
             Text(

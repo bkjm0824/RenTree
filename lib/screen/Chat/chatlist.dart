@@ -52,7 +52,9 @@ class _ChatScreenState extends State<ChatListScreen> {
           builder: (_) => AlertDialog(
             title: Row(
               children: [
-                Text("계정 정지 안내", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("계정 정지 안내",
+                    style: TextStyle(
+                        fontFamily: 'Pretender', fontWeight: FontWeight.w700)),
                 SizedBox(width: 8),
                 Image.asset(
                   'assets/redCard.png', // ← 경로 확인 필수
@@ -376,8 +378,8 @@ class _ChatScreenState extends State<ChatListScreen> {
                         child: Text(
                           '채팅 목록',
                           style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                            fontFamily: 'NanumSquare', // ← 여기만 바꿔주면 됨
+                            fontSize: 24,
                             color: Color(0xff747A82),
                           ),
                         ),
@@ -627,9 +629,10 @@ class _ChatScreenState extends State<ChatListScreen> {
                                                     opponentNickname ??
                                                         '(알수없음)',
                                                     style: TextStyle(
+                                                      fontFamily: 'Pretender',
                                                       fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18,
+                                                          FontWeight.w700,
+                                                      fontSize: 17,
                                                     ),
                                                   ),
                                                   SizedBox(width: 5),

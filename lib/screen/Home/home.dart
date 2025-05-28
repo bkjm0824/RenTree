@@ -54,7 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (_) => AlertDialog(
             title: Row(
               children: [
-                Text("계정 정지 안내", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("계정 정지 안내",
+                    style: TextStyle(
+                        fontFamily: 'Pretender', fontWeight: FontWeight.w600)),
                 SizedBox(width: 8),
                 Image.asset(
                   'assets/redCard.png', // ← 경로 확인 필수
@@ -256,7 +258,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 _navigateToScreen(RequestScreen());
               },
               child: Text("대여 요청하기",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w700)),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -270,7 +275,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 _navigateToScreen(PostGiveScreen());
               },
               child: Text("물품 등록하기",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w700)),
             ),
           ],
         ),
@@ -380,7 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => PostRentalScreen(itemId: item['id']),
+                                    builder: (_) =>
+                                        PostRentalScreen(itemId: item['id']),
                                   ),
                                 );
                                 await fetchItemsWithImage(); // ✅ 무조건 최신 정보로 반영
@@ -388,7 +397,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => PostRequestScreen(itemId: item['id']),
+                                    builder: (_) =>
+                                        PostRequestScreen(itemId: item['id']),
                                   ),
                                 );
                                 await fetchItemsWithImage(); // ✅ 요청글도 마찬가지
@@ -404,28 +414,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        width: 90,
-                                        height: 90,
-                                        decoration: BoxDecoration(
-                                          color: Color(0xffEBEBEB),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: item['type'] == 'rental'
-                                              ? (imageUrl != null && imageUrl.toString().isNotEmpty
-                                              ? Image.network(
-                                            'http://54.79.35.255:8080$imageUrl',
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                Image.asset('assets/box.png', fit: BoxFit.cover),
-                                          )
-                                              : Image.asset('assets/box.png', fit: BoxFit.cover))
-                                              : Image.asset('assets/requestIcon.png', fit: BoxFit.cover),
-                                        )
-
-                                      ),
+                                          width: 90,
+                                          height: 90,
+                                          decoration: BoxDecoration(
+                                            color: Color(0xffEBEBEB),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            child: item['type'] == 'rental'
+                                                ? (imageUrl != null &&
+                                                        imageUrl
+                                                            .toString()
+                                                            .isNotEmpty
+                                                    ? Image.network(
+                                                        'http://54.79.35.255:8080$imageUrl',
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context,
+                                                                error,
+                                                                stackTrace) =>
+                                                            Image.asset(
+                                                                'assets/box.png',
+                                                                fit: BoxFit
+                                                                    .cover),
+                                                      )
+                                                    : Image.asset(
+                                                        'assets/box.png',
+                                                        fit: BoxFit.cover))
+                                                : Image.asset(
+                                                    'assets/requestIcon.png',
+                                                    fit: BoxFit.cover),
+                                          )),
                                       SizedBox(width: 20),
                                       Expanded(
                                         flex: 3,
@@ -435,7 +456,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           children: [
                                             Text(item['title'],
                                                 style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: 'Pretender',
+                                                    fontWeight: FontWeight.w600,
                                                     fontSize: 16)),
                                             SizedBox(height: 4),
                                             Text(

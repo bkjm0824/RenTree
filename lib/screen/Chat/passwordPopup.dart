@@ -87,8 +87,10 @@ class _passwordPopupState extends State<passwordPopup> {
                     SizedBox(width: _isVerified ? 50 : 0),
                     Text(
                       _isVerified ? '🔓 사물함 비밀번호' : '계정 비밀번호 입력',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Pretender',
+                          fontWeight: FontWeight.w700),
                     ),
                     if (_isVerified)
                       IconButton(
@@ -121,7 +123,8 @@ class _passwordPopupState extends State<passwordPopup> {
                     _lockerPassword ?? '비밀번호 없음',
                     style: TextStyle(
                       fontSize: 40,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Pretender',
+                      fontWeight: FontWeight.w700,
                       color: Color(0xff6DB129),
                     ),
                   )
@@ -156,7 +159,8 @@ class _passwordPopupState extends State<passwordPopup> {
                       '확인',
                       style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Pretender',
+                        fontWeight: FontWeight.w700,
                         fontSize: 18,
                       ),
                     ),

@@ -120,8 +120,10 @@ class _rentalChangeState extends State<rentalChangeScreen> {
         _imageData = data
             .where(
                 (e) => e['imageUrl'] != null && e['imageUrl'].startsWith('/'))
-            .map((e) =>
-                {"id": e['id'], "url": 'http://54.79.35.255:8080${e['imageUrl']}'})
+            .map((e) => {
+                  "id": e['id'],
+                  "url": 'http://54.79.35.255:8080${e['imageUrl']}'
+                })
             .toList();
       });
     } else {
@@ -310,8 +312,9 @@ class _rentalChangeState extends State<rentalChangeScreen> {
                             Center(
                               child: Text('대여 글 수정하기',
                                   style: TextStyle(
-                                    fontSize: 24,
-                                  )),
+                                      fontSize: 24,
+                                      fontFamily: 'Pretender',
+                                      fontWeight: FontWeight.w600)),
                             ),
                             SizedBox(height: 30),
                             Container(
@@ -585,7 +588,8 @@ class _rentalChangeState extends State<rentalChangeScreen> {
                                     Text('대면',
                                         style: TextStyle(
                                             fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
                                             color: Color(0xff606060))),
                                     Checkbox(
                                       value: isFaceToFace,
@@ -609,7 +613,8 @@ class _rentalChangeState extends State<rentalChangeScreen> {
                                     Text('비대면',
                                         style: TextStyle(
                                             fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Pretender',
+                                            fontWeight: FontWeight.w600,
                                             color: Color(0xff606060))),
                                     Checkbox(
                                       value: isNonFaceToFace,
@@ -650,7 +655,8 @@ class _rentalChangeState extends State<rentalChangeScreen> {
                           style: TextStyle(
                               fontSize: 24,
                               color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                              fontFamily: 'Pretender',
+                              fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
