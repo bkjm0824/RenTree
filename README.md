@@ -72,3 +72,4 @@ https://github.com/oowhyun/RenTree/releases/download/rentree/app-release.apk
 | **방우현** | `Frontend` |
 | **김진우** | `Frontend` |
 
+시연 영상 주소 https://youtu.be/DOAW4uxpdk8?si=b_nVRPX3_qNETIzi
